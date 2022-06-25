@@ -289,7 +289,7 @@
   resolved "https://registry.yarnpkg.com/@codemirror/state/-/state-6.0.1.tgz#a1994f14c49e2f77cb9e26aef35f63a8b3707c6c"
   integrity sha512-6vYgaXc4KjSY0BUfSVDJooGcoswg/RJZpq/ZGjsUYmY0KN1lmB8u03nv+jiG1ncUV5qoggyxFT5AGD5Ak+5Zrw==
 
-"@codemirror/view@^6.0.0":
+"@codemirror/view@^6.0.0", "@codemirror/view@^6.0.2":
   version "6.0.2"
   resolved "https://registry.yarnpkg.com/@codemirror/view/-/view-6.0.2.tgz#27f4d08edd10a3678cf15390b4fba5e2a7220873"
   integrity sha512-mnVT/q1JvKPjpmjXJNeCi/xHyaJ3abGJsumIVpdQ1nE1MXAyHf7GHWt8QpWMUvDiqF0j+inkhVR2OviTdFFX7Q==

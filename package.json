@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@codemirror/search": "^6.0.0",
+    "@codemirror/view": "^6.0.2",
     "codemirror": "^6.0.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0"
