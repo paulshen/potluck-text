@@ -33,7 +33,10 @@ const AnnotationComponent = observer(
         .sliceDoc(annotation.span[0], annotation.span[1]);
     }).get();
     const bindDrag = useDrag(
-      action<Handler<"drag">>(({ offset }) => {
+      action<Handler<"drag">>(({ offset, first, event }) => {
+        if (first) {
+          event.preventDefault();
+        }
         annotation.position = offset;
       }),
       {
@@ -238,9 +241,9 @@ export function App() {
   }, []);
   return (
     <div>
-      <div className="p-8">
+      <div className="p-8 flex">
         <div
-          className="w-[512px] h-[512px] border border-zinc-200"
+          className="w-[384px] h-[384px] border border-zinc-200 overflow-auto"
           ref={editorRef}
         ></div>
       </div>
