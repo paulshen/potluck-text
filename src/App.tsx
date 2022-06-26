@@ -7,19 +7,31 @@ import { action, computed, observable, runInAction, untracked } from "mobx";
 import { observer } from "mobx-react-lite";
 import { Handler, useDrag } from "@use-gesture/react";
 import { nanoid } from "nanoid";
+import { CanvasBackground } from "./CanvasBackground";
+import {
+  annotationsMobx,
+  DragAnnotation,
+  selectedAnnotationsMobx,
+  Span,
+} from "./State";
+import classNames from "classnames";
 
-type Span = [from: number, to: number];
-type DragAnnotation = {
-  id: string;
-  position: [x: number, y: number];
-  span: Span;
-};
 const editorStateDoc = observable.box<EditorState>();
-const annotationsMobx = observable<DragAnnotation>([]);
 
-function Token({ children }: { children: React.ReactNode }) {
+function Token({
+  isSelected = false,
+  children,
+}: {
+  isSelected?: boolean;
+  children: React.ReactNode;
+}) {
   return (
-    <div className="relative -top-1 -my-px -left-2 px-2 py-1 text-xs font-mono rounded bg-zinc-200 cursor-default">
+    <div
+      className={classNames(
+        "relative -top-1 -my-px -left-2 px-2 py-1 text-xs font-mono rounded cursor-default",
+        isSelected ? "bg-zinc-300" : "bg-zinc-200"
+      )}
+    >
       {children}
     </div>
   );
@@ -32,12 +44,24 @@ const AnnotationComponent = observer(
         .get()!
         .sliceDoc(annotation.span[0], annotation.span[1]);
     }).get();
+    const isSelected = computed(() =>
+      selectedAnnotationsMobx.includes(annotation.id)
+    ).get();
+
     const bindDrag = useDrag(
-      action<Handler<"drag">>(({ offset, first, event }) => {
+      action<Handler<"drag">>(({ offset, delta, first, event }) => {
         if (first) {
           event.preventDefault();
         }
-        annotation.position = offset;
+        if (selectedAnnotationsMobx.includes(annotation.id)) {
+          for (const a of annotationsMobx) {
+            if (selectedAnnotationsMobx.includes(a.id)) {
+              a.position = [a.position[0] + delta[0], a.position[1] + delta[1]];
+            }
+          }
+        } else {
+          annotation.position = offset;
+        }
       }),
       {
         from: () => untracked(() => annotation.position),
@@ -53,7 +77,7 @@ const AnnotationComponent = observer(
           left: `${annotation.position[0]}px`,
         }}
       >
-        <Token>{text}</Token>
+        <Token isSelected={isSelected}>{text}</Token>
       </div>
     );
   }
@@ -104,10 +128,12 @@ function NewDragAnnotationComponent() {
       }));
     }
     function onMouseUp(e: MouseEvent) {
-      annotationsMobx.push({
-        id: nanoid(),
-        span: dragAnnotationSpan!,
-        position: [e.clientX + mouseOffset![0], e.clientY + mouseOffset![1]],
+      runInAction(() => {
+        annotationsMobx.push({
+          id: nanoid(),
+          span: dragAnnotationSpan!,
+          position: [e.clientX + mouseOffset![0], e.clientY + mouseOffset![1]],
+        });
       });
       cleanup();
     }
@@ -241,6 +267,7 @@ export function App() {
   }, []);
   return (
     <div>
+      <CanvasBackground />
       <div className="p-8 flex">
         <div
           className="w-[384px] h-[384px] border border-zinc-200 overflow-auto"
