@@ -3,16 +3,27 @@ import { EditorView, minimalSetup } from "codemirror";
 import { EditorState } from "@codemirror/state";
 import { ViewPlugin, ViewUpdate } from "@codemirror/view";
 import { EventEmitter } from "eventemitter3";
-import { computed, observable, runInAction } from "mobx";
+import { action, computed, observable, runInAction, untracked } from "mobx";
 import { observer } from "mobx-react-lite";
+import { Handler, useDrag } from "@use-gesture/react";
+import { nanoid } from "nanoid";
 
 type Span = [from: number, to: number];
 type DragAnnotation = {
+  id: string;
   position: [x: number, y: number];
   span: Span;
 };
 const editorStateDoc = observable.box<EditorState>();
 const annotationsMobx = observable<DragAnnotation>([]);
+
+function Token({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="relative -top-1 -my-px -left-2 px-2 py-1 text-xs font-mono rounded bg-zinc-200 cursor-default">
+      {children}
+    </div>
+  );
+}
 
 const AnnotationComponent = observer(
   ({ annotation }: { annotation: DragAnnotation }) => {
@@ -21,17 +32,25 @@ const AnnotationComponent = observer(
         .get()!
         .sliceDoc(annotation.span[0], annotation.span[1]);
     }).get();
+    const bindDrag = useDrag(
+      action<Handler<"drag">>(({ offset }) => {
+        annotation.position = offset;
+      }),
+      {
+        from: () => untracked(() => annotation.position),
+      }
+    );
+
     return (
       <div
-        className="absolute"
+        {...bindDrag()}
+        className="absolute touch-none"
         style={{
           top: `${annotation.position[1]}px`,
           left: `${annotation.position[0]}px`,
         }}
       >
-        <div className="relative -top-1 -my-px -left-1 p-1 text-xs font-mono rounded bg-indigo-100 cursor-default">
-          {text}
-        </div>
+        <Token>{text}</Token>
       </div>
     );
   }
@@ -43,7 +62,7 @@ const AnnotationsComponent = observer(() => {
         return (
           <AnnotationComponent
             annotation={annotation}
-            key={annotation.span[0]}
+            key={annotation.id}
           ></AnnotationComponent>
         );
       })}
@@ -83,6 +102,7 @@ function NewDragAnnotationComponent() {
     }
     function onMouseUp(e: MouseEvent) {
       annotationsMobx.push({
+        id: nanoid(),
         span: dragAnnotationSpan!,
         position: [e.clientX + mouseOffset![0], e.clientY + mouseOffset![1]],
       });
@@ -129,9 +149,7 @@ function NewDragAnnotationComponent() {
         top: `${spanPosition[1]}px`,
       }}
     >
-      <div className="relative -top-1 -my-px -left-1 p-1 text-xs font-mono rounded bg-indigo-100 cursor-default">
-        {text}
-      </div>
+      <Token>{text}</Token>
     </div>
   );
 }
@@ -185,6 +203,12 @@ export function App() {
           "&": {
             height: "100%",
           },
+          "&.cm-focused .cm-selectionBackground": {
+            backgroundColor: "#e4e4e7",
+          },
+          "&.cm-editor.cm-focused": {
+            outline: "none",
+          },
           ".cm-scroller": {
             fontFamily: `ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace`,
             fontSize: "0.75rem",
@@ -215,7 +239,10 @@ export function App() {
   return (
     <div>
       <div className="p-8">
-        <div className="w-[512px] h-[512px]" ref={editorRef}></div>
+        <div
+          className="w-[512px] h-[512px] border border-zinc-200"
+          ref={editorRef}
+        ></div>
       </div>
       <AnnotationsComponent />
       <NewDragAnnotationComponent />
