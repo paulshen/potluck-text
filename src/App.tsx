@@ -10,6 +10,7 @@ import { nanoid } from "nanoid";
 import { CanvasBackground } from "./CanvasBackground";
 import {
   annotationsMobx,
+  AnnotationType,
   DragAnnotation,
   selectedAnnotationsMobx,
   Span,
@@ -20,16 +21,29 @@ const editorStateDoc = observable.box<EditorState>();
 
 function Token({
   isSelected = false,
+  annotationType,
   children,
 }: {
   isSelected?: boolean;
+  annotationType?: AnnotationType | undefined;
   children: React.ReactNode;
 }) {
   return (
     <div
       className={classNames(
         "relative -top-1 -my-px -left-2 px-2 py-1 text-xs font-mono rounded cursor-default",
-        isSelected ? "bg-zinc-300" : "bg-zinc-200"
+        annotationType !== undefined ? "text-white" : undefined,
+        annotationType === AnnotationType.Ingredient
+          ? isSelected
+            ? "bg-indigo-600"
+            : "bg-indigo-500"
+          : annotationType === AnnotationType.Duration
+          ? isSelected
+            ? "bg-pink-600"
+            : "bg-pink-500"
+          : isSelected
+          ? "bg-zinc-300"
+          : "bg-zinc-200"
       )}
     >
       {children}
@@ -77,7 +91,9 @@ const AnnotationComponent = observer(
           left: `${annotation.position[0]}px`,
         }}
       >
-        <Token isSelected={isSelected}>{text}</Token>
+        <Token isSelected={isSelected} annotationType={annotation.type}>
+          {text}
+        </Token>
       </div>
     );
   }
@@ -133,6 +149,7 @@ function NewDragAnnotationComponent() {
           id: nanoid(),
           span: dragAnnotationSpan!,
           position: [e.clientX + mouseOffset![0], e.clientY + mouseOffset![1]],
+          type: undefined,
         });
       });
       cleanup();
@@ -222,7 +239,7 @@ const plugin = ViewPlugin.fromClass(
   }
 );
 
-export function App() {
+function Editor() {
   const editorRef = useRef(null);
   useEffect(() => {
     const view = new EditorView({
@@ -265,14 +282,47 @@ export function App() {
       view.destroy();
     };
   }, []);
+
+  return (
+    <div
+      className="w-[384px] h-[384px] border border-zinc-200 overflow-auto"
+      ref={editorRef}
+    ></div>
+  );
+}
+
+export function App() {
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.target === document.body) {
+        switch (e.key) {
+          case "1":
+          case "2": {
+            runInAction(() => {
+              annotationsMobx.forEach((annotation) => {
+                if (selectedAnnotationsMobx.includes(annotation.id)) {
+                  annotation.type =
+                    e.key === "1"
+                      ? AnnotationType.Ingredient
+                      : AnnotationType.Duration;
+                }
+              });
+            });
+            break;
+          }
+        }
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, []);
   return (
     <div>
       <CanvasBackground />
       <div className="p-8 flex">
-        <div
-          className="w-[384px] h-[384px] border border-zinc-200 overflow-auto"
-          ref={editorRef}
-        ></div>
+        <Editor />
       </div>
       <AnnotationsComponent />
       <NewDragAnnotationComponent />
