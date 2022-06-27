@@ -13,7 +13,7 @@ import {
   DragAnnotation,
   selectedAnnotationsMobx,
   Span,
-} from "./State";
+} from "./primitives";
 import classNames from "classnames";
 
 const editorStateDoc = observable.box<EditorState>();

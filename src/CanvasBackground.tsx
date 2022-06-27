@@ -1,7 +1,7 @@
 import { Handler, useDrag } from "@use-gesture/react";
 import { action, runInAction } from "mobx";
 import { useState } from "react";
-import { annotationsMobx, Rect, selectedAnnotationsMobx } from "./State";
+import { annotationsMobx, Rect, selectedAnnotationsMobx } from "./primitives";
 
 function doesRectContain(rect: Rect, [x, y]: [x: number, y: number]) {
   return (
