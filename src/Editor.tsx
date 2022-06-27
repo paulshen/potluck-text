@@ -21,7 +21,6 @@ const plugin = ViewPlugin.fromClass(
     eventHandlers: {
       mousedown(event, view) {
         if (event.metaKey) {
-          console.log(this.lastUpdate, event, view);
           const pos = view.posAtCoords({ x: event.clientX, y: event.clientY });
           if (pos === null) {
             return;

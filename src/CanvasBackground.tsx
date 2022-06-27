@@ -1,7 +1,13 @@
 import { Handler, useDrag } from "@use-gesture/react";
 import { action, runInAction } from "mobx";
 import { useState } from "react";
-import { annotationsMobx, Rect, selectedAnnotationsMobx } from "./primitives";
+import {
+  annotationsMobx,
+  CHAR_WIDTH,
+  editorStateDoc,
+  Rect,
+  selectedAnnotationsMobx,
+} from "./primitives";
 
 function doesRectContain(rect: Rect, [x, y]: [x: number, y: number]) {
   return (
@@ -10,6 +16,16 @@ function doesRectContain(rect: Rect, [x, y]: [x: number, y: number]) {
     y >= rect[1] &&
     y < rect[1] + rect[3]
   );
+}
+
+function doRectsOverlap(r1: Rect, r2: Rect): boolean {
+  if (r1[0] > r2[0] + r2[2] || r2[0] > r1[0] + r1[2]) {
+    return false;
+  }
+  if (r1[1] > r2[1] + r2[3] || r2[1] > r1[1] + r1[3]) {
+    return false;
+  }
+  return true;
 }
 
 export function CanvasBackground() {
@@ -34,9 +50,17 @@ export function CanvasBackground() {
         setSelectionRect(selectionRect);
         selectedAnnotationsMobx.replace(
           annotationsMobx
-            .filter((annotation) =>
-              doesRectContain(selectionRect, annotation.position)
-            )
+            .filter((annotation) => {
+              const text = editorStateDoc
+                .get()!
+                .sliceDoc(annotation.span[0], annotation.span[1]);
+              return doRectsOverlap(selectionRect, [
+                annotation.position[0] - 8,
+                annotation.position[1] - 4,
+                text.length * CHAR_WIDTH + 16,
+                24,
+              ]);
+            })
             .map((a) => a.id)
         );
       }

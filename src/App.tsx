@@ -28,19 +28,14 @@ function Token({
   return (
     <div
       className={classNames(
-        "relative -top-1 -my-px -left-2 px-2 py-1 text-xs font-mono rounded cursor-default",
+        "relative -top-1 -my-px -left-2 px-2 py-1 text-xs font-mono rounded cursor-default whitespace-nowrap",
         annotationType !== undefined ? "text-white" : undefined,
+        isSelected ? "shadow-lg bg-opacity-100" : "bg-opacity-80",
         annotationType === AnnotationType.Ingredient
-          ? isSelected
-            ? "bg-indigo-600"
-            : "bg-indigo-500"
+          ? "bg-indigo-600"
           : annotationType === AnnotationType.Duration
-          ? isSelected
-            ? "bg-orange-600"
-            : "bg-orange-500"
-          : isSelected
-          ? "bg-zinc-300"
-          : "bg-zinc-200"
+          ? "bg-orange-600"
+          : "bg-zinc-300"
       )}
     >
       {children}
