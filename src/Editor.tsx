@@ -1,7 +1,7 @@
-import { ViewPlugin, ViewUpdate } from "@codemirror/view";
-import { EditorView, minimalSetup } from "codemirror";
-import { runInAction } from "mobx";
-import { useRef, useEffect } from "react";
+import {ViewPlugin, ViewUpdate} from "@codemirror/view";
+import {EditorView, minimalSetup} from "codemirror";
+import {runInAction} from "mobx";
+import {useRef, useEffect} from "react";
 import {
   annotationsMobx,
   dragNewAnnotationEmitter,
@@ -11,11 +11,16 @@ import {
 const plugin = ViewPlugin.fromClass(
   class {
     lastUpdate: any;
-    constructor(view: EditorView) {}
+
+    constructor(view: EditorView) {
+    }
+
     update(update: ViewUpdate) {
       this.lastUpdate = update;
     }
-    destroy() {}
+
+    destroy() {
+    }
   },
   {
     eventHandlers: {
@@ -50,6 +55,7 @@ export function Editor() {
   const editorRef = useRef(null);
   useEffect(() => {
     const view = new EditorView({
+      state: editorStateDoc.get(),
       extensions: [
         minimalSetup,
         EditorView.theme({
