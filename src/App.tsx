@@ -133,8 +133,14 @@ const X_TOLERANCE = 10;
 const Y_TOLERANCE = 50;
 
 type Join = {
-  stack: DragStack
-  offsetByIndex: { [index: number]: number }
+  left: {
+    stack: DragStack
+    offsetByIndex: { [index: number]: number }
+  },
+  right: {
+    stack: DragStack
+    offsetByIndex: { [index: number]: number }
+  }
   height: number
 }
 
@@ -144,50 +150,63 @@ function getAnnotationText(annotation: Annotation): string {
     .sliceDoc(annotation.span[0], annotation.span[1]);
 }
 
-function findJoin(stack: DragStack): Join | undefined {
+function findJoin(rightStack: DragStack): Join | undefined {
 
-  const matchingStack = stacksMobx.find((other) => {
+  const leftStack = stacksMobx.find((other) => {
     return (
-      other.id !== stack.id &&
-      Math.abs(other.position[1] - stack.position[1]) < X_TOLERANCE &&
-      Math.abs(stack.position[0] - (X_DISTANCE + other.position[0])) < Y_TOLERANCE
+      other.id !== rightStack.id &&
+      Math.abs(other.position[1] - rightStack.position[1]) < X_TOLERANCE &&
+      Math.abs(rightStack.position[0] - (X_DISTANCE + other.position[0])) < Y_TOLERANCE
     )
   })
 
-  if (matchingStack) {
+  if (leftStack) {
     let offset = 0;
-    const offsetByIndex: { [index: number]: number } = {}
+    const rightOffsetByIndex: { [index: number]: number } = {}
+    const leftOffsetByIndex: { [index: number]: number } = {}
 
-
-    for (const matchingAnnotation of matchingStack.annotations) {
-      const matchingText = getAnnotationText(matchingAnnotation).toLowerCase()
+    leftStack.annotations.forEach((leftAnnotation, leftIndex) => {
+      const leftText = getAnnotationText(leftAnnotation).toLowerCase()
 
       let hasMatches = false;
 
-      stack.annotations.forEach((annotation, index) => {
-        if (getAnnotationText(annotation).toLowerCase().includes(matchingText)) {
+      leftOffsetByIndex[leftIndex] = offset
+
+      rightStack.annotations.forEach((rightAnnotation, rightIndex) => {
+        if (getAnnotationText(rightAnnotation).toLowerCase().includes(leftText)) {
           hasMatches = true
-          offsetByIndex[index] = offset
+          rightOffsetByIndex[rightIndex] = offset
           offset += 1;
         }
       })
 
+      offset += 0.5
+
       if (!hasMatches) {
         offset += 1;
       }
-    }
+    })
 
     return {
-      stack: matchingStack,
-      offsetByIndex,
+      left: {
+        stack: leftStack,
+        offsetByIndex: leftOffsetByIndex
+      },
+      right: {
+        stack: rightStack,
+        offsetByIndex: rightOffsetByIndex
+      },
       height: offset
     }
   }
 }
 
-const StackComponent = observer(({ stack }: { stack: DragStack }) => {
-
-  const join = findJoin(stack)
+const StackComponent = observer(({ stack, leftStack, offsetByIndex, height }: {
+  stack: DragStack,
+  leftStack?: DragStack
+  offsetByIndex?: {[index: number]: number}
+  height?: number
+}) => {
 
   const bindDrag = useDrag(
     action<Handler<"drag">>(({ offset, delta, first, event }) => {
@@ -206,12 +225,12 @@ const StackComponent = observer(({ stack }: { stack: DragStack }) => {
 
   return (
     <>
-      {join && (
+      {leftStack && (
         <div
           className="absolute icon icon-link bg-gray-300"
           style={{
-            top: `${(stack.position[1] + join.stack.position[1]) / 2 + 20}px`,
-            left: `${join.stack.position[0] + X_DISTANCE}px`
+            top: `${(stack.position[1] + leftStack.position[1]) / 2 + 20}px`,
+            left: `${leftStack.position[0] + X_DISTANCE}px`
           }}
         >
         </div>
@@ -229,8 +248,8 @@ const StackComponent = observer(({ stack }: { stack: DragStack }) => {
           style={{
             width: '200px',
             height: (
-              join
-                ? (join.height * ITEM_HEIGHT + 8)
+              height
+                ? (height * ITEM_HEIGHT + 8)
                 : (isExpanded ? 'inherit' : `${ITEM_HEIGHT}px`)
             )
           }}
@@ -239,8 +258,8 @@ const StackComponent = observer(({ stack }: { stack: DragStack }) => {
 
             const annotationComponent = <StackAnnotationComponent annotation={annotation}/>
 
-            if (join) {
-              const offset = join.offsetByIndex[index]
+            if (offsetByIndex) {
+              const offset = offsetByIndex[index]
 
               if (offset === undefined) {
                 return null
@@ -251,7 +270,8 @@ const StackComponent = observer(({ stack }: { stack: DragStack }) => {
                   className="absolute"
                   style={{
                     top: `${offset * ITEM_HEIGHT + 4}px`,
-                    left: '4px'
+                    left: '4px',
+                    width: '192px'
                   }}
                 >
                   {annotationComponent}
@@ -279,9 +299,51 @@ const StackComponent = observer(({ stack }: { stack: DragStack }) => {
 })
 
 const StacksComponent = observer(() => {
+
+
+  const joinsById: any = {}
+
+  stacksMobx.forEach((stack) => {
+    const join = findJoin(stack)
+
+    if (join) {
+      joinsById[join.left.stack.id] = {type: 'left', offsetByIndex: join.left.offsetByIndex, height: join.height }
+      joinsById[join.right.stack.id] = {type: 'right', offsetByIndex: join.right.offsetByIndex , leftStack: join.left.stack, height: join.height }
+    }
+  }, {})
+
+
   return (
     <>
       {stacksMobx.map((stack, index) => {
+        const join = joinsById[stack.id]
+
+        if (join) {
+          switch (join.type) {
+            case 'left':
+              return (
+                <StackComponent
+                  stack={stack}
+                  offsetByIndex={join.offsetByIndex}
+                  height={join.height}
+                  key={index}
+                />
+              )
+
+            case 'right':
+              return (
+                <StackComponent
+                  stack={stack}
+                  offsetByIndex={join.offsetByIndex}
+                  leftStack={join.leftStack}
+                  height={join.height}
+                  key={index}
+                />
+              )
+          }
+
+        }
+
         return (
           <StackComponent
             stack={stack}
