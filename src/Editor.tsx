@@ -55,7 +55,6 @@ export function Editor() {
   const editorRef = useRef(null);
   useEffect(() => {
     const view = new EditorView({
-      state: editorStateDoc.get(),
       extensions: [
         minimalSetup,
         EditorView.theme({

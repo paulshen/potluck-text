@@ -12,7 +12,7 @@ export enum AnnotationType {
   Duration,
 }
 
-export const editorStateDoc = observable.box<EditorState>(EditorState.create({
+const EXAMPLE_DOC = EditorState.create({
   doc:
     `# Chocolate Cookies
 
@@ -40,7 +40,9 @@ export const editorStateDoc = observable.box<EditorState>(EditorState.create({
 - flour
 - sugar
 `
-}));
+})
+
+export const editorStateDoc = observable.box<EditorState>();
 
 export const dragNewAnnotationEmitter = new EventEmitter();
 
@@ -111,30 +113,9 @@ const EXAMPLE_ANNOTATIONS: DragAnnotation[] = [{
 }
 ] as DragAnnotation[]
 
-export const annotationsMobx = observable<DragAnnotation>(EXAMPLE_ANNOTATIONS);
+export const annotationsMobx = observable<DragAnnotation>([]);
 
-export const stacksMobx = observable<DragStack>([
-  {
-    id: nanoid(),
-    isExpanded: false,
-    position: [900, 900],
-    annotations: [
-      {
-        "id": "Y1_2W1BT8Uy1Hq7IYE-Cc",
-        "span": [280, 283],
-      }, {
-        "id": "5aE5GT_3ZlpCh5U5ft2nR",
-        "span": [286, 297],
-      }, {
-        "id": "O2P9zd2stMpwG1773jzs5",
-        "span": [308, 313]
-      }, {
-        "id": "3K2J3me1ln4aDct4hHYcS",
-        "span": [300, 305],
-      }
-    ] as Annotation[]
-  }
-]);
+export const stacksMobx = observable<DragStack>([]);
 
 export const selectedAnnotationsMobx = observable<string>([]);
 
