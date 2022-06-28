@@ -1,0 +1,22 @@
+.icon {
+  width: 24px;
+  height: 24px;
+  background: #000;
+  mask-position: center;
+  -webkit-mask-position: center;
+  mask-size: contain;
+  -webkit-mask-size: contain;
+  mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
+}
+
+.icon-expandable {
+  mask-image: url('../icons/expandable.svg');
+  -webkit-mask-image: url('../icons/expandable.svg');
+  transition: transform ease-in 100ms;
+  transform: rotate(180deg);
+}
+
+.icon-expandable.is-expanded {
+  transform: rotate(0deg);
+}

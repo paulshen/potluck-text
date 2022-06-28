@@ -46,6 +46,7 @@ export const dragNewAnnotationEmitter = new EventEmitter();
 export type DragStack = {
   annotations: Annotation[]
   position: [x: number, y: number],
+  isExpanded: boolean,
 }
 
 export type Annotation = {
@@ -112,6 +113,7 @@ export const annotationsMobx = observable<DragAnnotation>(EXAMPLE_ANNOTATIONS);
 
 export const stacksMobx = observable<DragStack>([
   {
+    isExpanded: false,
     position: [900, 900],
     annotations: [
       {

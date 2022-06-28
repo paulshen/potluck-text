@@ -26,14 +26,14 @@ function Token({
   isSelected?: boolean;
   annotationType?: AnnotationType | undefined;
   children: React.ReactNode;
-  disableShift? : boolean
+  disableShift?: boolean
 }) {
   return (
     <div
       className={classNames(
         "relative px-2 py-1 text-xs font-mono rounded cursor-default whitespace-nowrap",
         annotationType !== undefined ? "text-white" : undefined,
-        isSelected ? "shadow-lg bg-opacity-100" : "bg-opacity-80",
+        isSelected ? "shadow-lg bg-opacity-100" : "bg-opacity-100",
         annotationType === AnnotationType.Ingredient
           ? "bg-indigo-600"
           : annotationType === AnnotationType.Duration
@@ -112,7 +112,7 @@ const AnnotationsComponent = observer(() => {
   );
 });
 
-const StackAnnotationComponent = observer(({ annotation }: {annotation: Annotation}) => {
+const StackAnnotationComponent = observer(({ annotation }: { annotation: Annotation }) => {
   const text = computed(() => {
     return editorStateDoc
       .get()!
@@ -143,16 +143,33 @@ const StackComponent = observer(({ stack }: { stack: DragStack }) => {
 
   return (
     <div
+      className="absolute touch-none flex flex-col items-center"
       {...bindDrag()}
-      className="absolute touch-none flex flex-col gap-1 border border-zinc-200 p-1 rounded border-dashed"
       style={{
         top: `${stack.position[1]}px`,
         left: `${stack.position[0]}px`
       }}>
 
-      {stack.annotations.map((annotation) => (
-        <StackAnnotationComponent annotation={annotation} />
-      ))}
+      <div
+        className="flex flex-col gap-1 border border-zinc-200 p-1 rounded border-dashed overflow-hidden"
+        style={{
+          height: stack.isExpanded ? 'inherit': '34px'
+        }}
+      >
+        {stack.annotations.map((annotation, index) => (
+          <StackAnnotationComponent annotation={annotation}/>
+        ))}
+      </div>
+
+      <button
+        onClick={() => {
+          runInAction(() => {
+            stack.isExpanded = !stack.isExpanded
+          })
+        }}
+        className={classNames("icon icon-expandable bg-gray-300", {
+          "is-expanded": stack.isExpanded
+        })}/>
 
     </div>
   )
@@ -270,7 +287,7 @@ export function App() {
           case "s":
             runInAction(() => {
 
-              const stackAnnotations : Annotation[] = []
+              const stackAnnotations: Annotation[] = []
 
               let minAnnotation: DragAnnotation | undefined;
 
@@ -293,6 +310,7 @@ export function App() {
 
               if (minAnnotation) {
                 stacksMobx.push({
+                  isExpanded: false,
                   position: [...minAnnotation.position],
                   annotations: stackAnnotations
                 })
