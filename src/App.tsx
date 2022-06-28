@@ -108,13 +108,28 @@ const AnnotationsComponent = observer(() => {
 
 
 const StackComponent = observer(({ stack }: { stack: DragStack }) => {
+
+  const bindDrag = useDrag(
+    action<Handler<"drag">>(({ offset, delta, first, event }) => {
+      if (first) {
+        event.preventDefault();
+      }
+
+      stack.position = offset;
+    }),
+    {
+      from: () => untracked(() => stack.position),
+    }
+  );
+
   return (
     <div
+      {...bindDrag()}
       className="absolute touch-none"
       style={{
-      top: `${stack.position[0]}px`,
-      left: `${stack.position[1]}px`
-    }}>
+        top: `${stack.position[1]}px`,
+        left: `${stack.position[0]}px`
+      }}>
 
       My Stack
 
