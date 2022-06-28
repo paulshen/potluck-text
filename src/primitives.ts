@@ -44,8 +44,14 @@ export const editorStateDoc = observable.box<EditorState>(EditorState.create({
 export const dragNewAnnotationEmitter = new EventEmitter();
 
 export type DragStack = {
-  annotations: DragAnnotation[]
+  annotations: Annotation[]
   position: [x: number, y: number],
+}
+
+export type Annotation = {
+  id: string;
+  span: Span;
+  type: AnnotationType | undefined
 }
 
 export type DragAnnotation = {
@@ -99,26 +105,29 @@ const EXAMPLE_ANNOTATIONS: DragAnnotation[] = [{
   "id": "F2mpJNX-u8Yy7DYPyvUwo",
   "span": [256, 261],
   "position": [850.4453125, 362]
-}, {
-  "id": "Y1_2W1BT8Uy1Hq7IYE-Cc",
-  "span": [280, 283],
-  "position": [169.4453125, 529]
-}, {
-  "id": "5aE5GT_3ZlpCh5U5ft2nR",
-  "span": [286, 297],
-  "position": [169.4453125, 567]
-}, {
-  "id": "3K2J3me1ln4aDct4hHYcS",
-  "span": [300, 305],
-  "position": [170.4453125, 605]
-}, { "id": "O2P9zd2stMpwG1773jzs5", "span": [308, 313], "position": [171.4453125, 647] }
+}
 ] as DragAnnotation[]
 
 export const annotationsMobx = observable<DragAnnotation>(EXAMPLE_ANNOTATIONS);
 
 export const stacksMobx = observable<DragStack>([
-  { position: [ 900, 900 ],
-    annotations: []
+  {
+    position: [900, 900],
+    annotations: [
+      {
+        "id": "Y1_2W1BT8Uy1Hq7IYE-Cc",
+        "span": [280, 283],
+      }, {
+        "id": "5aE5GT_3ZlpCh5U5ft2nR",
+        "span": [286, 297],
+      }, {
+        "id": "3K2J3me1ln4aDct4hHYcS",
+        "span": [300, 305],
+      }, {
+        "id": "O2P9zd2stMpwG1773jzs5",
+        "span": [308, 313]
+      }
+    ] as Annotation[]
   }
 ]);
 

@@ -5,6 +5,7 @@ import {Handler, useDrag} from "@use-gesture/react";
 import {nanoid} from "nanoid";
 import {CanvasBackground} from "./CanvasBackground";
 import {
+  Annotation,
   annotationsMobx,
   AnnotationType,
   DragAnnotation,
@@ -18,24 +19,27 @@ import {Editor} from "./Editor";
 
 function Token({
   isSelected = false,
+  disableShift = false,
   annotationType,
   children,
 }: {
   isSelected?: boolean;
   annotationType?: AnnotationType | undefined;
   children: React.ReactNode;
+  disableShift? : boolean
 }) {
   return (
     <div
       className={classNames(
-        "relative -top-1 -my-px -left-2 px-2 py-1 text-xs font-mono rounded cursor-default whitespace-nowrap",
+        "relative px-2 py-1 text-xs font-mono rounded cursor-default whitespace-nowrap",
         annotationType !== undefined ? "text-white" : undefined,
         isSelected ? "shadow-lg bg-opacity-100" : "bg-opacity-80",
         annotationType === AnnotationType.Ingredient
           ? "bg-indigo-600"
           : annotationType === AnnotationType.Duration
             ? "bg-orange-600"
-            : "bg-zinc-300"
+            : "bg-zinc-300",
+        disableShift ? "" : "-top-1 -my-px -left-2"
       )}
     >
       {children}
@@ -43,13 +47,15 @@ function Token({
   );
 }
 
-const AnnotationComponent = observer(
+const DragAnnotationComponent = observer(
   ({ annotation }: { annotation: DragAnnotation }) => {
+
     const text = computed(() => {
       return editorStateDoc
         .get()!
         .sliceDoc(annotation.span[0], annotation.span[1]);
     }).get();
+
     const isSelected = computed(() =>
       selectedAnnotationsMobx.includes(annotation.id)
     ).get();
@@ -96,16 +102,29 @@ const AnnotationsComponent = observer(() => {
     <>
       {annotationsMobx.map((annotation) => {
         return (
-          <AnnotationComponent
+          <DragAnnotationComponent
             annotation={annotation}
             key={annotation.id}
-          ></AnnotationComponent>
+          />
         );
       })}
     </>
   );
 });
 
+const StackAnnotationComponent = observer(({ annotation }: {annotation: Annotation}) => {
+  const text = computed(() => {
+    return editorStateDoc
+      .get()!
+      .sliceDoc(annotation.span[0], annotation.span[1]);
+  }).get();
+
+  return (
+    <Token disableShift={true} annotationType={annotation.type}>
+      {text}
+    </Token>
+  )
+})
 
 const StackComponent = observer(({ stack }: { stack: DragStack }) => {
 
@@ -125,13 +144,15 @@ const StackComponent = observer(({ stack }: { stack: DragStack }) => {
   return (
     <div
       {...bindDrag()}
-      className="absolute touch-none"
+      className="absolute touch-none flex flex-col gap-1 border border-zinc-200 p-1 rounded border-dashed"
       style={{
         top: `${stack.position[1]}px`,
         left: `${stack.position[0]}px`
       }}>
 
-      My Stack
+      {stack.annotations.map((annotation) => (
+        <StackAnnotationComponent annotation={annotation} />
+      ))}
 
     </div>
   )
