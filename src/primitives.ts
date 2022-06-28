@@ -43,6 +43,11 @@ export const editorStateDoc = observable.box<EditorState>(EditorState.create({
 
 export const dragNewAnnotationEmitter = new EventEmitter();
 
+export type DragStack = {
+  annotations: DragAnnotation[]
+  position: [x: number, y: number],
+}
+
 export type DragAnnotation = {
   id: string;
   position: [x: number, y: number];
@@ -111,6 +116,11 @@ const EXAMPLE_ANNOTATIONS: DragAnnotation[] = [{
 
 export const annotationsMobx = observable<DragAnnotation>(EXAMPLE_ANNOTATIONS);
 
+export const stacksMobx = observable<DragStack>([
+  { position: [ 900, 900 ],
+    annotations: []
+  }
+]);
 
 export const selectedAnnotationsMobx = observable<string>([]);
 

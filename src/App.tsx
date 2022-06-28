@@ -1,20 +1,20 @@
-import { useEffect, useState } from "react";
-import { action, computed, observable, runInAction, untracked } from "mobx";
-import { observer } from "mobx-react-lite";
-import { Handler, useDrag } from "@use-gesture/react";
-import { nanoid } from "nanoid";
-import { CanvasBackground } from "./CanvasBackground";
+import {useEffect, useState} from "react";
+import {action, computed, observable, runInAction, untracked} from "mobx";
+import {observer} from "mobx-react-lite";
+import {Handler, useDrag} from "@use-gesture/react";
+import {nanoid} from "nanoid";
+import {CanvasBackground} from "./CanvasBackground";
 import {
   annotationsMobx,
   AnnotationType,
   DragAnnotation,
-  dragNewAnnotationEmitter,
+  dragNewAnnotationEmitter, DragStack,
   editorStateDoc,
   selectedAnnotationsMobx,
-  Span,
+  Span, stacksMobx,
 } from "./primitives";
 import classNames from "classnames";
-import { Editor } from "./Editor";
+import {Editor} from "./Editor";
 
 function Token({
   isSelected = false,
@@ -34,8 +34,8 @@ function Token({
         annotationType === AnnotationType.Ingredient
           ? "bg-indigo-600"
           : annotationType === AnnotationType.Duration
-          ? "bg-orange-600"
-          : "bg-zinc-300"
+            ? "bg-orange-600"
+            : "bg-zinc-300"
       )}
     >
       {children}
@@ -90,6 +90,7 @@ const AnnotationComponent = observer(
     );
   }
 );
+
 const AnnotationsComponent = observer(() => {
   return (
     <>
@@ -105,19 +106,49 @@ const AnnotationsComponent = observer(() => {
   );
 });
 
+
+const StackComponent = observer(({ stack }: { stack: DragStack }) => {
+  return (
+    <div
+      className="absolute touch-none"
+      style={{
+      top: `${stack.position[0]}px`,
+      left: `${stack.position[1]}px`
+    }}>
+
+      My Stack
+
+    </div>
+  )
+})
+
+const StacksComponent = observer(() => {
+  return (
+    <>
+      {stacksMobx.map((stack, index) => {
+        return (
+          <StackComponent
+            stack={stack}
+            key={index}
+          />
+        )
+      })}
+    </>
+  )
+})
+
 function NewDragAnnotationComponent() {
-  const [dragAnnotation, setDragAnnotation] = useState<
-    | {
-        spanPosition: [x: number, y: number];
-        span: Span;
-        text: string;
-      }
-    | undefined
-  >(undefined);
+  const [dragAnnotation, setDragAnnotation] = useState<| {
+    spanPosition: [x: number, y: number];
+    span: Span;
+    text: string;
+  }
+    | undefined>(undefined);
 
   useEffect(() => {
     let dragAnnotationSpan: Span | undefined;
     let mouseOffset: [x: number, y: number] | undefined;
+
     function cleanup() {
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
@@ -125,6 +156,7 @@ function NewDragAnnotationComponent() {
       dragAnnotationSpan = undefined;
       mouseOffset = undefined;
     }
+
     function onMouseMove(e: MouseEvent) {
       setDragAnnotation((dragAnnotation) => ({
         ...dragAnnotation!,
@@ -134,6 +166,7 @@ function NewDragAnnotationComponent() {
         ],
       }));
     }
+
     function onMouseUp(e: MouseEvent) {
       runInAction(() => {
         annotationsMobx.push({
@@ -145,6 +178,7 @@ function NewDragAnnotationComponent() {
       });
       cleanup();
     }
+
     function onStart({
       spanPosition,
       span,
@@ -166,6 +200,7 @@ function NewDragAnnotationComponent() {
       window.addEventListener("mousemove", onMouseMove);
       window.addEventListener("mouseup", onMouseUp);
     }
+
     dragNewAnnotationEmitter.addListener("start", onStart);
     return () => {
       dragNewAnnotationEmitter.removeListener("start", onStart);
@@ -213,6 +248,7 @@ export function App() {
         }
       }
     }
+
     window.addEventListener("keydown", onKeyDown);
     return () => {
       window.removeEventListener("keydown", onKeyDown);
@@ -220,12 +256,13 @@ export function App() {
   }, []);
   return (
     <div>
-      <CanvasBackground />
+      <CanvasBackground/>
       <div className="p-8 flex">
-        <Editor />
+        <Editor/>
       </div>
-      <AnnotationsComponent />
-      <NewDragAnnotationComponent />
+      <AnnotationsComponent/>
+      <NewDragAnnotationComponent/>
+      <StacksComponent/>
     </div>
   );
 }
