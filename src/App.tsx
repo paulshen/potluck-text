@@ -267,6 +267,40 @@ export function App() {
     function onKeyDown(e: KeyboardEvent) {
       if (e.target === document.body) {
         switch (e.key) {
+          case "s":
+            runInAction(() => {
+
+              const stackAnnotations : Annotation[] = []
+
+              let minAnnotation: DragAnnotation | undefined;
+
+              const filteredAnnotations = annotationsMobx.filter((annotation) => {
+                const isSelected = selectedAnnotationsMobx.includes(annotation.id)
+
+                if (isSelected) {
+
+                  if (!minAnnotation || (minAnnotation.position[1] > annotation.position[1])) {
+                    minAnnotation = annotation
+                  }
+
+                  stackAnnotations.push(annotation)
+                }
+
+                return !isSelected
+              })
+
+              annotationsMobx.replace(filteredAnnotations)
+
+              if (minAnnotation) {
+                stacksMobx.push({
+                  position: [...minAnnotation.position],
+                  annotations: stackAnnotations
+                })
+              }
+
+            })
+            break;
+
           case "1":
           case "2": {
             runInAction(() => {
