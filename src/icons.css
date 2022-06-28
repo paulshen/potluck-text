@@ -10,6 +10,12 @@
   -webkit-mask-repeat: no-repeat;
 }
 
+.icon-link {
+  mask-image: url('../icons/link.svg');
+  -webkit-mask-image: url('../icons/link.svg');
+}
+
+
 .icon-expandable {
   mask-image: url('../icons/expandable.svg');
   -webkit-mask-image: url('../icons/expandable.svg');

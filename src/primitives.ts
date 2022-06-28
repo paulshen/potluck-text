@@ -1,6 +1,7 @@
 import {EditorState} from "@codemirror/state";
 import {EventEmitter} from "eventemitter3";
 import {observable} from "mobx";
+import {nanoid} from "nanoid";
 
 export type Position = [x: number, y: number];
 export type Rect = [x: number, y: number, width: number, height: number];
@@ -44,6 +45,7 @@ export const editorStateDoc = observable.box<EditorState>(EditorState.create({
 export const dragNewAnnotationEmitter = new EventEmitter();
 
 export type DragStack = {
+  id: string;
   annotations: Annotation[]
   position: [x: number, y: number],
   isExpanded: boolean,
@@ -113,6 +115,7 @@ export const annotationsMobx = observable<DragAnnotation>(EXAMPLE_ANNOTATIONS);
 
 export const stacksMobx = observable<DragStack>([
   {
+    id: nanoid(),
     isExpanded: false,
     position: [900, 900],
     annotations: [
@@ -123,11 +126,11 @@ export const stacksMobx = observable<DragStack>([
         "id": "5aE5GT_3ZlpCh5U5ft2nR",
         "span": [286, 297],
       }, {
-        "id": "3K2J3me1ln4aDct4hHYcS",
-        "span": [300, 305],
-      }, {
         "id": "O2P9zd2stMpwG1773jzs5",
         "span": [308, 313]
+      }, {
+        "id": "3K2J3me1ln4aDct4hHYcS",
+        "span": [300, 305],
       }
     ] as Annotation[]
   }

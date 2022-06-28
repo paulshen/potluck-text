@@ -126,7 +126,68 @@ const StackAnnotationComponent = observer(({ annotation }: { annotation: Annotat
   )
 })
 
+const ITEM_HEIGHT = 28;
+
+const X_DISTANCE = 210;
+const X_TOLERANCE = 10;
+const Y_TOLERANCE = 50;
+
+type Join = {
+  stack: DragStack
+  offsetByIndex: { [index: number]: number }
+  height: number
+}
+
+function getAnnotationText(annotation: Annotation): string {
+  return editorStateDoc
+    .get()!
+    .sliceDoc(annotation.span[0], annotation.span[1]);
+}
+
+function findJoin(stack: DragStack): Join | undefined {
+
+  const matchingStack = stacksMobx.find((other) => {
+    return (
+      other.id !== stack.id &&
+      Math.abs(other.position[1] - stack.position[1]) < X_TOLERANCE &&
+      Math.abs(stack.position[0] - (X_DISTANCE + other.position[0])) < Y_TOLERANCE
+    )
+  })
+
+  if (matchingStack) {
+    let offset = 0;
+    const offsetByIndex: { [index: number]: number } = {}
+
+
+    for (const matchingAnnotation of matchingStack.annotations) {
+      const matchingText = getAnnotationText(matchingAnnotation).toLowerCase()
+
+      let hasMatches = false;
+
+      stack.annotations.forEach((annotation, index) => {
+        if (getAnnotationText(annotation).toLowerCase().includes(matchingText)) {
+          hasMatches = true
+          offsetByIndex[index] = offset
+          offset += 1;
+        }
+      })
+
+      if (!hasMatches) {
+        offset += 1;
+      }
+    }
+
+    return {
+      stack: matchingStack,
+      offsetByIndex,
+      height: offset
+    }
+  }
+}
+
 const StackComponent = observer(({ stack }: { stack: DragStack }) => {
+
+  const join = findJoin(stack)
 
   const bindDrag = useDrag(
     action<Handler<"drag">>(({ offset, delta, first, event }) => {
@@ -141,37 +202,79 @@ const StackComponent = observer(({ stack }: { stack: DragStack }) => {
     }
   );
 
+  const isExpanded = true // stack.isExpanded
+
   return (
-    <div
-      className="absolute touch-none flex flex-col items-center"
-      {...bindDrag()}
-      style={{
-        top: `${stack.position[1]}px`,
-        left: `${stack.position[0]}px`
-      }}>
-
+    <>
+      {join && (
+        <div
+          className="absolute icon icon-link bg-gray-300"
+          style={{
+            top: `${(stack.position[1] + join.stack.position[1]) / 2 + 20}px`,
+            left: `${join.stack.position[0] + X_DISTANCE}px`
+          }}
+        >
+        </div>
+      )}
       <div
-        className="flex flex-col gap-1 border border-zinc-200 p-1 rounded border-dashed overflow-hidden"
+        className="absolute touch-none flex flex-col items-center"
+        {...bindDrag()}
         style={{
-          height: stack.isExpanded ? 'inherit': '34px'
-        }}
-      >
-        {stack.annotations.map((annotation, index) => (
-          <StackAnnotationComponent annotation={annotation}/>
-        ))}
+          top: `${stack.position[1]}px`,
+          left: `${stack.position[0]}px`
+        }}>
+
+        <div
+          className="flex flex-col gap-1 border border-zinc-200 p-1 rounded border-dashed relative"
+          style={{
+            width: '200px',
+            height: (
+              join
+                ? (join.height * ITEM_HEIGHT + 8)
+                : (isExpanded ? 'inherit' : `${ITEM_HEIGHT}px`)
+            )
+          }}
+        >
+          {stack.annotations.map((annotation, index) => {
+
+            const annotationComponent = <StackAnnotationComponent annotation={annotation}/>
+
+            if (join) {
+              const offset = join.offsetByIndex[index]
+
+              if (offset === undefined) {
+                return null
+              }
+
+              return (
+                <div
+                  className="absolute"
+                  style={{
+                    top: `${offset * ITEM_HEIGHT + 4}px`,
+                    left: '4px'
+                  }}
+                >
+                  {annotationComponent}
+                </div>
+              )
+            }
+
+            return annotationComponent
+          })}
+        </div>
+
+        {false && <button
+          onClick={() => {
+            runInAction(() => {
+              stack.isExpanded = !isExpanded
+            })
+          }}
+          className={classNames("icon icon-expandable bg-gray-300", {
+            "is-expanded": stack.isExpanded
+          })}/>}
+
       </div>
-
-      <button
-        onClick={() => {
-          runInAction(() => {
-            stack.isExpanded = !stack.isExpanded
-          })
-        }}
-        className={classNames("icon icon-expandable bg-gray-300", {
-          "is-expanded": stack.isExpanded
-        })}/>
-
-    </div>
+    </>
   )
 })
 
@@ -310,12 +413,12 @@ export function App() {
 
               if (minAnnotation) {
                 stacksMobx.push({
+                  id: nanoid(),
                   isExpanded: false,
                   position: [...minAnnotation.position],
                   annotations: stackAnnotations
                 })
               }
-
             })
             break;
 
