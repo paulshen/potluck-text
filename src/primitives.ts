@@ -28,6 +28,11 @@ export type SpatialComponent = SnippetToken | SnippetGroup;
 export const spatialComponentsMobx = observable<SpatialComponent>([]);
 export const selectedSpatialComponentsMobx = observable<string>([]);
 
+export type DragState = {
+  snippetsOverGroupId: string | undefined;
+};
+export const dragStateBox = observable.box<DragState | undefined>(undefined);
+
 export const CHAR_WIDTH = 7.2;
 export const GROUP_WIDTH = 192;
 export const TOKEN_HEIGHT = 24;

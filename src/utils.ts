@@ -4,10 +4,20 @@ import {
   GROUP_WIDTH,
   Rect,
   TOKEN_HEIGHT,
+  Position,
 } from "./primitives";
 
 // your favorite dumping ground of utility functions
 // ideally this file doesn't have dependencies outside primitives.ts
+
+export function doesRectContainPosition(rect: Rect, pos: Position) {
+  return (
+    pos[0] >= rect[0] &&
+    pos[0] <= rect[0] + rect[2] &&
+    pos[1] >= rect[1] &&
+    pos[1] <= rect[1] + rect[3]
+  );
+}
 
 export function getRectForSnippetGroup(group: SnippetGroup): Rect {
   return [

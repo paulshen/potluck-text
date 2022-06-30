@@ -6,6 +6,7 @@ import {
   SnippetGroup,
   selectedSpatialComponentsMobx,
   spatialComponentsMobx,
+  dragStateBox,
 } from "./primitives";
 import { getRectForSnippetGroup } from "./utils";
 
@@ -37,11 +38,15 @@ export const SnippetGroupComponent = observer(
     ).get();
 
     const rect = getRectForSnippetGroup(group);
+    const areSnippetsBeingDraggedOver = computed(
+      () => dragStateBox.get()?.snippetsOverGroupId === group.id
+    ).get();
 
     return (
       <div
         className={classNames(
           "absolute touch-none border border-dashed rounded-sm border-zinc-200 p-1 -z-1",
+          areSnippetsBeingDraggedOver ? "border-zinc-400" : "border-zinc-200",
           isSelected ? "shadow-lg" : undefined
         )}
         {...bindDrag()}
