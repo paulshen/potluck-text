@@ -5,7 +5,10 @@ import { observable } from "mobx";
 export type Position = [x: number, y: number];
 export type Rect = [x: number, y: number, width: number, height: number];
 export type Span = [from: number, to: number];
-export const editorStateDoc = observable.box<EditorState>();
+export const editorStateDoc = observable.box<EditorState | undefined>(
+  undefined,
+  { deep: false }
+);
 export const dragNewSnippetEmitter = new EventEmitter();
 
 export enum SpatialComponentType {
