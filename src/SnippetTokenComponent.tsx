@@ -90,7 +90,7 @@ export const SnippetTokenComponent = observer(
           left: `${left}px`,
           width:
             snippetGroup !== undefined
-              ? `${getGroupWidth(snippetGroup)}px`
+              ? `${GROUP_COLUMN_WIDTH - GROUP_TOKEN_COLUMN_GAP}px`
               : undefined,
         }}
       >
@@ -99,7 +99,7 @@ export const SnippetTokenComponent = observer(
           snippetGroup.extraColumns.map((column, index) => (
             <div
               className={classNames(
-                "absolute touch-none bg-zinc-100 px-2 py-1 text-xs font-mono rounded cursor-default whitespace-nowrap",
+                "absolute touch-none px-2 py-1 text-xs font-mono cursor-default whitespace-nowrap",
                 snippetGroup !== undefined ? "-z-1" : undefined
               )}
               style={{

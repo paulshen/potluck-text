@@ -56,10 +56,10 @@ export const SnippetGroupComponent = observer(
           }}
         ></div>
         <button
-          className={classNames("absolute touch-none")}
+          className={classNames("absolute touch-none text-gray-300")}
           style={{
             top: `${group.position[1] - 4}px`,
-            left: `${group.position[0] - 4 + getGroupWidth(group) + 8}px`,
+            left: `${group.position[0] - 4 + getGroupWidth(group) + 16}px`,
           }}
           onClick={() => group.extraColumns.push({ name: "testColumn" })}
         >
@@ -70,7 +70,9 @@ export const SnippetGroupComponent = observer(
             className={classNames("absolute touch-none text-gray-400 text-xs")}
             style={{
               top: `${group.position[1] - 20}px`,
-              left: `${group.position[0] + (index + 1) * GROUP_COLUMN_WIDTH}px`,
+              left: `${
+                group.position[0] + (index + 1) * GROUP_COLUMN_WIDTH + 4
+              }px`,
             }}
           >
             {column.name}
