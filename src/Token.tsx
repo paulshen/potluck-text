@@ -10,7 +10,7 @@ export function Token({
   return (
     <div
       className={classNames(
-        "relative px-2 py-1 text-xs font-mono rounded cursor-default whitespace-nowrap",
+        "relative px-2 py-1 text-xs font-mono rounded cursor-default whitespace-nowrap overflow-hidden text-ellipsis",
         isSelected ? "shadow-lg bg-zinc-300" : "bg-zinc-200"
       )}
     >
