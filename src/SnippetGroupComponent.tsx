@@ -1,38 +1,16 @@
-import { Handler, useDrag } from "@use-gesture/react";
 import classNames from "classnames";
-import { action, computed, untracked } from "mobx";
+import { computed } from "mobx";
 import { observer } from "mobx-react-lite";
 import {
   SnippetGroup,
   selectedSpatialComponentsMobx,
-  spatialComponentsMobx,
   dragStateBox,
 } from "./primitives";
-import { getRectForSnippetGroup } from "./utils";
+import { getRectForSnippetGroup, useDragSpatialComponent } from "./utils";
 
 export const SnippetGroupComponent = observer(
   ({ group }: { group: SnippetGroup }) => {
-    const bindDrag = useDrag(
-      action<Handler<"drag">>(({ delta, first, event }) => {
-        if (first) {
-          event.preventDefault();
-        }
-
-        if (selectedSpatialComponentsMobx.includes(group.id)) {
-          for (const spatialComponent of spatialComponentsMobx) {
-            if (selectedSpatialComponentsMobx.includes(spatialComponent.id)) {
-              spatialComponent.position = [
-                spatialComponent.position[0] + delta[0],
-                spatialComponent.position[1] + delta[1],
-              ];
-            }
-          }
-        } else {
-          group.position[0] = group.position[0] + delta[0];
-          group.position[1] = group.position[1] + delta[1];
-        }
-      })
-    );
+    const bindDrag = useDragSpatialComponent(group);
     const isSelected = computed(() =>
       selectedSpatialComponentsMobx.includes(group.id)
     ).get();

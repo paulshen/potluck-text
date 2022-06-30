@@ -29,6 +29,7 @@ export const spatialComponentsMobx = observable<SpatialComponent>([]);
 export const selectedSpatialComponentsMobx = observable<string>([]);
 
 export type DragState = {
+  spatialComponentIds: string[];
   snippetsOverGroupId: string | undefined;
 };
 export const dragStateBox = observable.box<DragState | undefined>(undefined);
