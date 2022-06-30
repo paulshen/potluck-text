@@ -9,6 +9,7 @@ import {
   spatialComponentsMobx,
   SpatialComponentType,
 } from "./primitives";
+import { getRectForSnippetGroup } from "./utils";
 
 function doesRectContain(rect: Rect, [x, y]: [x: number, y: number]) {
   return (
@@ -55,6 +56,14 @@ export function CanvasBackground() {
               let rect: Rect;
               switch (spatialComponent.type) {
                 case SpatialComponentType.Snippet: {
+                  const group = spatialComponentsMobx.find(
+                    (s) =>
+                      s.type === SpatialComponentType.SnippetGroup &&
+                      s.snippetIds.includes(spatialComponent.id)
+                  );
+                  if (group !== undefined) {
+                    return false;
+                  }
                   const text = editorStateDoc
                     .get()!
                     .sliceDoc(
@@ -70,8 +79,8 @@ export function CanvasBackground() {
                   break;
                 }
                 case SpatialComponentType.SnippetGroup: {
-                  // TODO:
-                  rect = [0, 0, 0, 0];
+                  rect = getRectForSnippetGroup(spatialComponent);
+                  break;
                 }
               }
               return doRectsOverlap(selectionRect, rect);

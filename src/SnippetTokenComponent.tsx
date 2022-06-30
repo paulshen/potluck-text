@@ -1,5 +1,4 @@
 import { useDrag, Handler } from "@use-gesture/react";
-import classNames from "classnames";
 import { computed, action, untracked } from "mobx";
 import { observer } from "mobx-react-lite";
 import {
@@ -9,6 +8,7 @@ import {
   GROUP_TOKEN_GAP,
   GROUP_WIDTH,
   selectedSpatialComponentsMobx,
+  SpatialComponent,
   spatialComponentsMobx,
   SpatialComponentType,
   TOKEN_HEIGHT,
@@ -35,30 +35,33 @@ export const SnippetTokenComponent = observer(
     ).get();
 
     const bindDrag = useDrag(
-      action<Handler<"drag">>(({ offset, delta, first, event, cancel }) => {
+      action<Handler<"drag">>(({ delta, first, event, cancel, memo = {} }) => {
+        let activeComponents: SpatialComponent[] | undefined =
+          memo.activeComponents;
+        if (activeComponents === undefined) {
+          const group = spatialComponentsMobx.find(
+            (s) =>
+              s.type === SpatialComponentType.SnippetGroup &&
+              s.snippetIds.includes(snippet.id)
+          );
+          const elementId = (group ?? snippet).id;
+          if (selectedSpatialComponentsMobx.includes(elementId)) {
+            activeComponents = spatialComponentsMobx.filter((s) =>
+              selectedSpatialComponentsMobx.includes(s.id)
+            );
+          } else {
+            activeComponents = [group ?? snippet];
+          }
+          memo.activeComponents = activeComponents;
+        }
         if (first) {
           event.preventDefault();
-          if (snippetGroup !== undefined) {
-            cancel();
-            return;
-          }
         }
-        if (selectedSpatialComponentsMobx.includes(snippet.id)) {
-          for (const spatialComponent of spatialComponentsMobx) {
-            if (selectedSpatialComponentsMobx.includes(spatialComponent.id)) {
-              spatialComponent.position = [
-                spatialComponent.position[0] + delta[0],
-                spatialComponent.position[1] + delta[1],
-              ];
-            }
-          }
-        } else {
-          snippet.position = offset;
+        for (const component of activeComponents) {
+          component.position[0] = component.position[0] + delta[0];
+          component.position[1] = component.position[1] + delta[1];
         }
-      }),
-      {
-        from: () => untracked(() => snippet.position),
-      }
+      })
     );
 
     let top;
@@ -78,10 +81,7 @@ export const SnippetTokenComponent = observer(
     return (
       <div
         {...bindDrag()}
-        className={classNames(
-          "absolute touch-none",
-          snippetGroup !== undefined ? "-z-1" : undefined
-        )}
+        className="absolute touch-none"
         style={{
           top: `${top}px`,
           left: `${left}px`,
