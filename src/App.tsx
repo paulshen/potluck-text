@@ -77,6 +77,7 @@ function NewDragSnippetComponent() {
           id: nanoid(),
           span: dragSnippetSpan!,
           position: [e.clientX + mouseOffset![0], e.clientY + mouseOffset![1]],
+          extraData: {},
         });
       });
       cleanup();
@@ -148,6 +149,7 @@ export function App() {
                 id: nanoid(),
                 position: selectedTokens[0].position,
                 snippetIds: selectedTokens.map((token) => token.id),
+                extraColumns: [],
               });
             }
             break;
