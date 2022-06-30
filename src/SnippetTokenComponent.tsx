@@ -12,7 +12,7 @@ import {
   TOKEN_HEIGHT,
 } from "./primitives";
 import { Token } from "./Token";
-import { useDragSpatialComponent } from "./utils";
+import { useDragSpatialComponent } from "./useDragSpatialComponent";
 
 export const SnippetTokenComponent = observer(
   ({ snippet }: { snippet: SnippetToken }) => {

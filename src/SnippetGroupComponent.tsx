@@ -6,7 +6,8 @@ import {
   selectedSpatialComponentsMobx,
   dragStateBox,
 } from "./primitives";
-import { getRectForSnippetGroup, useDragSpatialComponent } from "./utils";
+import { getRectForSnippetGroup } from "./utils";
+import { useDragSpatialComponent } from "./useDragSpatialComponent";
 
 export const SnippetGroupComponent = observer(
   ({ group }: { group: SnippetGroup }) => {
