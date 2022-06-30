@@ -3,8 +3,8 @@ import classNames from "classnames";
 import { computed, action, untracked } from "mobx";
 import { observer } from "mobx-react-lite";
 import {
-  AnnotationGroup,
-  AnnotationToken,
+  SnippetGroup,
+  SnippetToken,
   editorStateDoc,
   GROUP_TOKEN_GAP,
   GROUP_WIDTH,
@@ -15,37 +15,35 @@ import {
 } from "./primitives";
 import { Token } from "./Token";
 
-export const AnnotationTokenComponent = observer(
-  ({ annotation }: { annotation: AnnotationToken }) => {
+export const SnippetTokenComponent = observer(
+  ({ snippet }: { snippet: SnippetToken }) => {
     const text = computed(() => {
-      return editorStateDoc
-        .get()!
-        .sliceDoc(annotation.span[0], annotation.span[1]);
+      return editorStateDoc.get()!.sliceDoc(snippet.span[0], snippet.span[1]);
     }).get();
     // @ts-ignore
-    const annotationGroup: AnnotationGroup | undefined = computed(() =>
+    const snippetGroup: SnippetGroup | undefined = computed(() =>
       spatialComponentsMobx.find(
         (spatialComponent) =>
-          spatialComponent.type === SpatialComponentType.AnnotationGroup &&
-          spatialComponent.annotationIds.includes(annotation.id)
+          spatialComponent.type === SpatialComponentType.SnippetGroup &&
+          spatialComponent.snippetIds.includes(snippet.id)
       )
     ).get();
     const isSelected = computed(
       () =>
-        annotationGroup === undefined &&
-        selectedSpatialComponentsMobx.includes(annotation.id)
+        snippetGroup === undefined &&
+        selectedSpatialComponentsMobx.includes(snippet.id)
     ).get();
 
     const bindDrag = useDrag(
       action<Handler<"drag">>(({ offset, delta, first, event, cancel }) => {
         if (first) {
           event.preventDefault();
-          if (annotationGroup !== undefined) {
+          if (snippetGroup !== undefined) {
             cancel();
             return;
           }
         }
-        if (selectedSpatialComponentsMobx.includes(annotation.id)) {
+        if (selectedSpatialComponentsMobx.includes(snippet.id)) {
           for (const spatialComponent of spatialComponentsMobx) {
             if (selectedSpatialComponentsMobx.includes(spatialComponent.id)) {
               spatialComponent.position = [
@@ -55,26 +53,26 @@ export const AnnotationTokenComponent = observer(
             }
           }
         } else {
-          annotation.position = offset;
+          snippet.position = offset;
         }
       }),
       {
-        from: () => untracked(() => annotation.position),
+        from: () => untracked(() => snippet.position),
       }
     );
 
     let top;
     let left;
-    if (annotationGroup !== undefined) {
-      const index = annotationGroup.annotationIds.indexOf(annotation.id);
-      left = annotationGroup.position[0];
+    if (snippetGroup !== undefined) {
+      const index = snippetGroup.snippetIds.indexOf(snippet.id);
+      left = snippetGroup.position[0];
       top =
-        annotationGroup.position[1] +
+        snippetGroup.position[1] +
         index * TOKEN_HEIGHT +
         index * GROUP_TOKEN_GAP;
     } else {
-      left = annotation.position[0];
-      top = annotation.position[1];
+      left = snippet.position[0];
+      top = snippet.position[1];
     }
 
     return (
@@ -82,12 +80,12 @@ export const AnnotationTokenComponent = observer(
         {...bindDrag()}
         className={classNames(
           "absolute touch-none",
-          annotationGroup !== undefined ? "-z-1" : undefined
+          snippetGroup !== undefined ? "-z-1" : undefined
         )}
         style={{
           top: `${top}px`,
           left: `${left}px`,
-          width: annotationGroup !== undefined ? `${GROUP_WIDTH}px` : undefined,
+          width: snippetGroup !== undefined ? `${GROUP_WIDTH}px` : undefined,
         }}
       >
         <Token isSelected={isSelected}>{text}</Token>

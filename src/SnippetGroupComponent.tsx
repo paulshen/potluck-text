@@ -3,15 +3,15 @@ import classNames from "classnames";
 import { action, computed, untracked } from "mobx";
 import { observer } from "mobx-react-lite";
 import {
-  AnnotationGroup,
+  SnippetGroup,
   GROUP_TOKEN_GAP,
   GROUP_WIDTH,
   selectedSpatialComponentsMobx,
   TOKEN_HEIGHT,
 } from "./primitives";
 
-export const AnnotationGroupComponent = observer(
-  ({ group }: { group: AnnotationGroup }) => {
+export const SnippetGroupComponent = observer(
+  ({ group }: { group: SnippetGroup }) => {
     const bindDrag = useDrag(
       action<Handler<"drag">>(({ offset, delta, first, event }) => {
         if (first) {
@@ -40,8 +40,8 @@ export const AnnotationGroupComponent = observer(
           left: `${group.position[0] - 4}px`,
           width: `${GROUP_WIDTH + 8}px`,
           height: `${
-            group.annotationIds.length * TOKEN_HEIGHT +
-            (group.annotationIds.length - 1) * GROUP_TOKEN_GAP +
+            group.snippetIds.length * TOKEN_HEIGHT +
+            (group.snippetIds.length - 1) * GROUP_TOKEN_GAP +
             8
           }px`,
         }}

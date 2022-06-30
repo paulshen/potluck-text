@@ -3,7 +3,7 @@ import { EditorView, minimalSetup } from "codemirror";
 import { runInAction } from "mobx";
 import { useRef, useEffect } from "react";
 import {
-  dragNewAnnotationEmitter,
+  dragNewSnippetEmitter,
   editorStateDoc,
   spatialComponentsMobx,
   SpatialComponentType,
@@ -49,7 +49,7 @@ const plugin = ViewPlugin.fromClass(
               const fromPos = view.coordsAtPos(range.from)!;
               const left = fromPos.left - 8;
               const top = fromPos.top - 5;
-              dragNewAnnotationEmitter.emit("start", {
+              dragNewSnippetEmitter.emit("start", {
                 spanPosition: [left, top],
                 span: [range.from, range.to],
                 mouseOffset: [left - event.clientX, top - event.clientY],
@@ -96,7 +96,7 @@ export function Editor() {
         runInAction(() => {
           for (const spatialComponent of spatialComponentsMobx) {
             switch (spatialComponent.type) {
-              case SpatialComponentType.Annotation: {
+              case SpatialComponentType.Snippet: {
                 spatialComponent.span = [
                   transaction.changes.mapPos(spatialComponent.span[0]),
                   transaction.changes.mapPos(spatialComponent.span[1]),

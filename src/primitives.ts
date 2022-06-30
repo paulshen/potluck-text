@@ -6,25 +6,25 @@ export type Position = [x: number, y: number];
 export type Rect = [x: number, y: number, width: number, height: number];
 export type Span = [from: number, to: number];
 export const editorStateDoc = observable.box<EditorState>();
-export const dragNewAnnotationEmitter = new EventEmitter();
+export const dragNewSnippetEmitter = new EventEmitter();
 
 export enum SpatialComponentType {
-  Annotation,
-  AnnotationGroup,
+  Snippet,
+  SnippetGroup,
 }
-export type AnnotationToken = {
-  type: SpatialComponentType.Annotation;
+export type SnippetToken = {
+  type: SpatialComponentType.Snippet;
   id: string;
   span: Span;
   position: Position;
 };
-export type AnnotationGroup = {
-  type: SpatialComponentType.AnnotationGroup;
+export type SnippetGroup = {
+  type: SpatialComponentType.SnippetGroup;
   id: string;
   position: Position;
-  annotationIds: string[];
+  snippetIds: string[];
 };
-export type SpatialComponent = AnnotationToken | AnnotationGroup;
+export type SpatialComponent = SnippetToken | SnippetGroup;
 export const spatialComponentsMobx = observable<SpatialComponent>([]);
 export const selectedSpatialComponentsMobx = observable<string>([]);
 

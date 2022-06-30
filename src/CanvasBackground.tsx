@@ -54,7 +54,7 @@ export function CanvasBackground() {
             .filter((spatialComponent) => {
               let rect: Rect;
               switch (spatialComponent.type) {
-                case SpatialComponentType.Annotation: {
+                case SpatialComponentType.Snippet: {
                   const text = editorStateDoc
                     .get()!
                     .sliceDoc(
@@ -69,7 +69,7 @@ export function CanvasBackground() {
                   ];
                   break;
                 }
-                case SpatialComponentType.AnnotationGroup: {
+                case SpatialComponentType.SnippetGroup: {
                   // TODO:
                   rect = [0, 0, 0, 0];
                 }

@@ -4,8 +4,8 @@ import { observer } from "mobx-react-lite";
 import { nanoid } from "nanoid";
 import { CanvasBackground } from "./CanvasBackground";
 import {
-  AnnotationToken,
-  dragNewAnnotationEmitter,
+  SnippetToken,
+  dragNewSnippetEmitter,
   selectedSpatialComponentsMobx,
   Span,
   spatialComponentsMobx,
@@ -13,27 +13,27 @@ import {
 } from "./primitives";
 import { Editor } from "./Editor";
 import { Token } from "./Token";
-import { AnnotationTokenComponent } from "./AnnotationTokenComponent";
-import { AnnotationGroupComponent } from "./AnnotationGroupComponent";
+import { SnippetTokenComponent } from "./SnippetTokenComponent";
+import { SnippetGroupComponent } from "./SnippetGroupComponent";
 
 const SpatialComponents = observer(() => {
   return (
     <>
       {spatialComponentsMobx.map((spatialComponent) => {
         switch (spatialComponent.type) {
-          case SpatialComponentType.Annotation:
+          case SpatialComponentType.Snippet:
             return (
-              <AnnotationTokenComponent
-                annotation={spatialComponent}
+              <SnippetTokenComponent
+                snippet={spatialComponent}
                 key={spatialComponent.id}
-              ></AnnotationTokenComponent>
+              ></SnippetTokenComponent>
             );
-          case SpatialComponentType.AnnotationGroup:
+          case SpatialComponentType.SnippetGroup:
             return (
-              <AnnotationGroupComponent
+              <SnippetGroupComponent
                 group={spatialComponent}
                 key={spatialComponent.id}
-              ></AnnotationGroupComponent>
+              ></SnippetGroupComponent>
             );
         }
       })}
@@ -41,8 +41,8 @@ const SpatialComponents = observer(() => {
   );
 });
 
-function NewDragAnnotationComponent() {
-  const [dragAnnotation, setDragAnnotation] = useState<
+function NewDragSnippetComponent() {
+  const [dragSnippet, setDragSnippet] = useState<
     | {
         spanPosition: [x: number, y: number];
         span: Span;
@@ -52,18 +52,18 @@ function NewDragAnnotationComponent() {
   >(undefined);
 
   useEffect(() => {
-    let dragAnnotationSpan: Span | undefined;
+    let dragSnippetSpan: Span | undefined;
     let mouseOffset: [x: number, y: number] | undefined;
     function cleanup() {
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
-      setDragAnnotation(undefined);
-      dragAnnotationSpan = undefined;
+      setDragSnippet(undefined);
+      dragSnippetSpan = undefined;
       mouseOffset = undefined;
     }
     function onMouseMove(e: MouseEvent) {
-      setDragAnnotation((dragAnnotation) => ({
-        ...dragAnnotation!,
+      setDragSnippet((dragSnippet) => ({
+        ...dragSnippet!,
         spanPosition: [
           e.clientX + mouseOffset![0],
           e.clientY + mouseOffset![1],
@@ -73,9 +73,9 @@ function NewDragAnnotationComponent() {
     function onMouseUp(e: MouseEvent) {
       runInAction(() => {
         spatialComponentsMobx.push({
-          type: SpatialComponentType.Annotation,
+          type: SpatialComponentType.Snippet,
           id: nanoid(),
-          span: dragAnnotationSpan!,
+          span: dragSnippetSpan!,
           position: [e.clientX + mouseOffset![0], e.clientY + mouseOffset![1]],
         });
       });
@@ -92,9 +92,9 @@ function NewDragAnnotationComponent() {
       mouseOffset: [x: number, y: number];
       text: string;
     }) {
-      dragAnnotationSpan = span;
+      dragSnippetSpan = span;
       mouseOffset = mouseOffsetArg;
-      setDragAnnotation({
+      setDragSnippet({
         spanPosition,
         span,
         text,
@@ -102,18 +102,18 @@ function NewDragAnnotationComponent() {
       window.addEventListener("mousemove", onMouseMove);
       window.addEventListener("mouseup", onMouseUp);
     }
-    dragNewAnnotationEmitter.addListener("start", onStart);
+    dragNewSnippetEmitter.addListener("start", onStart);
     return () => {
-      dragNewAnnotationEmitter.removeListener("start", onStart);
+      dragNewSnippetEmitter.removeListener("start", onStart);
       cleanup();
     };
   }, []);
 
-  if (dragAnnotation === undefined) {
+  if (dragSnippet === undefined) {
     return null;
   }
 
-  const { spanPosition, span, text } = dragAnnotation;
+  const { spanPosition, span, text } = dragSnippet;
   return (
     <div
       className="fixed"
@@ -133,22 +133,21 @@ export function App() {
       if (e.target === document.body) {
         switch (e.key) {
           case "g": {
-            const selectedTokens: AnnotationToken[] =
-              selectedSpatialComponentsMobx
-                .flatMap((id) =>
-                  spatialComponentsMobx.filter(
-                    (spatialComponent): spatialComponent is AnnotationToken =>
-                      spatialComponent.id === id &&
-                      spatialComponent.type === SpatialComponentType.Annotation
-                  )
+            const selectedTokens: SnippetToken[] = selectedSpatialComponentsMobx
+              .flatMap((id) =>
+                spatialComponentsMobx.filter(
+                  (spatialComponent): spatialComponent is SnippetToken =>
+                    spatialComponent.id === id &&
+                    spatialComponent.type === SpatialComponentType.Snippet
                 )
-                .sort((a, b) => a.position[1] - b.position[1]);
+              )
+              .sort((a, b) => a.position[1] - b.position[1]);
             if (selectedTokens.length > 0) {
               spatialComponentsMobx.push({
-                type: SpatialComponentType.AnnotationGroup,
+                type: SpatialComponentType.SnippetGroup,
                 id: nanoid(),
                 position: selectedTokens[0].position,
-                annotationIds: selectedTokens.map((token) => token.id),
+                snippetIds: selectedTokens.map((token) => token.id),
               });
             }
             break;
@@ -168,7 +167,7 @@ export function App() {
         <Editor />
       </div>
       <SpatialComponents />
-      <NewDragAnnotationComponent />
+      <NewDragSnippetComponent />
     </div>
   );
 }
