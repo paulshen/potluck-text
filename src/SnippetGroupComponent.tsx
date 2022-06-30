@@ -6,6 +6,8 @@ import {
   SnippetGroup,
   selectedSpatialComponentsMobx,
   spatialComponentsMobx,
+  GROUP_COLUMN_WIDTH,
+  getGroupWidth,
 } from "./primitives";
 import { getRectForSnippetGroup } from "./utils";
 
@@ -39,19 +41,42 @@ export const SnippetGroupComponent = observer(
     const rect = getRectForSnippetGroup(group);
 
     return (
-      <div
-        className={classNames(
-          "absolute touch-none border border-dashed rounded-sm border-zinc-200 p-1 -z-1",
-          isSelected ? "shadow-lg" : undefined
-        )}
-        {...bindDrag()}
-        style={{
-          top: `${rect[1]}px`,
-          left: `${rect[0]}px`,
-          width: `${rect[2]}px`,
-          height: `${rect[3]}px`,
-        }}
-      ></div>
+      <>
+        <div
+          className={classNames(
+            "absolute touch-none border border-dashed rounded-sm border-zinc-200 p-1 -z-1",
+            isSelected ? "shadow-lg" : undefined
+          )}
+          {...bindDrag()}
+          style={{
+            top: `${rect[1]}px`,
+            left: `${rect[0]}px`,
+            width: `${rect[2]}px`,
+            height: `${rect[3]}px`,
+          }}
+        ></div>
+        <button
+          className={classNames("absolute touch-none")}
+          style={{
+            top: `${group.position[1] - 4}px`,
+            left: `${group.position[0] - 4 + getGroupWidth(group) + 8}px`,
+          }}
+          onClick={() => group.extraColumns.push({ name: "testColumn" })}
+        >
+          +
+        </button>
+        {group.extraColumns.map((column, index) => (
+          <div
+            className={classNames("absolute touch-none text-gray-400 text-xs")}
+            style={{
+              top: `${group.position[1] - 20}px`,
+              left: `${group.position[0] + (index + 1) * GROUP_COLUMN_WIDTH}px`,
+            }}
+          >
+            {column.name}
+          </div>
+        ))}
+      </>
     );
   }
 );
