@@ -24,7 +24,7 @@ export type SnippetToken = {
   span: Span;
   position: Position;
 
-  /** { [columnName]: data } */
+  /** { [columnId]: data } */
   extraData: { [key: string]: any };
 };
 export type SnippetGroup = {

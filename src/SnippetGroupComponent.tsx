@@ -4,6 +4,7 @@ import { action, computed, runInAction, set, untracked } from "mobx";
 import { observer } from "mobx-react-lite";
 import { nanoid } from "nanoid";
 import { useState } from "react";
+import { formulaIsValid } from "./formulas";
 import {
   SnippetGroup,
   selectedSpatialComponentsMobx,
@@ -112,7 +113,10 @@ export const SnippetGroupComponent = observer(
                 >
                   <span> = </span>
                   <input
-                    className="w-48"
+                    className={classNames(
+                      "w-48 font-mono",
+                      formulaIsValid(column.formula) ? "" : "bg-red-100"
+                    )}
                     value={column.formula}
                     onKeyDown={(e) => {
                       if (e.code === "Enter") {

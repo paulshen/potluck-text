@@ -1,9 +1,11 @@
+import { lookupIngredientByAisle } from "./ingredientLookup";
 import {
   SnippetGroup,
   GROUP_TOKEN_ROW_GAP,
   GROUP_COLUMN_WIDTH,
   Rect,
   TOKEN_HEIGHT,
+  SnippetToken,
 } from "./primitives";
 
 // your favorite dumping ground of utility functions

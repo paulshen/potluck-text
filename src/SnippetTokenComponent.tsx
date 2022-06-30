@@ -2,6 +2,7 @@ import { useDrag, Handler } from "@use-gesture/react";
 import classNames from "classnames";
 import { computed, action, untracked } from "mobx";
 import { observer } from "mobx-react-lite";
+import { executeFormula } from "./formulas";
 import {
   SnippetGroup,
   SnippetToken,
@@ -108,7 +109,9 @@ export const SnippetTokenComponent = observer(
                 width: `${GROUP_COLUMN_WIDTH - GROUP_TOKEN_COLUMN_GAP}px`,
               }}
             >
-              hello
+              {snippet.extraData[column.id] ??
+                (column.formula &&
+                  executeFormula(column.formula, text, snippet.extraData))}
             </div>
           ))}
       </div>
