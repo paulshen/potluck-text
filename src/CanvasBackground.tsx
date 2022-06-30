@@ -2,11 +2,12 @@ import { Handler, useDrag } from "@use-gesture/react";
 import { action, runInAction } from "mobx";
 import { useState } from "react";
 import {
-  annotationsMobx,
   CHAR_WIDTH,
   editorStateDoc,
   Rect,
-  selectedAnnotationsMobx,
+  selectedSpatialComponentsMobx,
+  spatialComponentsMobx,
+  SpatialComponentType,
 } from "./primitives";
 
 function doesRectContain(rect: Rect, [x, y]: [x: number, y: number]) {
@@ -35,7 +36,7 @@ export function CanvasBackground() {
   const bindDrag = useDrag(
     action<Handler<"drag">>(({ initial, first, last, movement }) => {
       if (first) {
-        selectedAnnotationsMobx.clear();
+        selectedSpatialComponentsMobx.clear();
       } else if (last) {
         setSelectionRect(undefined);
       } else {
@@ -48,18 +49,32 @@ export function CanvasBackground() {
           Math.abs(movement[1]),
         ];
         setSelectionRect(selectionRect);
-        selectedAnnotationsMobx.replace(
-          annotationsMobx
-            .filter((annotation) => {
-              const text = editorStateDoc
-                .get()!
-                .sliceDoc(annotation.span[0], annotation.span[1]);
-              return doRectsOverlap(selectionRect, [
-                annotation.position[0] - 8,
-                annotation.position[1] - 4,
-                text.length * CHAR_WIDTH + 16,
-                24,
-              ]);
+        selectedSpatialComponentsMobx.replace(
+          spatialComponentsMobx
+            .filter((spatialComponent) => {
+              let rect: Rect;
+              switch (spatialComponent.type) {
+                case SpatialComponentType.Annotation: {
+                  const text = editorStateDoc
+                    .get()!
+                    .sliceDoc(
+                      spatialComponent.span[0],
+                      spatialComponent.span[1]
+                    );
+                  rect = [
+                    spatialComponent.position[0] - 8,
+                    spatialComponent.position[1] - 4,
+                    text.length * CHAR_WIDTH + 16,
+                    24,
+                  ];
+                  break;
+                }
+                case SpatialComponentType.AnnotationGroup: {
+                  // TODO:
+                  rect = [0, 0, 0, 0];
+                }
+              }
+              return doRectsOverlap(selectionRect, rect);
             })
             .map((a) => a.id)
         );

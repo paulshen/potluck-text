@@ -3,9 +3,10 @@ import { EditorView, minimalSetup } from "codemirror";
 import { runInAction } from "mobx";
 import { useRef, useEffect } from "react";
 import {
-  annotationsMobx,
   dragNewAnnotationEmitter,
   editorStateDoc,
+  spatialComponentsMobx,
+  SpatialComponentType,
 } from "./primitives";
 
 const plugin = ViewPlugin.fromClass(
@@ -28,13 +29,12 @@ const plugin = ViewPlugin.fromClass(
           for (const range of view.state.selection.ranges) {
             if (pos >= range.from && pos < range.to) {
               const fromPos = view.coordsAtPos(range.from)!;
+              const left = fromPos.left - 8;
+              const top = fromPos.top - 5;
               dragNewAnnotationEmitter.emit("start", {
-                spanPosition: [fromPos.left, fromPos.top],
+                spanPosition: [left, top],
                 span: [range.from, range.to],
-                mouseOffset: [
-                  fromPos.left - event.clientX,
-                  fromPos.top - event.clientY,
-                ],
+                mouseOffset: [left - event.clientX, top - event.clientY],
                 text: view.state.sliceDoc(range.from, range.to),
               });
             }
@@ -75,11 +75,16 @@ export function Editor() {
       dispatch(transaction) {
         view.update([transaction]);
         runInAction(() => {
-          for (const annotation of annotationsMobx) {
-            annotation.span = [
-              transaction.changes.mapPos(annotation.span[0]),
-              transaction.changes.mapPos(annotation.span[1]),
-            ];
+          for (const spatialComponent of spatialComponentsMobx) {
+            switch (spatialComponent.type) {
+              case SpatialComponentType.Annotation: {
+                spatialComponent.span = [
+                  transaction.changes.mapPos(spatialComponent.span[0]),
+                  transaction.changes.mapPos(spatialComponent.span[1]),
+                ];
+                break;
+              }
+            }
           }
           editorStateDoc.set(transaction.state);
         });

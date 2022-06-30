@@ -1,105 +1,41 @@
 import { useEffect, useState } from "react";
-import { action, computed, observable, runInAction, untracked } from "mobx";
+import { runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
-import { Handler, useDrag } from "@use-gesture/react";
 import { nanoid } from "nanoid";
 import { CanvasBackground } from "./CanvasBackground";
 import {
-  annotationsMobx,
-  AnnotationType,
-  DragAnnotation,
+  AnnotationToken,
   dragNewAnnotationEmitter,
-  editorStateDoc,
-  selectedAnnotationsMobx,
+  selectedSpatialComponentsMobx,
   Span,
+  spatialComponentsMobx,
+  SpatialComponentType,
 } from "./primitives";
-import classNames from "classnames";
 import { Editor } from "./Editor";
+import { Token } from "./Token";
+import { AnnotationTokenComponent } from "./AnnotationTokenComponent";
+import { AnnotationGroupComponent } from "./AnnotationGroupComponent";
 
-function Token({
-  isSelected = false,
-  annotationType,
-  children,
-}: {
-  isSelected?: boolean;
-  annotationType?: AnnotationType | undefined;
-  children: React.ReactNode;
-}) {
-  return (
-    <div
-      className={classNames(
-        "relative -top-1 -my-px -left-2 px-2 py-1 text-xs font-mono rounded cursor-default whitespace-nowrap",
-        annotationType !== undefined ? "text-white" : undefined,
-        isSelected ? "shadow-lg bg-opacity-100" : "bg-opacity-80",
-        annotationType === AnnotationType.Ingredient
-          ? "bg-indigo-600"
-          : annotationType === AnnotationType.Duration
-          ? "bg-orange-600"
-          : "bg-zinc-300"
-      )}
-    >
-      {children}
-    </div>
-  );
-}
-
-const AnnotationComponent = observer(
-  ({ annotation }: { annotation: DragAnnotation }) => {
-    const text = computed(() => {
-      return editorStateDoc
-        .get()!
-        .sliceDoc(annotation.span[0], annotation.span[1]);
-    }).get();
-    const isSelected = computed(() =>
-      selectedAnnotationsMobx.includes(annotation.id)
-    ).get();
-
-    const bindDrag = useDrag(
-      action<Handler<"drag">>(({ offset, delta, first, event }) => {
-        if (first) {
-          event.preventDefault();
-        }
-        if (selectedAnnotationsMobx.includes(annotation.id)) {
-          for (const a of annotationsMobx) {
-            if (selectedAnnotationsMobx.includes(a.id)) {
-              a.position = [a.position[0] + delta[0], a.position[1] + delta[1]];
-            }
-          }
-        } else {
-          annotation.position = offset;
-        }
-      }),
-      {
-        from: () => untracked(() => annotation.position),
-      }
-    );
-
-    return (
-      <div
-        {...bindDrag()}
-        className="absolute touch-none"
-        style={{
-          top: `${annotation.position[1]}px`,
-          left: `${annotation.position[0]}px`,
-        }}
-      >
-        <Token isSelected={isSelected} annotationType={annotation.type}>
-          {text}
-        </Token>
-      </div>
-    );
-  }
-);
-const AnnotationsComponent = observer(() => {
+const SpatialComponents = observer(() => {
   return (
     <>
-      {annotationsMobx.map((annotation) => {
-        return (
-          <AnnotationComponent
-            annotation={annotation}
-            key={annotation.id}
-          ></AnnotationComponent>
-        );
+      {spatialComponentsMobx.map((spatialComponent) => {
+        switch (spatialComponent.type) {
+          case SpatialComponentType.Annotation:
+            return (
+              <AnnotationTokenComponent
+                annotation={spatialComponent}
+                key={spatialComponent.id}
+              ></AnnotationTokenComponent>
+            );
+          case SpatialComponentType.AnnotationGroup:
+            return (
+              <AnnotationGroupComponent
+                group={spatialComponent}
+                key={spatialComponent.id}
+              ></AnnotationGroupComponent>
+            );
+        }
       })}
     </>
   );
@@ -136,11 +72,11 @@ function NewDragAnnotationComponent() {
     }
     function onMouseUp(e: MouseEvent) {
       runInAction(() => {
-        annotationsMobx.push({
+        spatialComponentsMobx.push({
+          type: SpatialComponentType.Annotation,
           id: nanoid(),
           span: dragAnnotationSpan!,
           position: [e.clientX + mouseOffset![0], e.clientY + mouseOffset![1]],
-          type: undefined,
         });
       });
       cleanup();
@@ -196,18 +132,25 @@ export function App() {
     function onKeyDown(e: KeyboardEvent) {
       if (e.target === document.body) {
         switch (e.key) {
-          case "1":
-          case "2": {
-            runInAction(() => {
-              annotationsMobx.forEach((annotation) => {
-                if (selectedAnnotationsMobx.includes(annotation.id)) {
-                  annotation.type =
-                    e.key === "1"
-                      ? AnnotationType.Ingredient
-                      : AnnotationType.Duration;
-                }
+          case "g": {
+            const selectedTokens: AnnotationToken[] =
+              selectedSpatialComponentsMobx
+                .flatMap((id) =>
+                  spatialComponentsMobx.filter(
+                    (spatialComponent): spatialComponent is AnnotationToken =>
+                      spatialComponent.id === id &&
+                      spatialComponent.type === SpatialComponentType.Annotation
+                  )
+                )
+                .sort((a, b) => a.position[1] - b.position[1]);
+            if (selectedTokens.length > 0) {
+              spatialComponentsMobx.push({
+                type: SpatialComponentType.AnnotationGroup,
+                id: nanoid(),
+                position: selectedTokens[0].position,
+                annotationIds: selectedTokens.map((token) => token.id),
               });
-            });
+            }
             break;
           }
         }
@@ -224,7 +167,7 @@ export function App() {
       <div className="p-8 flex">
         <Editor />
       </div>
-      <AnnotationsComponent />
+      <SpatialComponents />
       <NewDragAnnotationComponent />
     </div>
   );
