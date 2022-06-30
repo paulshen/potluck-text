@@ -77,6 +77,7 @@ function NewDragSnippetComponent() {
           id: nanoid(),
           span: dragSnippetSpan!,
           position: [e.clientX + mouseOffset![0], e.clientY + mouseOffset![1]],
+          extraData: {},
         });
       });
       cleanup();

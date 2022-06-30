@@ -1,7 +1,9 @@
 import { Handler, useDrag } from "@use-gesture/react";
 import classNames from "classnames";
-import { action, computed, untracked } from "mobx";
+import { action, computed, runInAction, set, untracked } from "mobx";
 import { observer } from "mobx-react-lite";
+import { nanoid } from "nanoid";
+import { useState } from "react";
 import {
   SnippetGroup,
   selectedSpatialComponentsMobx,
@@ -13,6 +15,9 @@ import { getRectForSnippetGroup } from "./utils";
 
 export const SnippetGroupComponent = observer(
   ({ group }: { group: SnippetGroup }) => {
+    const [currentlyConfiguringColumn, setCurrentlyConfiguringColumn] =
+      useState<string>();
+
     const bindDrag = useDrag(
       action<Handler<"drag">>(({ delta, first, event }) => {
         if (first) {
@@ -61,23 +66,68 @@ export const SnippetGroupComponent = observer(
             top: `${group.position[1] - 4}px`,
             left: `${group.position[0] - 4 + getGroupWidth(group) + 16}px`,
           }}
-          onClick={() => group.extraColumns.push({ name: "testColumn" })}
+          onClick={() =>
+            group.extraColumns.push({ id: nanoid(), name: "New Column" })
+          }
         >
           +
         </button>
-        {group.extraColumns.map((column, index) => (
-          <div
-            className={classNames("absolute touch-none text-gray-400 text-xs")}
-            style={{
-              top: `${group.position[1] - 20}px`,
-              left: `${
-                group.position[0] + (index + 1) * GROUP_COLUMN_WIDTH + 4
-              }px`,
-            }}
-          >
-            {column.name}
-          </div>
-        ))}
+        {group.extraColumns.map((column, index) => {
+          const configuringColumn = currentlyConfiguringColumn === column.id;
+          return (
+            <div
+              className={classNames(
+                "absolute touch-none text-gray-400 text-xs"
+              )}
+              style={{
+                top: `${group.position[1] - 20}px`,
+                left: `${
+                  group.position[0] + (index + 1) * GROUP_COLUMN_WIDTH + 4
+                }px`,
+              }}
+            >
+              <input
+                className={classNames("border-none")}
+                onChange={(e) =>
+                  runInAction(() => (column.name = e.target.value))
+                }
+                value={column.name}
+              ></input>
+              <button
+                onClick={() => {
+                  if (configuringColumn) {
+                    setCurrentlyConfiguringColumn(undefined);
+                  } else {
+                    setCurrentlyConfiguringColumn(column.id);
+                  }
+                }}
+              >
+                {configuringColumn ? "done" : "️⚙"}
+              </button>
+              {configuringColumn && (
+                <div
+                  className={classNames(
+                    "absolute bg-zinc-50 h-8 w-64 shadow-md p-2 text-gray-700 -top-10"
+                  )}
+                >
+                  <span> = </span>
+                  <input
+                    className="w-48"
+                    value={column.formula}
+                    onKeyDown={(e) => {
+                      if (e.code === "Enter") {
+                        setCurrentlyConfiguringColumn(undefined);
+                      }
+                    }}
+                    onChange={(e) =>
+                      runInAction(() => (column.formula = e.target.value))
+                    }
+                  ></input>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </>
     );
   }

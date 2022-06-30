@@ -9,7 +9,9 @@ export const editorStateDoc = observable.box<EditorState>();
 export const dragNewSnippetEmitter = new EventEmitter();
 
 export type ColumnDefinition = {
+  id: string;
   name: string;
+  formula?: string;
 };
 
 export enum SpatialComponentType {
@@ -21,6 +23,9 @@ export type SnippetToken = {
   id: string;
   span: Span;
   position: Position;
+
+  /** { [columnName]: data } */
+  extraData: { [key: string]: any };
 };
 export type SnippetGroup = {
   type: SpatialComponentType.SnippetGroup;
