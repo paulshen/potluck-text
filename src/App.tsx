@@ -15,6 +15,7 @@ import { Editor } from "./Editor";
 import { Token } from "./Token";
 import { SnippetTokenComponent } from "./SnippetTokenComponent";
 import { SnippetGroupComponent } from "./SnippetGroupComponent";
+import { Pane } from "./Pane";
 
 const SpatialComponents = observer(() => {
   return (
@@ -166,9 +167,9 @@ export function App() {
   return (
     <div>
       <CanvasBackground />
-      <div className="p-8 flex">
+      <Pane>
         <Editor />
-      </div>
+      </Pane>
       <SpatialComponents />
       <NewDragSnippetComponent />
     </div>
