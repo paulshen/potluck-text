@@ -62,15 +62,12 @@ function NewDragSnippetComponent() {
       mouseOffset = undefined;
     }
     function onMouseMove(e: MouseEvent) {
-      if (mouseOffset === undefined) {
-        cleanup();
-        return;
-      }
+      const mouseOffsetSnapshot = mouseOffset!;
       setDragSnippet((dragSnippet) => ({
         ...dragSnippet!,
         spanPosition: [
-          e.clientX + mouseOffset![0],
-          e.clientY + mouseOffset![1],
+          e.clientX + mouseOffsetSnapshot[0],
+          e.clientY + mouseOffsetSnapshot[1],
         ],
       }));
     }
