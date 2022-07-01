@@ -33,9 +33,12 @@ export const SnippetGroupComponent = observer(
       <>
         <div
           className={classNames(
-            "absolute touch-none border border-dashed rounded-sm border-zinc-200 p-1 z-[-1]",
+            "absolute touch-none border border-dashed rounded-sm bg-white p-1",
             areSnippetsBeingDraggedOver ? "border-zinc-400" : "border-zinc-200",
-            isSelected ? "shadow-lg" : undefined
+            isSelected ? "shadow-lg" : undefined,
+            dragStateBox.get()?.spatialComponentIds.includes(group.id)
+              ? "z-40"
+              : "z-[-1]"
           )}
           {...bindDrag()}
           style={{

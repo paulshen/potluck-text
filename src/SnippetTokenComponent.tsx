@@ -14,6 +14,7 @@ import {
   GROUP_COLUMN_WIDTH,
   GROUP_TOKEN_COLUMN_GAP,
   getGroupWidth,
+  dragStateBox,
 } from "./primitives";
 import { Token } from "./Token";
 import { useDragSpatialComponent } from "./useDragSpatialComponent";
@@ -41,6 +42,7 @@ export const SnippetTokenComponent = observer(
 
     let top;
     let left;
+    let isBeingDragged = false;
     if (snippetGroup !== undefined) {
       const index = snippetGroup.snippetIds.indexOf(snippet.id);
       left = snippetGroup.position[0];
@@ -48,15 +50,23 @@ export const SnippetTokenComponent = observer(
         snippetGroup.position[1] +
         index * TOKEN_HEIGHT +
         index * GROUP_TOKEN_ROW_GAP;
+      isBeingDragged =
+        dragStateBox.get()?.spatialComponentIds.includes(snippetGroup.id) ??
+        false;
     } else {
       left = snippet.position[0];
       top = snippet.position[1];
+      isBeingDragged =
+        dragStateBox.get()?.spatialComponentIds.includes(snippet.id) ?? false;
     }
 
     return (
       <div
         {...bindDrag()}
-        className="absolute touch-none"
+        className={classNames(
+          "absolute touch-none",
+          isBeingDragged ? "z-50" : undefined
+        )}
         style={{
           top: `${top}px`,
           left: `${left}px`,
