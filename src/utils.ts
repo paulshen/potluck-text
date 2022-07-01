@@ -39,7 +39,7 @@ export function getRectForSnippetToken(snippet: SnippetToken): Rect {
     snippet.position[0],
     snippet.position[1],
     text.length * CHAR_WIDTH + 16,
-    24,
+    28,
   ];
 }
 

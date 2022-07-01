@@ -53,8 +53,8 @@ export type DragState = {
 };
 export const dragStateBox = observable.box<DragState | undefined>(undefined);
 
-export const CHAR_WIDTH = 7.2;
+export const CHAR_WIDTH = 8.5;
 export const GROUP_COLUMN_WIDTH = 192;
-export const TOKEN_HEIGHT = 24;
+export const TOKEN_HEIGHT = 28;
 export const GROUP_TOKEN_ROW_GAP = 4;
 export const GROUP_TOKEN_COLUMN_GAP = 4;
