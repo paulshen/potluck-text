@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { runInAction } from "mobx";
+import { action, runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
 import { nanoid } from "nanoid";
 import { CanvasBackground } from "./CanvasBackground";
@@ -10,12 +10,14 @@ import {
   Span,
   spatialComponentsMobx,
   SpatialComponentType,
+  textEditorStateMobx,
 } from "./primitives";
 import { Editor } from "./Editor";
 import { Token } from "./Token";
 import { SnippetTokenComponent } from "./SnippetTokenComponent";
 import { SnippetGroupComponent } from "./SnippetGroupComponent";
 import { Pane } from "./Pane";
+import { EditorState } from "@codemirror/state";
 
 const SpatialComponents = observer(() => {
   return (
@@ -135,7 +137,7 @@ function NewDragSnippetComponent() {
 
 const TEXT_ID = nanoid();
 
-export function App() {
+export const App = observer(() => {
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (e.target === document.body) {
@@ -172,11 +174,26 @@ export function App() {
   return (
     <div>
       <CanvasBackground />
-      <Pane>
-        <Editor textId={TEXT_ID} />
-      </Pane>
+      <button
+        onClick={action(() => {
+          textEditorStateMobx.set(
+            nanoid(),
+            EditorState.create({
+              doc: "",
+            })
+          );
+        })}
+        className="absolute top-2 right-2 font-mono text-xs"
+      >
+        add textarea
+      </button>
+      {[...textEditorStateMobx.keys()].map((textId) => (
+        <Pane key={textId}>
+          <Editor textId={textId} />
+        </Pane>
+      ))}
       <SpatialComponents />
       <NewDragSnippetComponent />
     </div>
   );
-}
+});
