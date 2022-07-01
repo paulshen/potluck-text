@@ -53,7 +53,7 @@ function NewDragSnippetComponent() {
   >(undefined);
 
   useEffect(() => {
-    let dragSnippetSpan: Span | undefined;
+    let dragSnippetSpan: [textId: string, span: Span] | undefined;
     let mouseOffset: [x: number, y: number] | undefined;
     function cleanup() {
       window.removeEventListener("mousemove", onMouseMove);
@@ -77,7 +77,8 @@ function NewDragSnippetComponent() {
         spatialComponentsMobx.push({
           type: SpatialComponentType.Snippet,
           id: nanoid(),
-          span: dragSnippetSpan!,
+          textId: dragSnippetSpan![0],
+          span: dragSnippetSpan![1],
           position: [e.clientX + mouseOffset![0], e.clientY + mouseOffset![1]],
           extraData: {},
         });
@@ -85,17 +86,19 @@ function NewDragSnippetComponent() {
       cleanup();
     }
     function onStart({
+      textId,
       spanPosition,
       span,
       mouseOffset: mouseOffsetArg,
       text,
     }: {
+      textId: string;
       spanPosition: [x: number, y: number];
       span: Span;
       mouseOffset: [x: number, y: number];
       text: string;
     }) {
-      dragSnippetSpan = span;
+      dragSnippetSpan = [textId, span];
       mouseOffset = mouseOffsetArg;
       setDragSnippet({
         spanPosition,
@@ -129,6 +132,8 @@ function NewDragSnippetComponent() {
     </div>
   );
 }
+
+const TEXT_ID = nanoid();
 
 export function App() {
   useEffect(() => {
@@ -168,7 +173,7 @@ export function App() {
     <div>
       <CanvasBackground />
       <Pane>
-        <Editor />
+        <Editor textId={TEXT_ID} />
       </Pane>
       <SpatialComponents />
       <NewDragSnippetComponent />

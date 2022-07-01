@@ -1,9 +1,7 @@
 import { Handler, useDrag } from "@use-gesture/react";
-import { action, runInAction } from "mobx";
+import { action } from "mobx";
 import { useState } from "react";
 import {
-  CHAR_WIDTH,
-  editorStateDoc,
   Rect,
   selectedSpatialComponentsMobx,
   spatialComponentsMobx,

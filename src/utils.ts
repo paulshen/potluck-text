@@ -7,7 +7,7 @@ import {
   Position,
   CHAR_WIDTH,
   SnippetToken,
-  editorStateDoc,
+  textEditorStateMobx,
 } from "./primitives";
 
 // your favorite dumping ground of utility functions
@@ -34,7 +34,9 @@ export function getRectForSnippetGroup(group: SnippetGroup): Rect {
 }
 
 export function getRectForSnippetToken(snippet: SnippetToken): Rect {
-  const text = editorStateDoc.get()!.sliceDoc(snippet.span[0], snippet.span[1]);
+  const text = textEditorStateMobx
+    .get(snippet.textId)!
+    .sliceDoc(snippet.span[0], snippet.span[1]);
   return [
     snippet.position[0],
     snippet.position[1],

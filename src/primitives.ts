@@ -5,8 +5,8 @@ import { observable } from "mobx";
 export type Position = [x: number, y: number];
 export type Rect = [x: number, y: number, width: number, height: number];
 export type Span = [from: number, to: number];
-export const editorStateDoc = observable.box<EditorState | undefined>(
-  undefined,
+export const textEditorStateMobx = observable.map<string, EditorState>(
+  {},
   { deep: false }
 );
 export const dragNewSnippetEmitter = new EventEmitter();
@@ -23,6 +23,7 @@ export enum SpatialComponentType {
 }
 export type SnippetToken = {
   type: SpatialComponentType.Snippet;
+  textId: string;
   id: string;
   span: Span;
   position: Position;

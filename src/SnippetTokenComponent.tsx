@@ -5,7 +5,6 @@ import { executeFormula } from "./formulas";
 import {
   SnippetGroup,
   SnippetToken,
-  editorStateDoc,
   GROUP_TOKEN_ROW_GAP,
   selectedSpatialComponentsMobx,
   spatialComponentsMobx,
@@ -15,6 +14,7 @@ import {
   GROUP_TOKEN_COLUMN_GAP,
   getGroupWidth,
   dragStateBox,
+  textEditorStateMobx,
 } from "./primitives";
 import { Token } from "./Token";
 import { useDragSpatialComponent } from "./useDragSpatialComponent";
@@ -23,7 +23,9 @@ import { getPositionForSnippetInGroup } from "./utils";
 export const SnippetTokenComponent = observer(
   ({ snippet }: { snippet: SnippetToken }) => {
     const text = computed(() => {
-      return editorStateDoc.get()!.sliceDoc(snippet.span[0], snippet.span[1]);
+      return textEditorStateMobx
+        .get(snippet.textId)!
+        .sliceDoc(snippet.span[0], snippet.span[1]);
     }).get();
     // @ts-ignore
     const snippetGroup: SnippetGroup | undefined = computed(() =>

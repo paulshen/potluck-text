@@ -1,12 +1,13 @@
+import { Facet } from "@codemirror/state";
 import { ViewPlugin, ViewUpdate } from "@codemirror/view";
 import { EditorView, minimalSetup } from "codemirror";
 import { runInAction } from "mobx";
 import { useRef, useEffect } from "react";
 import {
   dragNewSnippetEmitter,
-  editorStateDoc,
   spatialComponentsMobx,
   SpatialComponentType,
+  textEditorStateMobx,
 } from "./primitives";
 
 const DEFAULT_EDITOR_CONTENT = `
@@ -26,6 +27,10 @@ Simmer on low until liquid as evaporated. Chili is ready once flavors are blende
 
 Serve in bowl and garnish to taste with grated cheddar, avocado, sour cream, jalapeño, salsa, tortilla chips, Fritos, or corn bread.
 `;
+
+const textIdFacet = Facet.define<string, string>({
+  combine: (values) => values[0],
+});
 
 const plugin = ViewPlugin.fromClass(
   class {
@@ -50,6 +55,7 @@ const plugin = ViewPlugin.fromClass(
               const left = fromPos.left - 8;
               const top = fromPos.top - 5;
               dragNewSnippetEmitter.emit("start", {
+                textId: view.state.facet(textIdFacet),
                 spanPosition: [left, top],
                 span: [range.from, range.to],
                 mouseOffset: [left - event.clientX, top - event.clientY],
@@ -64,7 +70,7 @@ const plugin = ViewPlugin.fromClass(
   }
 );
 
-export function Editor() {
+export function Editor({ textId }: { textId: string }) {
   const editorRef = useRef(null);
   useEffect(() => {
     const view = new EditorView({
@@ -88,6 +94,7 @@ export function Editor() {
           },
         }),
         EditorView.lineWrapping,
+        textIdFacet.of(textId),
         plugin,
       ],
       parent: editorRef.current!,
@@ -97,17 +104,22 @@ export function Editor() {
           for (const spatialComponent of spatialComponentsMobx) {
             switch (spatialComponent.type) {
               case SpatialComponentType.Snippet: {
-                spatialComponent.span = [
-                  transaction.changes.mapPos(spatialComponent.span[0]),
-                  transaction.changes.mapPos(spatialComponent.span[1]),
-                ];
+                if (spatialComponent.textId === textId) {
+                  spatialComponent.span = [
+                    transaction.changes.mapPos(spatialComponent.span[0]),
+                    transaction.changes.mapPos(spatialComponent.span[1]),
+                  ];
+                }
                 break;
               }
             }
           }
-          editorStateDoc.set(transaction.state);
+          textEditorStateMobx.set(textId, transaction.state);
         });
       },
+    });
+    runInAction(() => {
+      textEditorStateMobx.set(textId, view.state);
     });
     return () => {
       view.destroy();
