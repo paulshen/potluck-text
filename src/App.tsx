@@ -187,11 +187,13 @@ export const App = observer(() => {
       >
         add textarea
       </button>
-      {[...textEditorStateMobx.keys()].map((textId) => (
-        <Pane key={textId}>
-          <Editor textId={textId} />
-        </Pane>
-      ))}
+      <div className="absolute">
+        {[...textEditorStateMobx.keys()].map((textId) => (
+          <Pane key={textId}>
+            <Editor textId={textId} />
+          </Pane>
+        ))}
+      </div>
       <SpatialComponents />
       <NewDragSnippetComponent />
     </div>

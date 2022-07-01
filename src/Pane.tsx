@@ -1,11 +1,14 @@
 import { useDrag } from "@use-gesture/react";
 import classNames from "classnames";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Position } from "./primitives";
+
+let maxPaneZIndex = 1;
 
 export function Pane({ children }: { children: React.ReactNode }) {
   const [position, setPosition] = useState<Position>([32, 32]);
   const [isGrabbing, setIsGrabbing] = useState(false);
+  const rootRef = useRef<HTMLDivElement | null>(null);
   const bindDrag = useDrag(
     ({ offset, first, last }) => {
       if (first) {
@@ -26,6 +29,11 @@ export function Pane({ children }: { children: React.ReactNode }) {
       style={{
         top: `${position[1]}px`,
         left: `${position[0]}px`,
+      }}
+      ref={rootRef}
+      onMouseDown={() => {
+        // hacky stuff here but move pane to top on mousedown
+        rootRef.current!.style.zIndex = `${maxPaneZIndex++}`;
       }}
     >
       <div
