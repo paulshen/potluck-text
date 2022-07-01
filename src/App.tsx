@@ -62,6 +62,10 @@ function NewDragSnippetComponent() {
       mouseOffset = undefined;
     }
     function onMouseMove(e: MouseEvent) {
+      if (mouseOffset === undefined) {
+        cleanup();
+        return;
+      }
       setDragSnippet((dragSnippet) => ({
         ...dragSnippet!,
         spanPosition: [
