@@ -183,7 +183,7 @@ export const App = observer(() => {
             })
           );
         })}
-        className="absolute top-2 right-2 font-mono text-xs"
+        className="absolute top-4 right-4 font-mono text-xs"
       >
         add textarea
       </button>

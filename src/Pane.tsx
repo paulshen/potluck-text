@@ -29,6 +29,7 @@ export function Pane({ children }: { children: React.ReactNode }) {
       style={{
         top: `${position[1]}px`,
         left: `${position[0]}px`,
+        zIndex: `${maxPaneZIndex}`,
       }}
       ref={rootRef}
       onMouseDown={() => {
