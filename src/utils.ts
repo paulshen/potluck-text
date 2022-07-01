@@ -5,6 +5,9 @@ import {
   Rect,
   TOKEN_HEIGHT,
   Position,
+  CHAR_WIDTH,
+  SnippetToken,
+  editorStateDoc,
 } from "./primitives";
 
 // your favorite dumping ground of utility functions
@@ -27,5 +30,25 @@ export function getRectForSnippetGroup(group: SnippetGroup): Rect {
     group.snippetIds.length * TOKEN_HEIGHT +
       (group.snippetIds.length - 1) * GROUP_TOKEN_ROW_GAP +
       8,
+  ];
+}
+
+export function getRectForSnippetToken(snippet: SnippetToken): Rect {
+  const text = editorStateDoc.get()!.sliceDoc(snippet.span[0], snippet.span[1]);
+  return [
+    snippet.position[0],
+    snippet.position[1],
+    text.length * CHAR_WIDTH + 16,
+    24,
+  ];
+}
+
+export function getPositionForSnippetInGroup(
+  group: SnippetGroup,
+  index: number
+): Position {
+  return [
+    group.position[0],
+    group.position[1] + index * (TOKEN_HEIGHT + GROUP_TOKEN_ROW_GAP),
   ];
 }

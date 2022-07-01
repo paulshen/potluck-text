@@ -9,7 +9,7 @@ import {
   spatialComponentsMobx,
   SpatialComponentType,
 } from "./primitives";
-import { getRectForSnippetGroup } from "./utils";
+import { getRectForSnippetGroup, getRectForSnippetToken } from "./utils";
 
 function doesRectContain(rect: Rect, [x, y]: [x: number, y: number]) {
   return (
@@ -64,18 +64,7 @@ export function CanvasBackground() {
                   if (group !== undefined) {
                     return false;
                   }
-                  const text = editorStateDoc
-                    .get()!
-                    .sliceDoc(
-                      spatialComponent.span[0],
-                      spatialComponent.span[1]
-                    );
-                  rect = [
-                    spatialComponent.position[0] - 8,
-                    spatialComponent.position[1] - 4,
-                    text.length * CHAR_WIDTH + 16,
-                    24,
-                  ];
+                  rect = getRectForSnippetToken(spatialComponent);
                   break;
                 }
                 case SpatialComponentType.SnippetGroup: {

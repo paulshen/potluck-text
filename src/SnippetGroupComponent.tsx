@@ -33,7 +33,7 @@ export const SnippetGroupComponent = observer(
       <>
         <div
           className={classNames(
-            "absolute touch-none border border-dashed rounded-sm border-zinc-200 p-1 -z-1",
+            "absolute touch-none border border-dashed rounded-sm border-zinc-200 p-1 z-[-1]",
             areSnippetsBeingDraggedOver ? "border-zinc-400" : "border-zinc-200",
             isSelected ? "shadow-lg" : undefined
           )}
