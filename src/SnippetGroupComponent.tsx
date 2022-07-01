@@ -52,7 +52,11 @@ export const SnippetGroupComponent = observer(
             left: `${group.position[0] - 4 + getGroupWidth(group) + 16}px`,
           }}
           onClick={() =>
-            group.extraColumns.push({ id: nanoid(), name: "New Column" })
+            group.extraColumns.push({
+              id: nanoid(),
+              name: "Aisle",
+              formula: "Lookup(text, Aisle)",
+            })
           }
         >
           +
