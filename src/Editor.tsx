@@ -9,8 +9,7 @@ import {
   SpatialComponentType,
 } from "./primitives";
 
-const DEFAULT_EDITOR_CONTENT = `
-# Chili
+const DEFAULT_EDITOR_CONTENT = `# Chili
 
 Bring 2 pounds low fat (~90/10) ground chuck beef to room temperature, and season with 1 Tbsp onion powder, 2 tsp salt, and 3/8 tsp garlic powder.
 
@@ -77,14 +76,15 @@ export function Editor() {
           },
           "&.cm-focused .cm-selectionBackground": {
             backgroundColor: "#e4e4e7",
+            color: "red",
           },
           "&.cm-editor.cm-focused": {
             outline: "none",
           },
           ".cm-scroller": {
             fontFamily: `ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace`,
-            fontSize: "0.75rem",
-            lineHeight: "1rem",
+            fontSize: "0.85rem",
+            lineHeight: "1.25rem",
           },
         }),
         EditorView.lineWrapping,
@@ -116,7 +116,7 @@ export function Editor() {
 
   return (
     <div
-      className="w-[384px] h-[384px] border border-zinc-200 overflow-auto"
+      className="text-lg max-w-[480px] h-[384px] border-black rounded-lg border-2 overflow-auto p-2"
       ref={editorRef}
     ></div>
   );
