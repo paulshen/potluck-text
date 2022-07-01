@@ -18,6 +18,7 @@ import {
 } from "./primitives";
 import { Token } from "./Token";
 import { useDragSpatialComponent } from "./useDragSpatialComponent";
+import { getPositionForSnippetInGroup } from "./utils";
 
 export const SnippetTokenComponent = observer(
   ({ snippet }: { snippet: SnippetToken }) => {
@@ -45,11 +46,9 @@ export const SnippetTokenComponent = observer(
     let isBeingDragged = false;
     if (snippetGroup !== undefined) {
       const index = snippetGroup.snippetIds.indexOf(snippet.id);
-      left = snippetGroup.position[0];
-      top =
-        snippetGroup.position[1] +
-        index * TOKEN_HEIGHT +
-        index * GROUP_TOKEN_ROW_GAP;
+      const position = getPositionForSnippetInGroup(snippetGroup, index);
+      left = position[0];
+      top = position[1];
       isBeingDragged =
         dragStateBox.get()?.spatialComponentIds.includes(snippetGroup.id) ??
         false;
@@ -78,23 +77,38 @@ export const SnippetTokenComponent = observer(
       >
         <Token isSelected={isSelected}>{text}</Token>
         {snippetGroup &&
-          snippetGroup.extraColumns.map((column, index) => (
-            <div
-              className={classNames(
-                "absolute touch-none px-2 py-1 text-xs font-mono cursor-default whitespace-nowrap",
-                snippetGroup !== undefined ? "-z-1" : undefined
-              )}
-              style={{
-                top: "0px",
-                left: `${GROUP_COLUMN_WIDTH * (index + 1)}px`,
-                width: `${GROUP_COLUMN_WIDTH - GROUP_TOKEN_COLUMN_GAP}px`,
-              }}
-            >
-              {snippet.extraData[column.id] ??
-                (column.formula &&
-                  executeFormula(column.formula, text, snippet.extraData))}
-            </div>
-          ))}
+          snippetGroup.extraColumns.map((column, index) => {
+            const data =
+              snippet.extraData[column.id] ??
+              (column.formula &&
+                executeFormula(column.formula, text, snippet.extraData));
+            return (
+              <div
+                className={classNames(
+                  "absolute touch-none px-2 py-1 text-xs font-mono cursor-default whitespace-nowrap",
+                  snippetGroup !== undefined ? "-z-1" : undefined
+                )}
+                style={{
+                  top: "0px",
+                  left: `${GROUP_COLUMN_WIDTH * (index + 1)}px`,
+                  width: `${GROUP_COLUMN_WIDTH - GROUP_TOKEN_COLUMN_GAP}px`,
+                }}
+              >
+                {typeof data === "string" && data}
+                {/* TODO: we currently infer the column type from data, but could
+                explicitly config it too.*/}
+                {typeof data === "boolean" && (
+                  <input
+                    type="checkbox"
+                    checked={data}
+                    onChange={() => {
+                      snippet.extraData[column.id] = !data;
+                    }}
+                  ></input>
+                )}
+              </div>
+            );
+          })}
       </div>
     );
   }

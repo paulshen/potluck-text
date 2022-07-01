@@ -4,6 +4,8 @@
 export function executeFormula(formula: string, text: string, extraData: any) {
   if (formula === "Lookup(text, Aisle)") {
     return lookupIngredientByAisle(text);
+  } else if (formula === "Checkbox()") {
+    return false;
   } else {
     return undefined;
   }
@@ -41,6 +43,9 @@ export const lookupIngredientByAisle = (ingredientText: string) => {
 
 export function formulaIsValid(formula: string | undefined) {
   return (
-    formula === "" || formula === undefined || formula === "Lookup(text, Aisle)"
+    formula === "" ||
+    formula === undefined ||
+    formula === "Lookup(text, Aisle)" ||
+    formula === "Checkbox()"
   );
 }
