@@ -187,7 +187,7 @@ export const App = observer(() => {
       >
         add textarea
       </button>
-      <div className="absolute">
+      <div className="absolute z-0">
         {[...textEditorStateMobx.keys()].map((textId) => (
           <Pane key={textId}>
             <Editor textId={textId} />

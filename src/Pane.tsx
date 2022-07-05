@@ -34,7 +34,7 @@ export function Pane({ children }: { children: React.ReactNode }) {
       ref={rootRef}
       onMouseDown={() => {
         // hacky stuff here but move pane to top on mousedown
-        rootRef.current!.style.zIndex = `${maxPaneZIndex++}`;
+        rootRef.current!.style.zIndex = `${++maxPaneZIndex}`;
       }}
     >
       <div
