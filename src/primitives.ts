@@ -7,8 +7,7 @@ export type Position = [x: number, y: number];
 export type Rect = [x: number, y: number, width: number, height: number];
 export type Span = [from: number, to: number];
 
-const DEFAULT_EDITOR_CONTENT = `
-# Chili
+const DEFAULT_EDITOR_CONTENT = `# Chili
 
 Bring 2 pounds low fat (~90/10) ground chuck beef to room temperature, and season with 1 Tbsp onion powder, 2 tsp salt, and 3/8 tsp garlic powder.
 
@@ -97,8 +96,8 @@ export type DragState = {
 };
 export const dragStateBox = observable.box<DragState | undefined>(undefined);
 
-export const CHAR_WIDTH = 7.2;
+export const CHAR_WIDTH = 8.5;
 export const GROUP_COLUMN_WIDTH = 192;
-export const TOKEN_HEIGHT = 24;
+export const TOKEN_HEIGHT = 28;
 export const GROUP_TOKEN_ROW_GAP = 4;
 export const GROUP_TOKEN_COLUMN_GAP = 4;

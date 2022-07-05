@@ -100,14 +100,15 @@ export function Editor({ textId }: { textId: string }) {
           },
           "&.cm-focused .cm-selectionBackground": {
             backgroundColor: "#e4e4e7",
+            color: "red",
           },
           "&.cm-editor.cm-focused": {
             outline: "none",
           },
           ".cm-scroller": {
             fontFamily: `ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace`,
-            fontSize: "0.75rem",
-            lineHeight: "1rem",
+            fontSize: "0.85rem",
+            lineHeight: "1.25rem",
           },
           ".cm-suggestion": {
             backgroundColor: "#facc1540",
@@ -173,7 +174,7 @@ export function Editor({ textId }: { textId: string }) {
 
   return (
     <div
-      className="w-[384px] h-[320px] bg-white border border-zinc-200 overflow-auto"
+      className="text-lg max-w-[480px] h-[320px] bg-white border-black border-b-2 border-l-2 border-r-2 rounded-b-lg overflow-auto"
       ref={editorRef}
     ></div>
   );
