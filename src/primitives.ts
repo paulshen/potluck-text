@@ -1,6 +1,6 @@
 import { EditorState } from "@codemirror/state";
 import { EventEmitter } from "eventemitter3";
-import { observable } from "mobx";
+import { observable, runInAction } from "mobx";
 import { nanoid } from "nanoid";
 
 export type Position = [x: number, y: number];
@@ -25,9 +25,10 @@ Simmer on low until liquid as evaporated. Chili is ready once flavors are blende
 Serve in bowl and garnish to taste with grated cheddar, avocado, sour cream, jalapeño, salsa, tortilla chips, Fritos, or corn bread.
 `;
 
+const FIRST_TEXT_ID = "text-id-1";
 export const textEditorStateMobx = observable.map<string, EditorState>(
   {
-    [nanoid()]: EditorState.create({ doc: DEFAULT_EDITOR_CONTENT }),
+    [FIRST_TEXT_ID]: EditorState.create({ doc: DEFAULT_EDITOR_CONTENT }),
   },
   { deep: false }
 );
@@ -60,6 +61,26 @@ export type SnippetGroup = {
   snippetIds: string[];
   /** Definitions for additional data to record for each annotation */
   extraColumns: ColumnDefinition[];
+};
+
+export type SnippetSuggestion = { id: string; from: number; to: number };
+export const snippetSuggestionsMobx = observable.map<
+  string,
+  SnippetSuggestion[]
+>({});
+// @ts-ignore EXAMPLE
+window.exampleSetSnippetSuggestion = (
+  textId: string = FIRST_TEXT_ID,
+  suggestions: SnippetSuggestion[] = [
+    { id: "1", from: 42, to: 59 },
+    { id: "2", from: 104, to: 116 },
+    { id: "3", from: 124, to: 128 },
+    { id: "4", from: 142, to: 155 },
+  ]
+) => {
+  runInAction(() => {
+    snippetSuggestionsMobx.set(textId, suggestions);
+  });
 };
 
 export type SpatialComponent = SnippetToken | SnippetGroup;

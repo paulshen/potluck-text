@@ -1,10 +1,12 @@
-import { Facet } from "@codemirror/state";
-import { ViewPlugin, ViewUpdate } from "@codemirror/view";
+import { Facet, StateEffect, StateField } from "@codemirror/state";
+import { Decoration, ViewPlugin, ViewUpdate } from "@codemirror/view";
 import { EditorView, minimalSetup } from "codemirror";
-import { runInAction } from "mobx";
+import { autorun, reaction, runInAction } from "mobx";
 import { useRef, useEffect } from "react";
 import {
   dragNewSnippetEmitter,
+  SnippetSuggestion,
+  snippetSuggestionsMobx,
   spatialComponentsMobx,
   SpatialComponentType,
   textEditorStateMobx,
@@ -14,7 +16,7 @@ const textIdFacet = Facet.define<string, string>({
   combine: (values) => values[0],
 });
 
-const plugin = ViewPlugin.fromClass(
+const dragSnippetPlugin = ViewPlugin.fromClass(
   class {
     lastUpdate: any;
     constructor(view: EditorView) {}
@@ -52,6 +54,37 @@ const plugin = ViewPlugin.fromClass(
   }
 );
 
+const setSnippetSuggestions = StateEffect.define<SnippetSuggestion[]>();
+
+const snippetSuggestionsField = StateField.define<SnippetSuggestion[]>({
+  create() {
+    return [];
+  },
+  update(suggestions, tr) {
+    for (let e of tr.effects) {
+      if (e.is(setSnippetSuggestions)) {
+        return e.value;
+      }
+    }
+    return suggestions.map((suggestion) => ({
+      ...suggestion,
+      from: tr.changes.mapPos(suggestion.from),
+      to: tr.changes.mapPos(suggestion.to),
+    }));
+  },
+});
+
+const suggestionMark = Decoration.mark({ class: "cm-suggestion" });
+const suggestionDecorations = EditorView.decorations.from(
+  snippetSuggestionsField,
+  (suggestions) =>
+    Decoration.set(
+      suggestions.map((suggestion) =>
+        suggestionMark.range(suggestion.from, suggestion.to)
+      )
+    )
+);
+
 export function Editor({ textId }: { textId: string }) {
   const editorRef = useRef(null);
   useEffect(() => {
@@ -74,10 +107,19 @@ export function Editor({ textId }: { textId: string }) {
             fontSize: "0.75rem",
             lineHeight: "1rem",
           },
+          ".cm-suggestion": {
+            backgroundColor: "#facc1540",
+            transition: "background-color 0.2s",
+          },
+          ".cm-suggestion:hover": {
+            backgroundColor: "#facc1580",
+          },
         }),
         EditorView.lineWrapping,
         textIdFacet.of(textId),
-        plugin,
+        dragSnippetPlugin,
+        snippetSuggestionsField,
+        suggestionDecorations,
       ],
       parent: editorRef.current!,
       dispatch(transaction) {
@@ -103,8 +145,18 @@ export function Editor({ textId }: { textId: string }) {
     runInAction(() => {
       textEditorStateMobx.set(textId, view.state);
     });
+    const unsubscribes: (() => void)[] = [
+      autorun(() => {
+        view.dispatch({
+          effects: [
+            setSnippetSuggestions.of(snippetSuggestionsMobx.get(textId) ?? []),
+          ],
+        });
+      }),
+    ];
     return () => {
       view.destroy();
+      unsubscribes.forEach((unsubscribe) => unsubscribe());
     };
   }, []);
 
