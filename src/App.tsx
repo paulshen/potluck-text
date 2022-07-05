@@ -24,6 +24,7 @@ import { SnippetGroupComponent } from "./SnippetGroupComponent";
 import { Pane } from "./Pane";
 import { EditorState } from "@codemirror/state";
 import { createSnippetsOnCanvasForSuggestions } from "./utils";
+import "./ShenIntegrationFile";
 
 const SpatialComponents = observer(() => {
   return (
