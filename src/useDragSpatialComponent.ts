@@ -23,15 +23,16 @@ export function useDragSpatialComponent(element: SpatialComponent) {
           memo.activeComponents;
         if (activeComponents === undefined) {
           const parentGroup: SnippetGroup | undefined =
-            element.type === SpatialComponentType.Snippet
+            element.spatialComponentType === SpatialComponentType.Snippet
               ? spatialComponentsMobx.find(
                   (s): s is SnippetGroup =>
-                    s.type === SpatialComponentType.SnippetGroup &&
+                    s.spatialComponentType ===
+                      SpatialComponentType.SnippetGroup &&
                     s.snippetIds.includes(element.id)
                 )
               : undefined;
           if (
-            element.type === SpatialComponentType.Snippet &&
+            element.spatialComponentType === SpatialComponentType.Snippet &&
             parentGroup !== undefined &&
             event.metaKey
           ) {
@@ -73,11 +74,13 @@ export function useDragSpatialComponent(element: SpatialComponent) {
 
         let snippetsDraggingOverGroup: SnippetGroup | undefined;
         if (
-          activeComponents.every((c) => c.type === SpatialComponentType.Snippet)
+          activeComponents.every(
+            (c) => c.spatialComponentType === SpatialComponentType.Snippet
+          )
         ) {
           snippetsDraggingOverGroup = spatialComponentsMobx.find(
             (c): c is SnippetGroup =>
-              c.type === SpatialComponentType.SnippetGroup &&
+              c.spatialComponentType === SpatialComponentType.SnippetGroup &&
               doesRectContainPosition(getRectForSnippetGroup(c), xy)
           );
         }

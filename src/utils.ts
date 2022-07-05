@@ -6,7 +6,7 @@ import {
   TOKEN_HEIGHT,
   Position,
   CHAR_WIDTH,
-  SnippetToken,
+  Snippet,
   textEditorStateMobx,
 } from "./primitives";
 
@@ -33,7 +33,7 @@ export function getRectForSnippetGroup(group: SnippetGroup): Rect {
   ];
 }
 
-export function getRectForSnippetToken(snippet: SnippetToken): Rect {
+export function getRectForSnippetToken(snippet: Snippet): Rect {
   const text = textEditorStateMobx
     .get(snippet.textId)!
     .sliceDoc(snippet.span[0], snippet.span[1]);

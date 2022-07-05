@@ -4,13 +4,14 @@ import { observer } from "mobx-react-lite";
 import { nanoid } from "nanoid";
 import { CanvasBackground } from "./CanvasBackground";
 import {
-  SnippetToken,
+  Snippet,
   dragNewSnippetEmitter,
   selectedSpatialComponentsMobx,
   Span,
   spatialComponentsMobx,
   SpatialComponentType,
   textEditorStateMobx,
+  INGREDIENT_TYPE,
 } from "./primitives";
 import { Editor } from "./Editor";
 import { Token } from "./Token";
@@ -23,7 +24,7 @@ const SpatialComponents = observer(() => {
   return (
     <>
       {spatialComponentsMobx.map((spatialComponent) => {
-        switch (spatialComponent.type) {
+        switch (spatialComponent.spatialComponentType) {
           case SpatialComponentType.Snippet:
             return (
               <SnippetTokenComponent
@@ -77,12 +78,13 @@ function NewDragSnippetComponent() {
     function onMouseUp(e: MouseEvent) {
       runInAction(() => {
         spatialComponentsMobx.push({
-          type: SpatialComponentType.Snippet,
+          spatialComponentType: SpatialComponentType.Snippet,
           id: nanoid(),
+          snippetTypeId: INGREDIENT_TYPE, // todo: make a real type id
           textId: dragSnippetSpan![0],
           span: dragSnippetSpan![1],
           position: [e.clientX + mouseOffset![0], e.clientY + mouseOffset![1]],
-          extraData: {},
+          data: {},
         });
       });
       cleanup();
@@ -143,18 +145,19 @@ export const App = observer(() => {
       if (e.target === document.body) {
         switch (e.key) {
           case "g": {
-            const selectedTokens: SnippetToken[] = selectedSpatialComponentsMobx
+            const selectedTokens: Snippet[] = selectedSpatialComponentsMobx
               .flatMap((id) =>
                 spatialComponentsMobx.filter(
-                  (spatialComponent): spatialComponent is SnippetToken =>
+                  (spatialComponent): spatialComponent is Snippet =>
                     spatialComponent.id === id &&
-                    spatialComponent.type === SpatialComponentType.Snippet
+                    spatialComponent.spatialComponentType ===
+                      SpatialComponentType.Snippet
                 )
               )
               .sort((a, b) => a.position[1] - b.position[1]);
             if (selectedTokens.length > 0) {
               spatialComponentsMobx.push({
-                type: SpatialComponentType.SnippetGroup,
+                spatialComponentType: SpatialComponentType.SnippetGroup,
                 id: nanoid(),
                 position: selectedTokens[0].position,
                 snippetIds: selectedTokens.map((token) => token.id),

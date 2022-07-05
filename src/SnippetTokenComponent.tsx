@@ -4,10 +4,11 @@ import { observer } from "mobx-react-lite";
 import { executeFormula } from "./formulas";
 import {
   SnippetGroup,
-  SnippetToken,
+  Snippet,
   GROUP_TOKEN_ROW_GAP,
   selectedSpatialComponentsMobx,
   spatialComponentsMobx,
+  snippetTypesMobx,
   SpatialComponentType,
   TOKEN_HEIGHT,
   GROUP_COLUMN_WIDTH,
@@ -15,13 +16,14 @@ import {
   getGroupWidth,
   dragStateBox,
   textEditorStateMobx,
+  SnippetType,
 } from "./primitives";
 import { Token } from "./Token";
 import { useDragSpatialComponent } from "./useDragSpatialComponent";
 import { getPositionForSnippetInGroup } from "./utils";
 
 export const SnippetTokenComponent = observer(
-  ({ snippet }: { snippet: SnippetToken }) => {
+  ({ snippet }: { snippet: Snippet }) => {
     const text = computed(() => {
       return textEditorStateMobx
         .get(snippet.textId)!
@@ -31,7 +33,8 @@ export const SnippetTokenComponent = observer(
     const snippetGroup: SnippetGroup | undefined = computed(() =>
       spatialComponentsMobx.find(
         (spatialComponent) =>
-          spatialComponent.type === SpatialComponentType.SnippetGroup &&
+          spatialComponent.spatialComponentType ===
+            SpatialComponentType.SnippetGroup &&
           spatialComponent.snippetIds.includes(snippet.id)
       )
     ).get();
@@ -40,6 +43,12 @@ export const SnippetTokenComponent = observer(
         snippetGroup === undefined &&
         selectedSpatialComponentsMobx.includes(snippet.id)
     ).get();
+
+    const snippetType: SnippetType = computed(() =>
+      snippetTypesMobx.find(
+        (snippetType) => snippetType.id === snippet.snippetTypeId
+      )
+    ).get()!;
 
     const bindDrag = useDragSpatialComponent(snippet);
 
@@ -77,13 +86,15 @@ export const SnippetTokenComponent = observer(
               : undefined,
         }}
       >
-        <Token isSelected={isSelected}>{text}</Token>
+        <Token isSelected={isSelected}>
+          {snippetType.icon} {text}
+        </Token>
         {snippetGroup &&
           snippetGroup.extraColumns.map((column, index) => {
             const data =
-              snippet.extraData[column.id] ??
+              snippet.data[column.id] ??
               (column.formula &&
-                executeFormula(column.formula, text, snippet.extraData));
+                executeFormula(column.formula, text, snippet.data));
             return (
               <div
                 className={classNames(
@@ -104,7 +115,7 @@ export const SnippetTokenComponent = observer(
                     type="checkbox"
                     checked={data}
                     onChange={() => {
-                      snippet.extraData[column.id] = !data;
+                      snippet.data[column.id] = !data;
                     }}
                   ></input>
                 )}

@@ -52,11 +52,12 @@ export function CanvasBackground() {
           spatialComponentsMobx
             .filter((spatialComponent) => {
               let rect: Rect;
-              switch (spatialComponent.type) {
+              switch (spatialComponent.spatialComponentType) {
                 case SpatialComponentType.Snippet: {
                   const group = spatialComponentsMobx.find(
                     (s) =>
-                      s.type === SpatialComponentType.SnippetGroup &&
+                      s.spatialComponentType ===
+                        SpatialComponentType.SnippetGroup &&
                       s.snippetIds.includes(spatialComponent.id)
                   );
                   if (group !== undefined) {

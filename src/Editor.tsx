@@ -129,7 +129,7 @@ export function Editor({ textId }: { textId: string }) {
         view.update([transaction]);
         runInAction(() => {
           for (const spatialComponent of spatialComponentsMobx) {
-            switch (spatialComponent.type) {
+            switch (spatialComponent.spatialComponentType) {
               case SpatialComponentType.Snippet: {
                 if (spatialComponent.textId === textId) {
                   spatialComponent.span = [

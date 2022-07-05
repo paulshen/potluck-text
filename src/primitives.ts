@@ -24,6 +24,16 @@ Simmer on low until liquid as evaporated. Chili is ready once flavors are blende
 Serve in bowl and garnish to taste with grated cheddar, avocado, sour cream, jalapeño, salsa, tortilla chips, Fritos, or corn bread.
 `;
 
+export const INGREDIENT_TYPE = "ingredient";
+const DEFAULT_SNIPPET_TYPES: SnippetType[] = [
+  {
+    id: INGREDIENT_TYPE,
+    name: "Ingredient",
+    icon: "🥕",
+    color: "#ffc107",
+  },
+];
+
 const FIRST_TEXT_ID = "text-id-1";
 export const textEditorStateMobx = observable.map<string, EditorState>(
   {
@@ -43,18 +53,28 @@ export enum SpatialComponentType {
   Snippet,
   SnippetGroup,
 }
-export type SnippetToken = {
-  type: SpatialComponentType.Snippet;
-  textId: string;
+
+export type SnippetType = {
   id: string;
+  name: string;
+  icon: string;
+  color: string;
+};
+
+export type Snippet = {
+  spatialComponentType: SpatialComponentType.Snippet;
+
+  id: string;
+  snippetTypeId: string;
+  textId: string;
   span: Span;
   position: Position;
 
   /** { [columnId]: data } */
-  extraData: { [key: string]: any };
+  data: { [key: string]: any };
 };
 export type SnippetGroup = {
-  type: SpatialComponentType.SnippetGroup;
+  spatialComponentType: SpatialComponentType.SnippetGroup;
   id: string;
   position: Position;
   snippetIds: string[];
@@ -82,12 +102,13 @@ window.exampleSetSnippetSuggestion = (
   });
 };
 
-export type SpatialComponent = SnippetToken | SnippetGroup;
+export type SpatialComponent = Snippet | SnippetGroup;
 export const getGroupWidth = (group: SnippetGroup): number => {
   return (group.extraColumns.length + 1) * GROUP_COLUMN_WIDTH;
 };
 
 export const spatialComponentsMobx = observable<SpatialComponent>([]);
+export const snippetTypesMobx = observable<SnippetType>(DEFAULT_SNIPPET_TYPES);
 export const selectedSpatialComponentsMobx = observable<string>([]);
 
 export type DragState = {
