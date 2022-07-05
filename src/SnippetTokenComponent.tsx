@@ -4,7 +4,7 @@ import { observer } from "mobx-react-lite";
 import { executeFormula } from "./formulas";
 import {
   SnippetGroup,
-  Snippet,
+  SnippetOnCanvas,
   GROUP_TOKEN_ROW_GAP,
   selectedSpatialComponentsMobx,
   spatialComponentsMobx,
@@ -17,13 +17,20 @@ import {
   dragStateBox,
   textEditorStateMobx,
   SnippetType,
+  Snippet,
 } from "./primitives";
 import { Token } from "./Token";
 import { useDragSpatialComponent } from "./useDragSpatialComponent";
-import { getPositionForSnippetInGroup } from "./utils";
+import {
+  getPositionForSnippetInGroup,
+  getSnippetForSnippetOnCanvas,
+} from "./utils";
 
 export const SnippetTokenComponent = observer(
-  ({ snippet }: { snippet: Snippet }) => {
+  ({ snippetOnCanvas }: { snippetOnCanvas: SnippetOnCanvas }) => {
+    const snippet: Snippet = computed(() =>
+      getSnippetForSnippetOnCanvas(snippetOnCanvas)
+    ).get();
     const text = computed(() => {
       return textEditorStateMobx
         .get(snippet.textId)!
@@ -35,28 +42,26 @@ export const SnippetTokenComponent = observer(
         (spatialComponent) =>
           spatialComponent.spatialComponentType ===
             SpatialComponentType.SnippetGroup &&
-          spatialComponent.snippetIds.includes(snippet.id)
+          spatialComponent.snippetIds.includes(snippetOnCanvas.id)
       )
     ).get();
     const isSelected = computed(
       () =>
         snippetGroup === undefined &&
-        selectedSpatialComponentsMobx.includes(snippet.id)
+        selectedSpatialComponentsMobx.includes(snippetOnCanvas.id)
     ).get();
 
-    const snippetType: SnippetType = computed(() =>
-      snippetTypesMobx.find(
-        (snippetType) => snippetType.id === snippet.snippetTypeId
-      )
-    ).get()!;
+    const snippetType: SnippetType = computed(() => {
+      return snippetTypesMobx.get(snippet.snippetTypeId);
+    }).get()!;
 
-    const bindDrag = useDragSpatialComponent(snippet);
+    const bindDrag = useDragSpatialComponent(snippetOnCanvas);
 
     let top;
     let left;
     let isBeingDragged = false;
     if (snippetGroup !== undefined) {
-      const index = snippetGroup.snippetIds.indexOf(snippet.id);
+      const index = snippetGroup.snippetIds.indexOf(snippetOnCanvas.id);
       const position = getPositionForSnippetInGroup(snippetGroup, index);
       left = position[0];
       top = position[1];
@@ -64,10 +69,11 @@ export const SnippetTokenComponent = observer(
         dragStateBox.get()?.spatialComponentIds.includes(snippetGroup.id) ??
         false;
     } else {
-      left = snippet.position[0];
-      top = snippet.position[1];
+      left = snippetOnCanvas.position[0];
+      top = snippetOnCanvas.position[1];
       isBeingDragged =
-        dragStateBox.get()?.spatialComponentIds.includes(snippet.id) ?? false;
+        dragStateBox.get()?.spatialComponentIds.includes(snippetOnCanvas.id) ??
+        false;
     }
 
     return (
