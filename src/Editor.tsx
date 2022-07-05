@@ -5,13 +5,11 @@ import { autorun, reaction, runInAction } from "mobx";
 import { useRef, useEffect } from "react";
 import {
   dragNewSnippetEmitter,
+  snippetsMobx,
   SnippetSuggestion,
   snippetSuggestionsMobx,
-  spatialComponentsMobx,
-  SpatialComponentType,
   textEditorStateMobx,
 } from "./primitives";
-import { getSnippetForSnippetOnCanvas } from "./utils";
 
 const textIdFacet = Facet.define<string, string>({
   combine: (values) => values[0],
@@ -129,18 +127,12 @@ export function Editor({ textId }: { textId: string }) {
       dispatch(transaction) {
         view.update([transaction]);
         runInAction(() => {
-          for (const spatialComponent of spatialComponentsMobx) {
-            switch (spatialComponent.spatialComponentType) {
-              case SpatialComponentType.Snippet: {
-                const snippet = getSnippetForSnippetOnCanvas(spatialComponent);
-                if (snippet.textId === textId) {
-                  snippet.span = [
-                    transaction.changes.mapPos(snippet.span[0]),
-                    transaction.changes.mapPos(snippet.span[1]),
-                  ];
-                }
-                break;
-              }
+          for (const snippet of snippetsMobx.values()) {
+            if (snippet.textId === textId) {
+              snippet.span = [
+                transaction.changes.mapPos(snippet.span[0]),
+                transaction.changes.mapPos(snippet.span[1]),
+              ];
             }
           }
           const snippetSuggestions = snippetSuggestionsMobx.get(textId);
