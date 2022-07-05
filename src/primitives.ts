@@ -63,7 +63,7 @@ export type SnippetGroup = {
   extraColumns: ColumnDefinition[];
 };
 
-export type SnippetSuggestion = { id: string; from: number; to: number };
+export type SnippetSuggestion = { id: string; span: Span };
 export const snippetSuggestionsMobx = observable.map<
   string,
   SnippetSuggestion[]
@@ -72,10 +72,10 @@ export const snippetSuggestionsMobx = observable.map<
 window.exampleSetSnippetSuggestion = (
   textId: string = FIRST_TEXT_ID,
   suggestions: SnippetSuggestion[] = [
-    { id: "1", from: 42, to: 59 },
-    { id: "2", from: 104, to: 116 },
-    { id: "3", from: 124, to: 128 },
-    { id: "4", from: 142, to: 155 },
+    { id: "1", span: [42, 59] },
+    { id: "2", span: [104, 116] },
+    { id: "3", span: [124, 128] },
+    { id: "4", span: [142, 155] },
   ]
 ) => {
   runInAction(() => {

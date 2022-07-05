@@ -68,8 +68,10 @@ const snippetSuggestionsField = StateField.define<SnippetSuggestion[]>({
     }
     return suggestions.map((suggestion) => ({
       ...suggestion,
-      from: tr.changes.mapPos(suggestion.from),
-      to: tr.changes.mapPos(suggestion.to),
+      span: [
+        tr.changes.mapPos(suggestion.span[0]),
+        tr.changes.mapPos(suggestion.span[1]),
+      ],
     }));
   },
 });
@@ -80,7 +82,7 @@ const suggestionDecorations = EditorView.decorations.from(
   (suggestions) =>
     Decoration.set(
       suggestions.map((suggestion) =>
-        suggestionMark.range(suggestion.from, suggestion.to)
+        suggestionMark.range(suggestion.span[0], suggestion.span[1])
       )
     )
 );
@@ -137,6 +139,15 @@ export function Editor({ textId }: { textId: string }) {
                 break;
               }
             }
+          }
+          const snippetSuggestions = snippetSuggestionsMobx.get(textId);
+          if (snippetSuggestions !== undefined) {
+            snippetSuggestions.forEach((suggestion) => {
+              suggestion.span = [
+                transaction.changes.mapPos(suggestion.span[0]),
+                transaction.changes.mapPos(suggestion.span[1]),
+              ];
+            });
           }
           textEditorStateMobx.set(textId, transaction.state);
         });
