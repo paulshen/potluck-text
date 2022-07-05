@@ -1,3 +1,4 @@
+import { nanoid } from "nanoid";
 import {
   SnippetGroup,
   GROUP_TOKEN_ROW_GAP,
@@ -10,6 +11,10 @@ import {
   textEditorStateMobx,
   snippetsMobx,
   Snippet,
+  SnippetSuggestion,
+  INGREDIENT_TYPE,
+  SpatialComponentType,
+  spatialComponentsMobx,
 } from "./primitives";
 
 // your favorite dumping ground of utility functions
@@ -62,4 +67,43 @@ export function getSnippetForSnippetOnCanvas(
   snippetOnCanvas: SnippetOnCanvas
 ): Snippet {
   return snippetsMobx.get(snippetOnCanvas.snippetId)!;
+}
+
+/** Given some snippet suggestions for a given text box,
+ *  create snippets for those suggestions,
+ *  and also create corresponding SnippetOnCanvas objects on the canvas.
+ *  (Note: this side effects on the MobX state.)
+ */
+export function createSnippetsOnCanvasForSuggestions(
+  textId: string,
+  suggestions: SnippetSuggestion[]
+) {
+  const snippets: Snippet[] = suggestions.map((suggestion) => {
+    return {
+      id: nanoid(),
+      snippetTypeId: suggestion.snippetTypeId,
+      textId,
+      span: suggestion.span,
+      type: "suggestion",
+      data: {},
+    };
+  });
+
+  const snippetsOnCanvas: SnippetOnCanvas[] = snippets.map((snippet) => {
+    return {
+      spatialComponentType: SpatialComponentType.Snippet,
+      id: nanoid(),
+      snippetId: snippet.id,
+      // Randomly scattered in a reasonable spot; todo: make nicer positions
+      position: [500 + Math.random() * 200, 50 + Math.random() * 500],
+    };
+  });
+
+  for (const snippet of snippets) {
+    snippetsMobx.set(snippet.id, snippet);
+  }
+
+  for (const snippetOnCanvas of snippetsOnCanvas) {
+    spatialComponentsMobx.push(snippetOnCanvas);
+  }
 }

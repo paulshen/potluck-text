@@ -24,12 +24,40 @@ Simmer on low until liquid as evaporated. Chili is ready once flavors are blende
 Serve in bowl and garnish to taste with grated cheddar, avocado, sour cream, jalapeño, salsa, tortilla chips, Fritos, or corn bread.
 `;
 
+const DEFAULT_SUGGESTION_INDICES = [
+  [15, 58],
+  [96, 115],
+  [117, 127],
+  [133, 154],
+  [336, 362],
+  [364, 390],
+  [392, 423],
+  [425, 443],
+  [445, 458],
+  [460, 490],
+  [492, 513],
+  [515, 544],
+  [550, 573],
+];
+
 export const INGREDIENT_TYPE = "ingredient";
 const DEFAULT_SNIPPET_TYPES: { [key: string]: SnippetType } = {
   [INGREDIENT_TYPE]: {
     name: "Ingredient",
     icon: "🥕",
     color: "#ffc107",
+    suggest: (text: string) => {
+      const indices = DEFAULT_SUGGESTION_INDICES;
+
+      return indices.map(([from, to]) => ({
+        id: nanoid(),
+        span: [from, to],
+        snippetTypeId: INGREDIENT_TYPE,
+      }));
+    },
+
+    // TODO: this will parse out structured data for the ingredient
+    parse: (text: string) => {},
   },
 };
 
@@ -57,6 +85,12 @@ export type SnippetType = {
   name: string;
   icon: string;
   color: string;
+
+  /** Given a whole document, suggest character indexes that could become snippets of this type */
+  suggest: (text: string) => SnippetSuggestion[];
+
+  /** Given text for a single snippet, return structured data for the snippet */
+  parse: (text: string) => any;
 };
 
 export type Snippet = {
@@ -84,25 +118,15 @@ export type SnippetGroup = {
   extraColumns: ColumnDefinition[];
 };
 
-export type SnippetSuggestion = { id: string; span: Span };
+export type SnippetSuggestion = {
+  id: string;
+  span: Span;
+  snippetTypeId: string;
+};
 export const snippetSuggestionsMobx = observable.map<
   string,
   SnippetSuggestion[]
 >({});
-// @ts-ignore EXAMPLE
-window.exampleSetSnippetSuggestion = (
-  textId: string = FIRST_TEXT_ID,
-  suggestions: SnippetSuggestion[] = [
-    { id: "1", span: [42, 59] },
-    { id: "2", span: [104, 116] },
-    { id: "3", span: [124, 128] },
-    { id: "4", span: [142, 155] },
-  ]
-) => {
-  runInAction(() => {
-    snippetSuggestionsMobx.set(textId, suggestions);
-  });
-};
 
 export type SpatialComponent = SnippetOnCanvas | SnippetGroup;
 export const getGroupWidth = (group: SnippetGroup): number => {

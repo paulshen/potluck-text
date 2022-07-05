@@ -13,6 +13,9 @@ import {
   textEditorStateMobx,
   INGREDIENT_TYPE,
   snippetsMobx,
+  SnippetSuggestion,
+  snippetTypesMobx,
+  snippetSuggestionsMobx,
 } from "./primitives";
 import { Editor } from "./Editor";
 import { Token } from "./Token";
@@ -20,6 +23,7 @@ import { SnippetTokenComponent } from "./SnippetTokenComponent";
 import { SnippetGroupComponent } from "./SnippetGroupComponent";
 import { Pane } from "./Pane";
 import { EditorState } from "@codemirror/state";
+import { createSnippetsOnCanvasForSuggestions } from "./utils";
 
 const SpatialComponents = observer(() => {
   return (
@@ -181,6 +185,7 @@ export const App = observer(() => {
       window.removeEventListener("keydown", onKeyDown);
     };
   }, []);
+
   return (
     <div>
       <CanvasBackground />
@@ -198,11 +203,41 @@ export const App = observer(() => {
         add textarea
       </button>
       <div className="absolute z-0">
-        {[...textEditorStateMobx.keys()].map((textId) => (
-          <Pane key={textId}>
-            <Editor textId={textId} />
-          </Pane>
-        ))}
+        {[...textEditorStateMobx.keys()].map((textId) => {
+          const numSuggestions =
+            snippetSuggestionsMobx.get(textId)?.length ?? 0;
+          return (
+            <Pane key={textId}>
+              <Editor textId={textId} />
+              <button
+                className="text-sm text-gray-400 mr-4"
+                onClick={() =>
+                  runInAction(() => {
+                    const suggestions: SnippetSuggestion[] = snippetTypesMobx
+                      .get(INGREDIENT_TYPE)!
+                      .suggest(textEditorStateMobx.get(textId)!.sliceDoc(0));
+                    snippetSuggestionsMobx.set(textId, suggestions);
+                  })
+                }
+              >
+                🪄 Suggest
+              </button>
+              {numSuggestions > 0 && (
+                <button
+                  className="text-sm text-gray-400"
+                  onClick={() => {
+                    createSnippetsOnCanvasForSuggestions(
+                      textId,
+                      snippetSuggestionsMobx.get(textId) ?? []
+                    );
+                  }}
+                >
+                  Extract {numSuggestions} snippets
+                </button>
+              )}
+            </Pane>
+          );
+        })}
       </div>
       <SpatialComponents />
       <NewDragSnippetComponent />

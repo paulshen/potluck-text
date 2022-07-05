@@ -1,4 +1,10 @@
-import { Facet, StateEffect, StateField } from "@codemirror/state";
+import { EditorSelection } from "@codemirror/state";
+import {
+  Facet,
+  SelectionRange,
+  StateEffect,
+  StateField,
+} from "@codemirror/state";
 import { Decoration, ViewPlugin, ViewUpdate } from "@codemirror/view";
 import { EditorView, minimalSetup } from "codemirror";
 import { autorun, reaction, runInAction } from "mobx";
@@ -34,7 +40,15 @@ const dragSnippetPlugin = ViewPlugin.fromClass(
           if (pos === null) {
             return;
           }
-          for (const range of view.state.selection.ranges) {
+          const suggestionsAsRanges: SelectionRange[] =
+            // @ts-ignore - The field is there because the plugin adds it.
+            view.state.field(snippetSuggestionsField).map((suggestion) => {
+              const [from, to] = suggestion.span;
+              return EditorSelection.range(from, to);
+            });
+          const possibleDragRanges =
+            view.state.selection.ranges.concat(suggestionsAsRanges);
+          for (const range of possibleDragRanges) {
             if (pos >= range.from && pos < range.to) {
               const fromPos = view.coordsAtPos(range.from)!;
               const left = fromPos.left - 8;
@@ -46,6 +60,8 @@ const dragSnippetPlugin = ViewPlugin.fromClass(
                 mouseOffset: [left - event.clientX, top - event.clientY],
                 text: view.state.sliceDoc(range.from, range.to),
               });
+              // We only want to drag out a single snippet
+              break;
             }
           }
           return true;
@@ -112,7 +128,7 @@ export function Editor({ textId }: { textId: string }) {
             lineHeight: "1.25rem",
           },
           ".cm-suggestion": {
-            backgroundColor: "#facc1540",
+            backgroundColor: "#facc1520",
             transition: "background-color 0.2s",
           },
           ".cm-suggestion:hover": {
@@ -176,7 +192,7 @@ export function Editor({ textId }: { textId: string }) {
 
   return (
     <div
-      className="text-lg max-w-[480px] h-[320px] bg-white border-black border-b-2 border-l-2 border-r-2 rounded-b-lg overflow-auto"
+      className="text-lg max-w-[480px] h-[480px] bg-white border-black border-b-2 border-l-2 border-r-2 rounded-b-lg overflow-auto"
       ref={editorRef}
     ></div>
   );
