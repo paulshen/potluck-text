@@ -1,6 +1,6 @@
 import { EditorState } from "@codemirror/state";
 import { EventEmitter } from "eventemitter3";
-import { observable, runInAction } from "mobx";
+import { observable, runInAction, toJS } from "mobx";
 import { nanoid } from "nanoid";
 
 export type Position = [x: number, y: number];
@@ -61,7 +61,7 @@ const DEFAULT_SNIPPET_TYPES: { [key: string]: SnippetType } = {
   },
 };
 
-const FIRST_TEXT_ID = "text-id-1";
+export const FIRST_TEXT_ID = "text-id-1";
 export const textEditorStateMobx = observable.map<string, EditorState>(
   {
     [FIRST_TEXT_ID]: EditorState.create({ doc: DEFAULT_EDITOR_CONTENT }),
@@ -137,6 +137,11 @@ export const snippetTypesMobx = observable.map<string, SnippetType>(
   DEFAULT_SNIPPET_TYPES
 );
 export const snippetsMobx = observable.map<string, Snippet>({});
+// map of snippetId => array of data to display in editor next to snippet
+export const snippetEditorAnnotationsMobx = observable.map<
+  string,
+  { key: string; value: string }[]
+>({});
 
 export const spatialComponentsMobx = observable<SpatialComponent>([]);
 export const selectedSpatialComponentsMobx = observable<string>([]);

@@ -1,20 +1,27 @@
-import { EditorSelection } from "@codemirror/state";
 import {
   Facet,
   SelectionRange,
+  EditorSelection,
   StateEffect,
   StateField,
 } from "@codemirror/state";
-import { Decoration, ViewPlugin, ViewUpdate } from "@codemirror/view";
+import {
+  ViewPlugin,
+  ViewUpdate,
+  Decoration,
+  WidgetType,
+} from "@codemirror/view";
 import { EditorView, minimalSetup } from "codemirror";
-import { autorun, reaction, runInAction } from "mobx";
+import { autorun, comparer, reaction, runInAction } from "mobx";
 import { useRef, useEffect } from "react";
 import {
   dragNewSnippetEmitter,
   snippetsMobx,
+  Snippet,
   SnippetSuggestion,
   snippetSuggestionsMobx,
   textEditorStateMobx,
+  snippetEditorAnnotationsMobx,
 } from "./primitives";
 
 const textIdFacet = Facet.define<string, string>({
@@ -69,15 +76,14 @@ const dragSnippetPlugin = ViewPlugin.fromClass(
   }
 );
 
-const setSnippetSuggestions = StateEffect.define<SnippetSuggestion[]>();
-
+const setSnippetSuggestionsEffect = StateEffect.define<SnippetSuggestion[]>();
 const snippetSuggestionsField = StateField.define<SnippetSuggestion[]>({
   create() {
     return [];
   },
   update(suggestions, tr) {
     for (let e of tr.effects) {
-      if (e.is(setSnippetSuggestions)) {
+      if (e.is(setSnippetSuggestionsEffect)) {
         return e.value;
       }
     }
@@ -98,7 +104,82 @@ const suggestionDecorations = EditorView.decorations.from(
     Decoration.set(
       suggestions.map((suggestion) =>
         suggestionMark.range(suggestion.span[0], suggestion.span[1])
-      )
+      ),
+      true
+    )
+);
+
+type SnippetWithAnnotation = Snippet & {
+  annotations: { key: string; value: string }[];
+};
+const setSnippetsEffect = StateEffect.define<SnippetWithAnnotation[]>();
+const snippetsField = StateField.define<SnippetWithAnnotation[]>({
+  create() {
+    return [];
+  },
+  update(snippets, tr) {
+    for (let e of tr.effects) {
+      if (e.is(setSnippetsEffect)) {
+        return e.value;
+      }
+    }
+    return snippets.map((snippet) => ({
+      ...snippet,
+      span: [
+        tr.changes.mapPos(snippet.span[0]),
+        tr.changes.mapPos(snippet.span[1]),
+      ],
+    }));
+  },
+});
+
+const ANNOTATION_COLOR: Record<string, string> = {
+  Aisle: "bg-green-100",
+};
+
+class SnippetAnnotationsWidget extends WidgetType {
+  constructor(readonly annotations: { key: string; value: string }[]) {
+    super();
+  }
+
+  eq(other: WidgetType): boolean {
+    return (
+      other instanceof SnippetAnnotationsWidget &&
+      comparer.structural(this.annotations, other.annotations)
+    );
+  }
+
+  toDOM() {
+    const wrap = document.createElement("span");
+    wrap.className = "rounded-r";
+    wrap.setAttribute("aria-hidden", "true");
+    for (const { key, value } of this.annotations) {
+      const token = document.createElement("span");
+      token.className = `${
+        ANNOTATION_COLOR[key] ?? "bg-blue-100"
+      } px-1 text-gray-600`;
+      token.innerText = value;
+      wrap.appendChild(token);
+    }
+    return wrap;
+  }
+}
+
+const snippetDecorations = EditorView.decorations.from(
+  snippetsField,
+  (snippets) =>
+    Decoration.set(
+      snippets.flatMap((snippet) => [
+        Decoration.mark({ class: "cm-snippet" }).range(
+          snippet.span[0],
+          snippet.span[1]
+        ),
+        Decoration.widget({
+          widget: new SnippetAnnotationsWidget(snippet.annotations),
+          side: 1,
+        }).range(snippet.span[1]),
+      ]),
+      true
     )
 );
 
@@ -132,12 +213,20 @@ export function Editor({ textId }: { textId: string }) {
           ".cm-suggestion:hover": {
             backgroundColor: "#facc1580",
           },
+          ".cm-snippet": {
+            backgroundColor: "#80808020",
+          },
+          ".cm-snippet .cm-suggestion": {
+            backgroundColor: "#80808020",
+          },
         }),
         EditorView.lineWrapping,
         textIdFacet.of(textId),
         dragSnippetPlugin,
         snippetSuggestionsField,
         suggestionDecorations,
+        snippetsField,
+        snippetDecorations,
       ],
       parent: editorRef.current!,
       dispatch(transaction) {
@@ -171,10 +260,27 @@ export function Editor({ textId }: { textId: string }) {
       autorun(() => {
         view.dispatch({
           effects: [
-            setSnippetSuggestions.of(snippetSuggestionsMobx.get(textId) ?? []),
+            setSnippetSuggestionsEffect.of(
+              snippetSuggestionsMobx.get(textId) ?? []
+            ),
           ],
         });
       }),
+      reaction(
+        () =>
+          [...snippetsMobx.values()]
+            .filter((snippet) => snippet.textId === textId)
+            .map((snippet) => ({
+              ...snippet,
+              annotations: snippetEditorAnnotationsMobx.get(snippet.id) ?? [],
+            })),
+        (snippetsWithAnnotations) => {
+          view.dispatch({
+            effects: [setSnippetsEffect.of(snippetsWithAnnotations)],
+          });
+        },
+        { equals: comparer.structural }
+      ),
     ];
     return () => {
       view.destroy();
