@@ -6,8 +6,10 @@ import {
   TOKEN_HEIGHT,
   Position,
   CHAR_WIDTH,
-  Snippet,
+  SnippetOnCanvas,
   textEditorStateMobx,
+  snippetsMobx,
+  Snippet,
 } from "./primitives";
 
 // your favorite dumping ground of utility functions
@@ -33,13 +35,14 @@ export function getRectForSnippetGroup(group: SnippetGroup): Rect {
   ];
 }
 
-export function getRectForSnippetToken(snippet: Snippet): Rect {
+export function getRectForSnippetToken(snippetOnCanvas: SnippetOnCanvas): Rect {
+  const snippet = getSnippetForSnippetOnCanvas(snippetOnCanvas);
   const text = textEditorStateMobx
     .get(snippet.textId)!
     .sliceDoc(snippet.span[0], snippet.span[1]);
   return [
-    snippet.position[0],
-    snippet.position[1],
+    snippetOnCanvas.position[0],
+    snippetOnCanvas.position[1],
     text.length * CHAR_WIDTH + 16,
     TOKEN_HEIGHT,
   ];
@@ -53,4 +56,10 @@ export function getPositionForSnippetInGroup(
     group.position[0],
     group.position[1] + index * (TOKEN_HEIGHT + GROUP_TOKEN_ROW_GAP),
   ];
+}
+
+export function getSnippetForSnippetOnCanvas(
+  snippetOnCanvas: SnippetOnCanvas
+): Snippet {
+  return snippetsMobx.get(snippetOnCanvas.snippetId)!;
 }

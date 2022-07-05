@@ -11,6 +11,7 @@ import {
   SpatialComponentType,
   textEditorStateMobx,
 } from "./primitives";
+import { getSnippetForSnippetOnCanvas } from "./utils";
 
 const textIdFacet = Facet.define<string, string>({
   combine: (values) => values[0],
@@ -131,10 +132,11 @@ export function Editor({ textId }: { textId: string }) {
           for (const spatialComponent of spatialComponentsMobx) {
             switch (spatialComponent.spatialComponentType) {
               case SpatialComponentType.Snippet: {
-                if (spatialComponent.textId === textId) {
-                  spatialComponent.span = [
-                    transaction.changes.mapPos(spatialComponent.span[0]),
-                    transaction.changes.mapPos(spatialComponent.span[1]),
+                const snippet = getSnippetForSnippetOnCanvas(spatialComponent);
+                if (snippet.textId === textId) {
+                  snippet.span = [
+                    transaction.changes.mapPos(snippet.span[0]),
+                    transaction.changes.mapPos(snippet.span[1]),
                   ];
                 }
                 break;

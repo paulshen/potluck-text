@@ -4,7 +4,7 @@ import { observer } from "mobx-react-lite";
 import { nanoid } from "nanoid";
 import { CanvasBackground } from "./CanvasBackground";
 import {
-  Snippet,
+  SnippetOnCanvas,
   dragNewSnippetEmitter,
   selectedSpatialComponentsMobx,
   Span,
@@ -12,6 +12,7 @@ import {
   SpatialComponentType,
   textEditorStateMobx,
   INGREDIENT_TYPE,
+  snippetsMobx,
 } from "./primitives";
 import { Editor } from "./Editor";
 import { Token } from "./Token";
@@ -28,7 +29,7 @@ const SpatialComponents = observer(() => {
           case SpatialComponentType.Snippet:
             return (
               <SnippetTokenComponent
-                snippet={spatialComponent}
+                snippetOnCanvas={spatialComponent}
                 key={spatialComponent.id}
               ></SnippetTokenComponent>
             );
@@ -77,14 +78,19 @@ function NewDragSnippetComponent() {
     }
     function onMouseUp(e: MouseEvent) {
       runInAction(() => {
+        const snippetId = nanoid();
+        snippetsMobx.set(snippetId, {
+          id: snippetId,
+          snippetTypeId: INGREDIENT_TYPE,
+          textId: dragSnippetSpan![0],
+          span: dragSnippetSpan![1],
+          data: {},
+        });
         spatialComponentsMobx.push({
           spatialComponentType: SpatialComponentType.Snippet,
           id: nanoid(),
-          snippetTypeId: INGREDIENT_TYPE, // todo: make a real type id
-          textId: dragSnippetSpan![0],
-          span: dragSnippetSpan![1],
+          snippetId,
           position: [e.clientX + mouseOffset![0], e.clientY + mouseOffset![1]],
-          data: {},
         });
       });
       cleanup();
@@ -145,16 +151,17 @@ export const App = observer(() => {
       if (e.target === document.body) {
         switch (e.key) {
           case "g": {
-            const selectedTokens: Snippet[] = selectedSpatialComponentsMobx
-              .flatMap((id) =>
-                spatialComponentsMobx.filter(
-                  (spatialComponent): spatialComponent is Snippet =>
-                    spatialComponent.id === id &&
-                    spatialComponent.spatialComponentType ===
-                      SpatialComponentType.Snippet
+            const selectedTokens: SnippetOnCanvas[] =
+              selectedSpatialComponentsMobx
+                .flatMap((id) =>
+                  spatialComponentsMobx.filter(
+                    (spatialComponent): spatialComponent is SnippetOnCanvas =>
+                      spatialComponent.id === id &&
+                      spatialComponent.spatialComponentType ===
+                        SpatialComponentType.Snippet
+                  )
                 )
-              )
-              .sort((a, b) => a.position[1] - b.position[1]);
+                .sort((a, b) => a.position[1] - b.position[1]);
             if (selectedTokens.length > 0) {
               spatialComponentsMobx.push({
                 spatialComponentType: SpatialComponentType.SnippetGroup,
