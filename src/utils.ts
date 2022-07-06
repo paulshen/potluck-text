@@ -112,3 +112,18 @@ export function createSnippetsOnCanvasForSuggestions(
     spatialComponentsMobx.push(snippetOnCanvas);
   }
 }
+
+export function getParentByClassName(
+  element: HTMLElement | { parentElement: HTMLElement | null },
+  className: string
+): HTMLElement | undefined {
+  let iter: HTMLElement | null =
+    element instanceof HTMLElement ? element : element.parentElement;
+  while (iter !== null) {
+    if (iter.classList.contains(className)) {
+      return iter;
+    }
+    iter = iter.parentElement;
+  }
+  return undefined;
+}

@@ -4,6 +4,7 @@ import {
   EditorSelection,
   StateEffect,
   StateField,
+  ChangeSet,
 } from "@codemirror/state";
 import {
   ViewPlugin,
@@ -25,6 +26,7 @@ import {
   snippetTypesMobx,
   INGREDIENT_TYPE,
 } from "./primitives";
+import { getParentByClassName } from "./utils";
 
 const textIdFacet = Facet.define<string, string>({
   combine: (values) => values[0],
@@ -68,10 +70,9 @@ const dragSnippetPlugin = ViewPlugin.fromClass(
                 text: view.state.sliceDoc(range.from, range.to),
               });
               // We only want to drag out a single snippet
-              break;
+              return true;
             }
           }
-          return true;
         }
       },
     },
@@ -139,8 +140,12 @@ const ANNOTATION_COLOR: Record<string, string> = {
   Aisle: "bg-green-100",
 };
 
+const ANNOTATION_TOKEN_CLASSNAME = "annotation-token";
 class SnippetAnnotationsWidget extends WidgetType {
-  constructor(readonly annotations: { key: string; value: string }[]) {
+  constructor(
+    readonly snippetId: string,
+    readonly annotations: { key: string; value: string }[]
+  ) {
     super();
   }
 
@@ -157,15 +162,53 @@ class SnippetAnnotationsWidget extends WidgetType {
     wrap.setAttribute("aria-hidden", "true");
     for (const { key, value } of this.annotations) {
       const token = document.createElement("span");
-      token.className = `${
+      token.className = `${ANNOTATION_TOKEN_CLASSNAME} ${
         ANNOTATION_COLOR[key] ?? "bg-blue-100"
       } px-1 text-gray-800 font-mono text-sm`;
       token.innerText = value;
+      token.setAttribute("data-snippet-id", this.snippetId);
       wrap.appendChild(token);
     }
     return wrap;
   }
+
+  ignoreEvent(event: Event): boolean {
+    return false;
+  }
 }
+
+const snippetAnnotationPlugin = ViewPlugin.define((view) => ({}), {
+  eventHandlers: {
+    mousedown(e, view) {
+      if (!e.metaKey) {
+        return false;
+      }
+      const target = e.target as HTMLElement;
+      const parentAnnotationToken = getParentByClassName(
+        target,
+        ANNOTATION_TOKEN_CLASSNAME
+      );
+      if (parentAnnotationToken !== undefined) {
+        const snippetId = parentAnnotationToken.getAttribute("data-snippet-id");
+        if (snippetId !== null) {
+          const snippet = snippetsMobx.get(snippetId)!;
+          view.dispatch({
+            changes: ChangeSet.of(
+              {
+                // this currently inserts the annotation text after the snippet
+                from: snippet.span[1],
+                insert: ` ${parentAnnotationToken.innerText}`,
+              },
+              view.state.doc.length
+            ),
+          });
+          return true;
+        }
+      }
+      return false;
+    },
+  },
+});
 
 const snippetDecorations = EditorView.decorations.from(
   snippetsField,
@@ -177,7 +220,7 @@ const snippetDecorations = EditorView.decorations.from(
           snippet.span[1]
         ),
         Decoration.widget({
-          widget: new SnippetAnnotationsWidget(snippet.annotations),
+          widget: new SnippetAnnotationsWidget(snippet.id, snippet.annotations),
           side: 1,
         }).range(snippet.span[1]),
       ]),
@@ -238,6 +281,7 @@ export function Editor({ textId }: { textId: string }) {
         suggestionDecorations,
         snippetsField,
         snippetDecorations,
+        snippetAnnotationPlugin,
       ],
       parent: editorRef.current!,
       dispatch(transaction) {
