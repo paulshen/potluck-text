@@ -55,20 +55,25 @@ const dragSnippetPlugin = ViewPlugin.fromClass(
           if (pos === null) {
             return;
           }
-          const suggestionsAsRanges: SelectionRange[] =
-            // @ts-ignore - The field is there because the plugin adds it.
-            view.state.field(snippetSuggestionsField).map((suggestion) => {
-              const [from, to] = suggestion.span;
-              return EditorSelection.range(from, to);
-            });
-          const possibleDragRanges =
-            view.state.selection.ranges.concat(suggestionsAsRanges);
-          for (const range of possibleDragRanges) {
+          const snippetRanges: [
+            range: SelectionRange,
+            snippetId: string | undefined
+          ][] = view.state.field(snippetsField).map((snippet) => {
+            const [from, to] = snippet.span;
+            return [EditorSelection.range(from, to), snippet.id];
+          });
+          snippetRanges.push(
+            ...view.state.selection.ranges.map<[SelectionRange, undefined]>(
+              (range) => [range, undefined]
+            )
+          );
+          for (const [range, snippetId] of snippetRanges) {
             if (pos >= range.from && pos < range.to) {
               const fromPos = view.coordsAtPos(range.from)!;
               const left = fromPos.left - 8;
               const top = fromPos.top - 5;
               dragNewSnippetEmitter.emit("start", {
+                snippetId,
                 textId: view.state.facet(textIdFacet),
                 spanPosition: [left, top],
                 span: [range.from, range.to],
@@ -312,11 +317,12 @@ export const Editor = observer(({ textId }: { textId: string }) => {
           ".cm-snippet": {
             backgroundColor: "#80808010",
             transition: "background-color 0.2s",
-            padding: "0 0.3rem",
+            margin: "0 -0.2rem",
+            padding: "0 0.2rem",
+            borderRadius: "2px",
           },
           ".cm-snippet:hover": {
             backgroundColor: "#facc1580",
-            padding: "0 0.3rem",
           },
           ".cm-snippet .cm-suggestion": {
             backgroundColor: "#80808015",
@@ -405,10 +411,7 @@ export const Editor = observer(({ textId }: { textId: string }) => {
         <button
           className="text-sm text-gray-400"
           onClick={() => {
-            createSnippetsForSuggestions(
-              textId,
-              suggestionsComputed.get()
-            );
+            createSnippetsForSuggestions(textId, suggestionsComputed.get());
           }}
         >
           Create {numSuggestions} suggested snippets

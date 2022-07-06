@@ -1,3 +1,4 @@
+import { runInAction } from "mobx";
 import { nanoid } from "nanoid";
 import {
   SnippetGroup,
@@ -91,9 +92,11 @@ export function createSnippetsForSuggestions(
       data: snippetTypesMobx.get(INGREDIENT_TYPE)!.parse(textInSnippet),
     };
   });
-  for (const snippet of snippets) {
-    snippetsMobx.set(snippet.id, snippet);
-  }
+  runInAction(() => {
+    for (const snippet of snippets) {
+      snippetsMobx.set(snippet.id, snippet);
+    }
+  });
 }
 
 export function getParentByClassName(

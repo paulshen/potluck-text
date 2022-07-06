@@ -110,7 +110,10 @@ export const SnippetTokenComponent = observer(
               {snippetType.icon} {text}
               {/* todo: only show properties inline which are configured visible */}
               {snippetType.properties.map((property) => (
-                <span className="font-mono text-xs ml-2 p-1 bg-white">
+                <span
+                  className="font-mono text-xs ml-2 p-1 bg-white"
+                  key={property.id}
+                >
                   {snippet.data[property.id]}
                 </span>
               ))}
@@ -141,6 +144,7 @@ export const SnippetTokenComponent = observer(
                   left: `${GROUP_COLUMN_WIDTH * (index + 1)}px`,
                   width: `${GROUP_COLUMN_WIDTH - GROUP_TOKEN_COLUMN_GAP}px`,
                 }}
+                key={column.id}
               >
                 {typeof data === "string" && data}
                 {/* TODO: we currently infer the column type from data, but could

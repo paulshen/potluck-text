@@ -58,12 +58,14 @@ function NewDragSnippetComponent() {
   >(undefined);
 
   useEffect(() => {
+    let dragSnippetId: string | undefined;
     let dragSnippetSpan: [textId: string, span: Span] | undefined;
     let mouseOffset: [x: number, y: number] | undefined;
     function cleanup() {
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
       setDragSnippet(undefined);
+      dragSnippetId = undefined;
       dragSnippetSpan = undefined;
       mouseOffset = undefined;
     }
@@ -79,17 +81,20 @@ function NewDragSnippetComponent() {
     }
     function onMouseUp(e: MouseEvent) {
       runInAction(() => {
-        const textInSnippet = textEditorStateMobx
-          .get(dragSnippetSpan![0])
-          ?.sliceDoc(dragSnippetSpan![1][0], dragSnippetSpan![1][1])!;
-        const snippetId = nanoid();
-        snippetsMobx.set(snippetId, {
-          id: snippetId,
-          snippetTypeId: INGREDIENT_TYPE,
-          textId: dragSnippetSpan![0],
-          span: dragSnippetSpan![1],
-          data: snippetTypesMobx.get(INGREDIENT_TYPE)!.parse(textInSnippet),
-        });
+        let snippetId = dragSnippetId;
+        if (snippetId === undefined) {
+          const textInSnippet = textEditorStateMobx
+            .get(dragSnippetSpan![0])
+            ?.sliceDoc(dragSnippetSpan![1][0], dragSnippetSpan![1][1])!;
+          snippetId = nanoid();
+          snippetsMobx.set(snippetId, {
+            id: snippetId,
+            snippetTypeId: INGREDIENT_TYPE,
+            textId: dragSnippetSpan![0],
+            span: dragSnippetSpan![1],
+            data: snippetTypesMobx.get(INGREDIENT_TYPE)!.parse(textInSnippet),
+          });
+        }
         spatialComponentsMobx.push({
           spatialComponentType: SpatialComponentType.Snippet,
           id: nanoid(),
@@ -100,18 +105,21 @@ function NewDragSnippetComponent() {
       cleanup();
     }
     function onStart({
+      snippetId,
       textId,
       spanPosition,
       span,
       mouseOffset: mouseOffsetArg,
       text,
     }: {
+      snippetId: string | undefined;
       textId: string;
       spanPosition: [x: number, y: number];
       span: Span;
       mouseOffset: [x: number, y: number];
       text: string;
     }) {
+      dragSnippetId = snippetId;
       dragSnippetSpan = [textId, span];
       mouseOffset = mouseOffsetArg;
       setDragSnippet({
