@@ -2,6 +2,7 @@ import { EditorState } from "@codemirror/state";
 import { EventEmitter } from "eventemitter3";
 import { observable, runInAction, toJS } from "mobx";
 import { nanoid } from "nanoid";
+import { RECOGNIZED_INGREDIENTS } from "./ingredients";
 
 export type Position = [x: number, y: number];
 export type Rect = [x: number, y: number, width: number, height: number];
@@ -24,33 +25,6 @@ Simmer on low until liquid as evaporated. Chili is ready once flavors are blende
 Serve in bowl and garnish to taste with grated cheddar, avocado, sour cream, jalapeño, salsa, tortilla chips, Fritos, or corn bread.
 `;
 
-const DEFAULT_SUGGESTION_STRINGS = [
-  "ground chuck beef",
-  "onion powder",
-  "salt",
-  "garlic powder",
-  "ipa beer",
-  "tomato sauce/puree",
-  "ground ancho chili powder",
-  "ground cumin",
-  "paprika",
-  "cocoa powder",
-  "dried oregano",
-  "ground cayenne pepper",
-  "ground cinnamon",
-  "poblano peppers",
-  "kidney beans",
-  "black beans",
-  "grated cheddar",
-  "avocado",
-  "sour cream",
-  "jalapeño",
-  "salsa",
-  "tortilla chips",
-  "Fritos",
-  "corn bread",
-];
-
 export const INGREDIENT_TYPE = "ingredient";
 const DEFAULT_SNIPPET_TYPES: { [key: string]: SnippetType } = {
   [INGREDIENT_TYPE]: {
@@ -59,8 +33,8 @@ const DEFAULT_SNIPPET_TYPES: { [key: string]: SnippetType } = {
     color: "#ffc107",
     suggest: (text: string) => {
       let matches: [number, number][] = [];
-      for (const stringTemplate of DEFAULT_SUGGESTION_STRINGS) {
-        for (const match of text.matchAll(new RegExp(stringTemplate, "g"))) {
+      for (const stringTemplate of RECOGNIZED_INGREDIENTS) {
+        for (const match of text.matchAll(new RegExp(stringTemplate, "ig"))) {
           const from = match.index ?? 0;
           const to = from + match[0].length;
           matches.push([from, to]);
