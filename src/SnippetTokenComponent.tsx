@@ -19,6 +19,8 @@ import {
   textEditorStateMobx,
   SnippetType,
   Snippet,
+  SnippetTypeViewConfiguration,
+  snippetTypeViewConfigurationsMobx,
 } from "./primitives";
 import { Token } from "./Token";
 import { useDragSpatialComponent } from "./useDragSpatialComponent";
@@ -58,6 +60,12 @@ export const SnippetTokenComponent = observer(
     const snippetType: SnippetType = computed(() => {
       return snippetTypesMobx.get(snippet.snippetTypeId);
     }).get()!;
+
+    const snippetTypeViewConfiguration: SnippetTypeViewConfiguration = computed(
+      () => {
+        return snippetTypeViewConfigurationsMobx.get(snippet.snippetTypeId);
+      }
+    ).get()!;
 
     const bindDrag = useDragSpatialComponent(rootRef, snippetOnCanvas);
 
@@ -108,23 +116,29 @@ export const SnippetTokenComponent = observer(
           <HoverCard.Trigger>
             <Token isSelected={isSelected}>
               {snippetType.icon} {text}
-              {/* todo: only show properties inline which are configured visible */}
-              {snippetType.properties.map(
-                (property) =>
-                  snippet.data[property.id] !== undefined && (
-                    <span
-                      className="font-mono text-xs ml-2 p-1 bg-white"
-                      key={property.id}
-                    >
-                      {snippet.data[property.id]}
-                    </span>
+              {snippetType.properties
+                .filter((p) =>
+                  snippetTypeViewConfiguration.inlineVisiblePropertyIds.includes(
+                    p.id
                   )
-              )}
+                )
+                .map(
+                  (property) =>
+                    snippet.data[property.id] !== undefined && (
+                      <span
+                        className="font-mono text-xs ml-2 p-1 bg-white"
+                        key={property.id}
+                      >
+                        {snippet.data[property.id]}
+                      </span>
+                    )
+                )}
             </Token>
           </HoverCard.Trigger>
 
           <HoverCard.Content
             sideOffset={4}
+            align={"start"}
             className="border border-zinc-100 bg-white rounded-md shadow-lg"
           >
             <SnippetTokenHovercardContent snippet={snippet} />

@@ -28,6 +28,13 @@ export const INGREDIENT_TYPE = "ingredient";
 const DEFAULT_SNIPPET_TYPES: { [key: string]: SnippetType } = {
   [INGREDIENT_TYPE]: ingredientSnippetType,
 };
+const DEFAULT_SNIPPET_TYPE_CONFIGURATION: {
+  [key: string]: SnippetTypeViewConfiguration;
+} = {
+  [INGREDIENT_TYPE]: {
+    inlineVisiblePropertyIds: ["ingredient--aisle"],
+  },
+};
 
 export const FIRST_TEXT_ID = "text-id-1";
 export const textEditorStateMobx = observable.map<string, EditorState>(
@@ -69,6 +76,11 @@ export type SnippetType = {
   properties: SnippetProperty[];
 };
 
+export type SnippetTypeViewConfiguration = {
+  /** IDs of properties that should be visible inline */
+  inlineVisiblePropertyIds: string[];
+};
+
 export type Snippet = {
   id: string;
   snippetTypeId: string;
@@ -108,6 +120,10 @@ export const snippetTypesMobx = observable.map<string, SnippetType>(
   DEFAULT_SNIPPET_TYPES
 );
 export const snippetsMobx = observable.map<string, Snippet>({});
+export const snippetTypeViewConfigurationsMobx = observable.map<
+  string,
+  SnippetTypeViewConfiguration
+>(DEFAULT_SNIPPET_TYPE_CONFIGURATION);
 
 export const spatialComponentsMobx = observable<SpatialComponent>([]);
 export const selectedSpatialComponentsMobx = observable<string>([]);
