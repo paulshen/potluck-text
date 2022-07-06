@@ -13,9 +13,6 @@ import {
   textEditorStateMobx,
   INGREDIENT_TYPE,
   snippetsMobx,
-  SnippetSuggestion,
-  snippetTypesMobx,
-  snippetSuggestionsMobx,
 } from "./primitives";
 import { Editor } from "./Editor";
 import { Token } from "./Token";
@@ -23,7 +20,6 @@ import { SnippetTokenComponent } from "./SnippetTokenComponent";
 import { SnippetGroupComponent } from "./SnippetGroupComponent";
 import { Pane } from "./Pane";
 import { EditorState } from "@codemirror/state";
-import { createSnippetsOnCanvasForSuggestions } from "./utils";
 import "./ShenIntegrationFile";
 
 const SpatialComponents = observer(() => {
@@ -216,24 +212,9 @@ export const App = observer(() => {
       </button>
       <div className="absolute z-0">
         {[...textEditorStateMobx.keys()].map((textId) => {
-          const numSuggestions =
-            snippetSuggestionsMobx.get(textId)?.length ?? 0;
           return (
             <Pane key={textId}>
               <Editor textId={textId} />
-              {numSuggestions > 0 && (
-                <button
-                  className="text-sm text-gray-400"
-                  onClick={() => {
-                    createSnippetsOnCanvasForSuggestions(
-                      textId,
-                      snippetSuggestionsMobx.get(textId) ?? []
-                    );
-                  }}
-                >
-                  Create {numSuggestions} suggested snippets
-                </button>
-              )}
             </Pane>
           );
         })}

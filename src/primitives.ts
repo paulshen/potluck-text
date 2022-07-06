@@ -1,8 +1,7 @@
 import { EditorState } from "@codemirror/state";
 import { EventEmitter } from "eventemitter3";
-import { observable, runInAction, toJS } from "mobx";
-import { nanoid } from "nanoid";
-import { RECOGNIZED_INGREDIENTS } from "./ingredients";
+import { observable } from "mobx";
+import { ingredientSnippetType } from "./ingredients";
 
 export type Position = [x: number, y: number];
 export type Rect = [x: number, y: number, width: number, height: number];
@@ -27,30 +26,7 @@ Serve in bowl and garnish to taste with grated cheddar, avocado, sour cream, jal
 
 export const INGREDIENT_TYPE = "ingredient";
 const DEFAULT_SNIPPET_TYPES: { [key: string]: SnippetType } = {
-  [INGREDIENT_TYPE]: {
-    name: "Ingredient",
-    icon: "🥕",
-    color: "#ffc107",
-    suggest: (text: string) => {
-      let matches: [number, number][] = [];
-      for (const stringTemplate of RECOGNIZED_INGREDIENTS) {
-        for (const match of text.matchAll(new RegExp(stringTemplate, "ig"))) {
-          const from = match.index ?? 0;
-          const to = from + match[0].length;
-          matches.push([from, to]);
-        }
-      }
-
-      return matches.map(([from, to]) => ({
-        id: nanoid(),
-        span: [from, to],
-        snippetTypeId: INGREDIENT_TYPE,
-      }));
-    },
-
-    // TODO: this will parse out structured data for the ingredient
-    parse: (text: string) => {},
-  },
+  [INGREDIENT_TYPE]: ingredientSnippetType,
 };
 
 export const FIRST_TEXT_ID = "text-id-1";
@@ -111,14 +87,9 @@ export type SnippetGroup = {
 };
 
 export type SnippetSuggestion = {
-  id: string;
   span: Span;
   snippetTypeId: string;
 };
-export const snippetSuggestionsMobx = observable.map<
-  string,
-  SnippetSuggestion[]
->({});
 
 export type SpatialComponent = SnippetOnCanvas | SnippetGroup;
 export const getGroupWidth = (group: SnippetGroup): number => {

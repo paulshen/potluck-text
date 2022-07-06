@@ -15,6 +15,7 @@ import {
   INGREDIENT_TYPE,
   SpatialComponentType,
   spatialComponentsMobx,
+  Span,
 } from "./primitives";
 
 // your favorite dumping ground of utility functions
@@ -127,3 +128,7 @@ export function getParentByClassName(
   }
   return undefined;
 }
+
+export const spanOverlaps = ([from, to]: Span, [from2, to2]: Span) => {
+  return (from <= from2 && to >= from2) || (from2 <= from && to2 >= from);
+};

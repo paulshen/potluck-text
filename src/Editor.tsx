@@ -13,20 +13,24 @@ import {
   WidgetType,
 } from "@codemirror/view";
 import { EditorView, minimalSetup } from "codemirror";
-import { autorun, comparer, reaction, runInAction } from "mobx";
+import { comparer, computed, reaction, runInAction } from "mobx";
+import { observer } from "mobx-react-lite";
 import { useRef, useEffect } from "react";
 import {
   dragNewSnippetEmitter,
   snippetsMobx,
   Snippet,
   SnippetSuggestion,
-  snippetSuggestionsMobx,
   textEditorStateMobx,
   snippetEditorAnnotationsMobx,
   snippetTypesMobx,
   INGREDIENT_TYPE,
 } from "./primitives";
-import { getParentByClassName } from "./utils";
+import {
+  createSnippetsOnCanvasForSuggestions,
+  getParentByClassName,
+  spanOverlaps,
+} from "./utils";
 
 const textIdFacet = Facet.define<string, string>({
   combine: (values) => values[0],
@@ -228,8 +232,26 @@ const snippetDecorations = EditorView.decorations.from(
     )
 );
 
-export function Editor({ textId }: { textId: string }) {
+export const Editor = observer(({ textId }: { textId: string }) => {
   const editorRef = useRef(null);
+  const suggestionsComputed = computed(() => {
+    const text = computed(() => textEditorStateMobx.get(textId)!.sliceDoc(0));
+    const suggestions: SnippetSuggestion[] = snippetTypesMobx
+      .get(INGREDIENT_TYPE)!
+      .suggest(text.get());
+    const existingSnippets = [...snippetsMobx.values()].filter(
+      (snippet) => snippet.textId === textId
+    );
+    // Filter down to only the suggestions that do not overlap with an existing snippet's span
+    const filteredSuggestions = suggestions.filter((suggestion) => {
+      return existingSnippets.every(
+        (snippet) => !spanOverlaps(snippet.span, suggestion.span)
+      );
+    });
+    return filteredSuggestions;
+  });
+  const numSuggestions = computed(() => suggestionsComputed.get().length).get();
+
   useEffect(() => {
     const view = new EditorView({
       doc: textEditorStateMobx.get(textId)?.doc ?? "",
@@ -295,7 +317,7 @@ export function Editor({ textId }: { textId: string }) {
               ];
             }
           }
-          const snippetSuggestions = snippetSuggestionsMobx.get(textId);
+          const snippetSuggestions = suggestionsComputed.get();
           if (snippetSuggestions !== undefined) {
             snippetSuggestions.forEach((suggestion) => {
               suggestion.span = [
@@ -305,37 +327,23 @@ export function Editor({ textId }: { textId: string }) {
             });
           }
           textEditorStateMobx.set(textId, transaction.state);
-
-          // Update the suggestions based on the latest text.
-          // (We wrap in this effects check to avoid an infinite loop)
-          if (transaction.effects.length === 0) {
-            const suggestions: SnippetSuggestion[] = snippetTypesMobx
-              .get(INGREDIENT_TYPE)!
-              .suggest(view.state.sliceDoc(0));
-            snippetSuggestionsMobx.set(textId, suggestions);
-          }
         });
       },
     });
+
     runInAction(() => {
       textEditorStateMobx.set(textId, view.state);
-
-      // Populate suggestions based on initial text
-      const suggestions: SnippetSuggestion[] = snippetTypesMobx
-        .get(INGREDIENT_TYPE)!
-        .suggest(view.state.sliceDoc(0));
-      snippetSuggestionsMobx.set(textId, suggestions);
     });
     const unsubscribes: (() => void)[] = [
-      autorun(() => {
-        view.dispatch({
-          effects: [
-            setSnippetSuggestionsEffect.of(
-              snippetSuggestionsMobx.get(textId) ?? []
-            ),
-          ],
-        });
-      }),
+      reaction(
+        () => suggestionsComputed.get(),
+        (snippetSuggestions) => {
+          view.dispatch({
+            effects: [setSnippetSuggestionsEffect.of(snippetSuggestions)],
+          });
+        },
+        { equals: comparer.structural, fireImmediately: true }
+      ),
       reaction(
         () =>
           [...snippetsMobx.values()]
@@ -359,9 +367,24 @@ export function Editor({ textId }: { textId: string }) {
   }, []);
 
   return (
-    <div
-      className="text-lg h-[480px] bg-white border-black border-b-2 border-l-2 border-r-2 rounded-b-lg overflow-auto"
-      ref={editorRef}
-    ></div>
+    <div>
+      <div
+        className="text-lg h-[480px] bg-white border-black border-b-2 border-l-2 border-r-2 rounded-b-lg overflow-auto"
+        ref={editorRef}
+      ></div>
+      {numSuggestions > 0 && (
+        <button
+          className="text-sm text-gray-400"
+          onClick={() => {
+            createSnippetsOnCanvasForSuggestions(
+              textId,
+              suggestionsComputed.get()
+            );
+          }}
+        >
+          Create {numSuggestions} suggested snippets
+        </button>
+      )}
+    </div>
   );
-}
+});

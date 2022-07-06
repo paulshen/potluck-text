@@ -1,4 +1,13 @@
-export const RECOGNIZED_INGREDIENTS = [
+import { nanoid } from "nanoid";
+import {
+  INGREDIENT_TYPE,
+  SnippetSuggestion,
+  SnippetType,
+  Span,
+} from "./primitives";
+import { spanOverlaps } from "./utils";
+
+const RECOGNIZED_INGREDIENTS = [
   "ground chuck beef",
   "onion powder",
   "salt",
@@ -386,3 +395,33 @@ export const RECOGNIZED_INGREDIENTS = [
   "Yogurt",
   "Zucchini",
 ];
+
+export const ingredientSnippetType: SnippetType = {
+  name: "Ingredient",
+  icon: "🥕",
+  color: "#ffc107",
+  suggest: (text: string): SnippetSuggestion[] => {
+    let matches: Span[] = [];
+    // We could probably do this faster if we combined all the known strings into one regex,
+    // but this is simpler to reason about and seems fast enough for now.
+    for (const stringTemplate of RECOGNIZED_INGREDIENTS) {
+      for (const match of text.matchAll(new RegExp(stringTemplate, "ig"))) {
+        const from = match.index ?? 0;
+        const to = from + match[0].length;
+        // Only add the match if it doesn't overlap with other existing matches.
+        // This prevents weird overlapping matches
+        if (!matches.some((existing) => spanOverlaps(existing, [from, to]))) {
+          matches.push([from, to]);
+        }
+      }
+    }
+
+    return matches.map(([from, to]) => ({
+      span: [from, to],
+      snippetTypeId: INGREDIENT_TYPE,
+    }));
+  },
+
+  // TODO: this will parse out structured data for the ingredient
+  parse: (text: string) => {},
+};
