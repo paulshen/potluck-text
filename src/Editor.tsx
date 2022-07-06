@@ -218,11 +218,17 @@ export function Editor({ textId }: { textId: string }) {
             backgroundColor: "#facc1580",
           },
           ".cm-snippet": {
-            backgroundColor: "#80808015",
+            backgroundColor: "#80808010",
+            transition: "background-color 0.2s",
+            padding: "0 0.3rem",
+          },
+          ".cm-snippet:hover": {
+            backgroundColor: "#facc1580",
             padding: "0 0.3rem",
           },
           ".cm-snippet .cm-suggestion": {
             backgroundColor: "#80808015",
+            textDecoration: "none",
           },
         }),
         EditorView.lineWrapping,
