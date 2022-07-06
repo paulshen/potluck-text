@@ -21,7 +21,6 @@ import { SnippetTokenComponent } from "./SnippetTokenComponent";
 import { SnippetGroupComponent } from "./SnippetGroupComponent";
 import { Pane } from "./Pane";
 import { EditorState } from "@codemirror/state";
-import "./ShenIntegrationFile";
 
 const SpatialComponents = observer(() => {
   return (

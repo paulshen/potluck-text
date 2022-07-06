@@ -108,11 +108,6 @@ export const snippetTypesMobx = observable.map<string, SnippetType>(
   DEFAULT_SNIPPET_TYPES
 );
 export const snippetsMobx = observable.map<string, Snippet>({});
-// map of snippetId => array of data to display in editor next to snippet
-export const snippetEditorAnnotationsMobx = observable.map<
-  string,
-  { key: string; value: string }[]
->({});
 
 export const spatialComponentsMobx = observable<SpatialComponent>([]);
 export const selectedSpatialComponentsMobx = observable<string>([]);

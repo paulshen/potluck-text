@@ -23,7 +23,6 @@ import {
   Snippet,
   SnippetSuggestion,
   textEditorStateMobx,
-  snippetEditorAnnotationsMobx,
   snippetTypesMobx,
   INGREDIENT_TYPE,
 } from "./primitives";
@@ -119,11 +118,8 @@ const suggestionDecorations = EditorView.decorations.from(
     )
 );
 
-type SnippetWithAnnotation = Snippet & {
-  annotations: { key: string; value: string }[];
-};
-const setSnippetsEffect = StateEffect.define<SnippetWithAnnotation[]>();
-const snippetsField = StateField.define<SnippetWithAnnotation[]>({
+const setSnippetsEffect = StateEffect.define<Snippet[]>();
+const snippetsField = StateField.define<Snippet[]>({
   create() {
     return [];
   },
@@ -144,22 +140,22 @@ const snippetsField = StateField.define<SnippetWithAnnotation[]>({
 });
 
 const ANNOTATION_COLOR: Record<string, string> = {
-  Aisle: "bg-green-100",
+  aisle: "bg-green-100",
 };
 
 const ANNOTATION_TOKEN_CLASSNAME = "annotation-token";
-class SnippetAnnotationsWidget extends WidgetType {
+class SnippetDataWidget extends WidgetType {
   constructor(
     readonly snippetId: string,
-    readonly annotations: { key: string; value: string }[]
+    readonly snippetData: { [key: string]: string }
   ) {
     super();
   }
 
   eq(other: WidgetType): boolean {
     return (
-      other instanceof SnippetAnnotationsWidget &&
-      comparer.structural(this.annotations, other.annotations)
+      other instanceof SnippetDataWidget &&
+      comparer.structural(this.snippetData, other.snippetData)
     );
   }
 
@@ -167,11 +163,11 @@ class SnippetAnnotationsWidget extends WidgetType {
     const wrap = document.createElement("span");
     wrap.className = "rounded-r";
     wrap.setAttribute("aria-hidden", "true");
-    for (const { key, value } of this.annotations) {
+    for (const [key, value] of Object.entries(this.snippetData)) {
       const token = document.createElement("span");
       token.className = `${ANNOTATION_TOKEN_CLASSNAME} ${
         ANNOTATION_COLOR[key] ?? "bg-blue-100"
-      } px-1 text-gray-800 font-mono text-sm`;
+      } ml-1 align-top relative top-px text-gray-800 font-mono text-[10px] py-0.5 px-1 rounded-sm whitespace-nowrap`;
       token.innerText = value;
       token.setAttribute("data-snippet-id", this.snippetId);
       wrap.appendChild(token);
@@ -227,7 +223,7 @@ const snippetDecorations = EditorView.decorations.from(
           snippet.span[1]
         ),
         Decoration.widget({
-          widget: new SnippetAnnotationsWidget(snippet.id, snippet.annotations),
+          widget: new SnippetDataWidget(snippet.id, snippet.data),
           side: 1,
         }).range(snippet.span[1]),
       ]),
@@ -382,15 +378,12 @@ export const Editor = observer(({ textId }: { textId: string }) => {
       ),
       reaction(
         () =>
-          [...snippetsMobx.values()]
-            .filter((snippet) => snippet.textId === textId)
-            .map((snippet) => ({
-              ...snippet,
-              annotations: snippetEditorAnnotationsMobx.get(snippet.id) ?? [],
-            })),
-        (snippetsWithAnnotations) => {
+          [...snippetsMobx.values()].filter(
+            (snippet) => snippet.textId === textId
+          ),
+        (snippets) => {
           view.dispatch({
-            effects: [setSnippetsEffect.of(snippetsWithAnnotations)],
+            effects: [setSnippetsEffect.of(snippets)],
           });
         },
         { equals: comparer.structural }
