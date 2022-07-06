@@ -25,7 +25,7 @@ export function Pane({ children }: { children: React.ReactNode }) {
 
   return (
     <div
-      className="w-[24rem] absolute top-0 left-0"
+      className="w-[36rem] absolute top-0 left-0"
       style={{
         top: `${position[1]}px`,
         left: `${position[0]}px`,

@@ -157,7 +157,7 @@ class SnippetAnnotationsWidget extends WidgetType {
       const token = document.createElement("span");
       token.className = `${
         ANNOTATION_COLOR[key] ?? "bg-blue-100"
-      } px-1 text-gray-600`;
+      } px-1 text-gray-800 font-mono text-sm`;
       token.innerText = value;
       wrap.appendChild(token);
     }
@@ -202,22 +202,25 @@ export function Editor({ textId }: { textId: string }) {
             outline: "none",
           },
           ".cm-scroller": {
-            fontFamily: `ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace`,
-            fontSize: "0.85rem",
-            lineHeight: "1.25rem",
+            fontFamily: `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"`,
+            fontSize: "1rem",
+            lineHeight: "1.35rem",
           },
           ".cm-suggestion": {
-            backgroundColor: "#facc1520",
+            textDecoration: "underline",
+            textDecorationColor: "#aaaaaa",
+            textDecorationStyle: "dashed",
             transition: "background-color 0.2s",
           },
           ".cm-suggestion:hover": {
             backgroundColor: "#facc1580",
           },
           ".cm-snippet": {
-            backgroundColor: "#80808020",
+            backgroundColor: "#80808015",
+            padding: "0 0.3rem",
           },
           ".cm-snippet .cm-suggestion": {
-            backgroundColor: "#80808020",
+            backgroundColor: "#80808015",
           },
         }),
         EditorView.lineWrapping,
@@ -290,7 +293,7 @@ export function Editor({ textId }: { textId: string }) {
 
   return (
     <div
-      className="text-lg max-w-[480px] h-[480px] bg-white border-black border-b-2 border-l-2 border-r-2 rounded-b-lg overflow-auto"
+      className="text-lg h-[480px] bg-white border-black border-b-2 border-l-2 border-r-2 rounded-b-lg overflow-auto"
       ref={editorRef}
     ></div>
   );
