@@ -221,19 +221,6 @@ export const App = observer(() => {
           return (
             <Pane key={textId}>
               <Editor textId={textId} />
-              <button
-                className="text-sm text-gray-400 mr-4"
-                onClick={() =>
-                  runInAction(() => {
-                    const suggestions: SnippetSuggestion[] = snippetTypesMobx
-                      .get(INGREDIENT_TYPE)!
-                      .suggest(textEditorStateMobx.get(textId)!.sliceDoc(0));
-                    snippetSuggestionsMobx.set(textId, suggestions);
-                  })
-                }
-              >
-                🪄 Suggest
-              </button>
               {numSuggestions > 0 && (
                 <button
                   className="text-sm text-gray-400"
@@ -244,7 +231,7 @@ export const App = observer(() => {
                     );
                   }}
                 >
-                  Extract {numSuggestions} snippets
+                  Create {numSuggestions} suggested snippets
                 </button>
               )}
             </Pane>
