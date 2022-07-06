@@ -27,27 +27,7 @@ import {
   getSnippetForSnippetOnCanvas,
 } from "./utils";
 import { useRef, useState } from "react";
-
-const SnippetTokenHovercardContent = observer(
-  ({ snippet }: { snippet: Snippet }) => {
-    const text = computed(() => {
-      return textEditorStateMobx
-        .get(snippet.textId)!
-        .sliceDoc(snippet.span[0], snippet.span[1]);
-    }).get();
-    return (
-      <HoverCard.Content
-        sideOffset={4}
-        className="border border-zinc-100 bg-white rounded-md shadow-lg"
-      >
-        <div className="p-8">
-          This is the hovercard for {text}. Properties:{" "}
-          {JSON.stringify(snippet.data)}
-        </div>
-      </HoverCard.Content>
-    );
-  }
-);
+import { SnippetTokenHovercardContent } from "./SnippetTokenHovercardContent";
 
 export const SnippetTokenComponent = observer(
   ({ snippetOnCanvas }: { snippetOnCanvas: SnippetOnCanvas }) => {
@@ -136,7 +116,13 @@ export const SnippetTokenComponent = observer(
               ))}
             </Token>
           </HoverCard.Trigger>
-          <SnippetTokenHovercardContent snippet={snippet} />
+
+          <HoverCard.Content
+            sideOffset={4}
+            className="border border-zinc-100 bg-white rounded-md shadow-lg"
+          >
+            <SnippetTokenHovercardContent snippet={snippet} />
+          </HoverCard.Content>
         </HoverCard.Root>
         {snippetGroup &&
           snippetGroup.extraColumns.map((column, index) => {

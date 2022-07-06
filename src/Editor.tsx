@@ -11,6 +11,7 @@ import {
   ViewUpdate,
   Decoration,
   WidgetType,
+  hoverTooltip,
 } from "@codemirror/view";
 import { EditorView, minimalSetup } from "codemirror";
 import { comparer, computed, reaction, runInAction } from "mobx";
@@ -31,6 +32,8 @@ import {
   getParentByClassName,
   spanOverlaps,
 } from "./utils";
+import ReactDOM from "react-dom/client";
+import { SnippetTokenHovercardContent } from "./SnippetTokenHovercardContent";
 
 const textIdFacet = Facet.define<string, string>({
   combine: (values) => values[0],
@@ -232,6 +235,34 @@ const snippetDecorations = EditorView.decorations.from(
     )
 );
 
+const snippetHover = hoverTooltip((view, pos, side) => {
+  const textId = view.state.facet(textIdFacet);
+  for (const snippet of snippetsMobx.values()) {
+    if (snippet.textId !== textId) {
+      continue;
+    }
+    if (pos >= snippet.span[0] && pos < snippet.span[1]) {
+      return {
+        pos: snippet.span[0],
+        end: snippet.span[1],
+        above: false,
+        create(view) {
+          let dom = document.createElement("div");
+          dom.className =
+            "border border-zinc-100 bg-white rounded-md shadow-lg";
+          // You can't handle when a codemirror tooltip unmounts so this is going
+          // to be dangling for now.
+          ReactDOM.createRoot(dom).render(
+            <SnippetTokenHovercardContent snippet={snippet} />
+          );
+          return { dom };
+        },
+      };
+    }
+  }
+  return null;
+});
+
 export const Editor = observer(({ textId }: { textId: string }) => {
   const editorRef = useRef(null);
   const suggestionsComputed = computed(() => {
@@ -295,6 +326,10 @@ export const Editor = observer(({ textId }: { textId: string }) => {
             backgroundColor: "#80808015",
             textDecoration: "none",
           },
+          ".cm-tooltip": {
+            border: "none",
+            backgroundColor: "transparent",
+          },
         }),
         EditorView.lineWrapping,
         textIdFacet.of(textId),
@@ -304,6 +339,7 @@ export const Editor = observer(({ textId }: { textId: string }) => {
         snippetsField,
         snippetDecorations,
         snippetAnnotationPlugin,
+        snippetHover,
       ],
       parent: editorRef.current!,
       dispatch(transaction) {
