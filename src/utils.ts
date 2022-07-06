@@ -14,8 +14,6 @@ import {
   Snippet,
   SnippetSuggestion,
   INGREDIENT_TYPE,
-  SpatialComponentType,
-  spatialComponentsMobx,
   Span,
   snippetTypesMobx,
 } from "./primitives";
@@ -117,3 +115,20 @@ export function getParentByClassName(
 export const spanOverlaps = ([from, to]: Span, [from2, to2]: Span) => {
   return (from <= from2 && to >= from2) || (from2 <= from && to2 >= from);
 };
+
+export function createSnippetFromSpan(textId: string, span: Span): string {
+  const textInSnippet = textEditorStateMobx
+    .get(textId)
+    ?.sliceDoc(span[0], span[1])!;
+  const snippetId = nanoid();
+  runInAction(() => {
+    snippetsMobx.set(snippetId, {
+      id: snippetId,
+      snippetTypeId: INGREDIENT_TYPE,
+      textId,
+      span,
+      data: snippetTypesMobx.get(INGREDIENT_TYPE)!.parse(textInSnippet),
+    });
+  });
+  return snippetId;
+}

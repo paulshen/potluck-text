@@ -27,6 +27,7 @@ import {
   INGREDIENT_TYPE,
 } from "./primitives";
 import {
+  createSnippetFromSpan,
   createSnippetsForSuggestions,
   getParentByClassName,
   spanOverlaps,
@@ -37,58 +38,6 @@ import { SnippetTokenHovercardContent } from "./SnippetTokenHovercardContent";
 const textIdFacet = Facet.define<string, string>({
   combine: (values) => values[0],
 });
-
-const dragSnippetPlugin = ViewPlugin.fromClass(
-  class {
-    lastUpdate: any;
-    constructor(view: EditorView) {}
-    update(update: ViewUpdate) {
-      this.lastUpdate = update;
-    }
-    destroy() {}
-  },
-  {
-    eventHandlers: {
-      mousedown(event, view) {
-        if (event.metaKey) {
-          const pos = view.posAtCoords({ x: event.clientX, y: event.clientY });
-          if (pos === null) {
-            return;
-          }
-          const snippetRanges: [
-            range: SelectionRange,
-            snippetId: string | undefined
-          ][] = view.state.field(snippetsField).map((snippet) => {
-            const [from, to] = snippet.span;
-            return [EditorSelection.range(from, to), snippet.id];
-          });
-          snippetRanges.push(
-            ...view.state.selection.ranges.map<[SelectionRange, undefined]>(
-              (range) => [range, undefined]
-            )
-          );
-          for (const [range, snippetId] of snippetRanges) {
-            if (pos >= range.from && pos < range.to) {
-              const fromPos = view.coordsAtPos(range.from)!;
-              const left = fromPos.left - 8;
-              const top = fromPos.top - 5;
-              dragNewSnippetEmitter.emit("start", {
-                snippetId,
-                textId: view.state.facet(textIdFacet),
-                spanPosition: [left, top],
-                span: [range.from, range.to],
-                mouseOffset: [left - event.clientX, top - event.clientY],
-                text: view.state.sliceDoc(range.from, range.to),
-              });
-              // We only want to drag out a single snippet
-              return true;
-            }
-          }
-        }
-      },
-    },
-  }
-);
 
 const setSnippetSuggestionsEffect = StateEffect.define<SnippetSuggestion[]>();
 const snippetSuggestionsField = StateField.define<SnippetSuggestion[]>({
@@ -144,6 +93,72 @@ const snippetsField = StateField.define<Snippet[]>({
   },
 });
 
+const dragSnippetPlugin = ViewPlugin.fromClass(
+  class {
+    lastUpdate: any;
+    constructor(view: EditorView) {}
+    update(update: ViewUpdate) {
+      this.lastUpdate = update;
+    }
+    destroy() {}
+  },
+  {
+    eventHandlers: {
+      mousedown(event, view) {
+        if (event.metaKey) {
+          const pos = view.posAtCoords({ x: event.clientX, y: event.clientY });
+          if (pos === null) {
+            return;
+          }
+          const snippetRanges: [
+            range: SelectionRange,
+            snippetId: string | undefined
+          ][] = view.state.field(snippetsField).map((snippet) => {
+            const [from, to] = snippet.span;
+            return [EditorSelection.range(from, to), snippet.id];
+          });
+          snippetRanges.push(
+            ...view.state.selection.ranges
+              .filter((range) => !range.empty)
+              .map<[SelectionRange, undefined]>((range) => [range, undefined])
+          );
+          const overlappingSnippetRange = snippetRanges.find(
+            ([range]) => pos >= range.from && pos < range.to
+          );
+          if (overlappingSnippetRange !== undefined) {
+            const [range, snippetId] = overlappingSnippetRange;
+            const fromPos = view.coordsAtPos(range.from)!;
+            const left = fromPos.left - 8;
+            const top = fromPos.top - 5;
+            dragNewSnippetEmitter.emit("start", {
+              snippetId,
+              textId: view.state.facet(textIdFacet),
+              spanPosition: [left, top],
+              span: [range.from, range.to],
+              mouseOffset: [left - event.clientX, top - event.clientY],
+              text: view.state.sliceDoc(range.from, range.to),
+            });
+            // We only want to drag out a single snippet
+            return true;
+          } else {
+            const suggestions = view.state.field(snippetSuggestionsField);
+            const suggestionAtPos = suggestions.find(
+              (suggestion) =>
+                pos >= suggestion.span[0] && pos < suggestion.span[1]
+            );
+            if (suggestionAtPos !== undefined) {
+              const textId = view.state.facet(textIdFacet);
+              runInAction(() => {
+                createSnippetFromSpan(textId, suggestionAtPos.span);
+              });
+              return true;
+            }
+          }
+        }
+      },
+    },
+  }
+);
 const ANNOTATION_COLOR: Record<string, string> = {
   aisle: "bg-green-100",
 };

@@ -21,6 +21,7 @@ import { SnippetTokenComponent } from "./SnippetTokenComponent";
 import { SnippetGroupComponent } from "./SnippetGroupComponent";
 import { Pane } from "./Pane";
 import { EditorState } from "@codemirror/state";
+import { createSnippetFromSpan } from "./utils";
 
 const SpatialComponents = observer(() => {
   return (
@@ -50,7 +51,7 @@ const SpatialComponents = observer(() => {
 function NewDragSnippetComponent() {
   const [dragSnippet, setDragSnippet] = useState<
     | {
-        spanPosition: [x: number, y: number];
+        spanPosition: [x: number, y: number] | undefined;
         span: Span;
         text: string;
       }
@@ -61,6 +62,7 @@ function NewDragSnippetComponent() {
     let dragSnippetId: string | undefined;
     let dragSnippetSpan: [textId: string, span: Span] | undefined;
     let mouseOffset: [x: number, y: number] | undefined;
+    let didMouseMove = false;
     function cleanup() {
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
@@ -70,6 +72,7 @@ function NewDragSnippetComponent() {
       mouseOffset = undefined;
     }
     function onMouseMove(e: MouseEvent) {
+      didMouseMove = true;
       const mouseOffsetSnapshot = mouseOffset!;
       setDragSnippet((dragSnippet) => ({
         ...dragSnippet!,
@@ -83,24 +86,22 @@ function NewDragSnippetComponent() {
       runInAction(() => {
         let snippetId = dragSnippetId;
         if (snippetId === undefined) {
-          const textInSnippet = textEditorStateMobx
-            .get(dragSnippetSpan![0])
-            ?.sliceDoc(dragSnippetSpan![1][0], dragSnippetSpan![1][1])!;
-          snippetId = nanoid();
-          snippetsMobx.set(snippetId, {
-            id: snippetId,
-            snippetTypeId: INGREDIENT_TYPE,
-            textId: dragSnippetSpan![0],
-            span: dragSnippetSpan![1],
-            data: snippetTypesMobx.get(INGREDIENT_TYPE)!.parse(textInSnippet),
+          snippetId = createSnippetFromSpan(
+            dragSnippetSpan![0],
+            dragSnippetSpan![1]
+          );
+        }
+        if (didMouseMove) {
+          spatialComponentsMobx.push({
+            spatialComponentType: SpatialComponentType.Snippet,
+            id: nanoid(),
+            snippetId,
+            position: [
+              e.clientX + mouseOffset![0],
+              e.clientY + mouseOffset![1],
+            ],
           });
         }
-        spatialComponentsMobx.push({
-          spatialComponentType: SpatialComponentType.Snippet,
-          id: nanoid(),
-          snippetId,
-          position: [e.clientX + mouseOffset![0], e.clientY + mouseOffset![1]],
-        });
       });
       cleanup();
     }
@@ -123,7 +124,8 @@ function NewDragSnippetComponent() {
       dragSnippetSpan = [textId, span];
       mouseOffset = mouseOffsetArg;
       setDragSnippet({
-        spanPosition,
+        // we won't render the preview until user has moved the mouse
+        spanPosition: undefined,
         span,
         text,
       });
@@ -137,11 +139,11 @@ function NewDragSnippetComponent() {
     };
   }, []);
 
-  if (dragSnippet === undefined) {
+  if (dragSnippet?.spanPosition === undefined) {
     return null;
   }
 
-  const { spanPosition, span, text } = dragSnippet;
+  const { spanPosition, text } = dragSnippet;
   return (
     <div
       className="fixed"
