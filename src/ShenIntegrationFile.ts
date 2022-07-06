@@ -8,6 +8,7 @@ import {
 
 // temporary file with integration examples
 
+// @ts-ignore
 window.populateExampleSnippets = () => {
   runInAction(() => {
     spatialComponentsMobx.replace([]);
