@@ -24,20 +24,31 @@ Simmer on low until liquid as evaporated. Chili is ready once flavors are blende
 Serve in bowl and garnish to taste with grated cheddar, avocado, sour cream, jalapeño, salsa, tortilla chips, Fritos, or corn bread.
 `;
 
-const DEFAULT_SUGGESTION_INDICES = [
-  [15, 58],
-  [96, 115],
-  [117, 127],
-  [133, 154],
-  [336, 362],
-  [364, 390],
-  [392, 423],
-  [425, 443],
-  [445, 458],
-  [460, 490],
-  [492, 513],
-  [515, 544],
-  [550, 573],
+const DEFAULT_SUGGESTION_STRINGS = [
+  "ground chuck beef",
+  "onion powder",
+  "salt",
+  "garlic powder",
+  "ipa beer",
+  "tomato sauce/puree",
+  "ground ancho chili powder",
+  "ground cumin",
+  "paprika",
+  "cocoa powder",
+  "dried oregano",
+  "ground cayenne pepper",
+  "ground cinnamon",
+  "poblano peppers",
+  "kidney beans",
+  "black beans",
+  "grated cheddar",
+  "avocado",
+  "sour cream",
+  "jalapeño",
+  "salsa",
+  "tortilla chips",
+  "Fritos",
+  "corn bread",
 ];
 
 export const INGREDIENT_TYPE = "ingredient";
@@ -47,9 +58,16 @@ const DEFAULT_SNIPPET_TYPES: { [key: string]: SnippetType } = {
     icon: "🥕",
     color: "#ffc107",
     suggest: (text: string) => {
-      const indices = DEFAULT_SUGGESTION_INDICES;
+      let matches: [number, number][] = [];
+      for (const stringTemplate of DEFAULT_SUGGESTION_STRINGS) {
+        for (const match of text.matchAll(new RegExp(stringTemplate, "g"))) {
+          const from = match.index ?? 0;
+          const to = from + match[0].length;
+          matches.push([from, to]);
+        }
+      }
 
-      return indices.map(([from, to]) => ({
+      return matches.map(([from, to]) => ({
         id: nanoid(),
         span: [from, to],
         snippetTypeId: INGREDIENT_TYPE,

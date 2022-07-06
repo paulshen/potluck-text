@@ -22,6 +22,8 @@ import {
   snippetSuggestionsMobx,
   textEditorStateMobx,
   snippetEditorAnnotationsMobx,
+  snippetTypesMobx,
+  INGREDIENT_TYPE,
 } from "./primitives";
 
 const textIdFacet = Facet.define<string, string>({
@@ -253,11 +255,26 @@ export function Editor({ textId }: { textId: string }) {
             });
           }
           textEditorStateMobx.set(textId, transaction.state);
+
+          // Update the suggestions based on the latest text.
+          // (We wrap in this effects check to avoid an infinite loop)
+          if (transaction.effects.length === 0) {
+            const suggestions: SnippetSuggestion[] = snippetTypesMobx
+              .get(INGREDIENT_TYPE)!
+              .suggest(view.state.sliceDoc(0));
+            snippetSuggestionsMobx.set(textId, suggestions);
+          }
         });
       },
     });
     runInAction(() => {
       textEditorStateMobx.set(textId, view.state);
+
+      // Populate suggestions based on initial text
+      const suggestions: SnippetSuggestion[] = snippetTypesMobx
+        .get(INGREDIENT_TYPE)!
+        .suggest(view.state.sliceDoc(0));
+      snippetSuggestionsMobx.set(textId, suggestions);
     });
     const unsubscribes: (() => void)[] = [
       autorun(() => {

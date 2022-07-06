@@ -89,13 +89,18 @@ export function createSnippetsOnCanvasForSuggestions(
     };
   });
 
-  const snippetsOnCanvas: SnippetOnCanvas[] = snippets.map((snippet) => {
+  const snippetsOnCanvas: SnippetOnCanvas[] = snippets.map((snippet, index) => {
     return {
       spatialComponentType: SpatialComponentType.Snippet,
       id: nanoid(),
       snippetId: snippet.id,
       // Randomly scattered in a reasonable spot; todo: make nicer positions
-      position: [500 + Math.random() * 200, 50 + Math.random() * 500],
+      position: [
+        700 + Math.random() * 10,
+        50 +
+          index * (TOKEN_HEIGHT + GROUP_TOKEN_ROW_GAP + 5) +
+          Math.random() * 5,
+      ],
     };
   });
 
