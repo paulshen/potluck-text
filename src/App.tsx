@@ -13,6 +13,7 @@ import {
   textEditorStateMobx,
   INGREDIENT_TYPE,
   snippetsMobx,
+  snippetTypesMobx,
 } from "./primitives";
 import { Editor } from "./Editor";
 import { Token } from "./Token";
@@ -79,13 +80,16 @@ function NewDragSnippetComponent() {
     }
     function onMouseUp(e: MouseEvent) {
       runInAction(() => {
+        const textInSnippet = textEditorStateMobx
+          .get(dragSnippetSpan![0])
+          ?.sliceDoc(dragSnippetSpan![1][0], dragSnippetSpan![1][1])!;
         const snippetId = nanoid();
         snippetsMobx.set(snippetId, {
           id: snippetId,
           snippetTypeId: INGREDIENT_TYPE,
           textId: dragSnippetSpan![0],
           span: dragSnippetSpan![1],
-          data: {},
+          data: snippetTypesMobx.get(INGREDIENT_TYPE)!.parse(textInSnippet),
         });
         spatialComponentsMobx.push({
           spatialComponentType: SpatialComponentType.Snippet,

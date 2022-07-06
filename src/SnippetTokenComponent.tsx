@@ -41,6 +41,7 @@ const SnippetTokenHovercardContent = observer(
         className="border border-zinc-100 bg-white rounded-md shadow-lg"
       >
         <div className="p-8">This is the hovercard for {text}</div>
+        <div>{JSON.stringify(snippet.data)}</div>
       </HoverCard.Content>
     );
   }
