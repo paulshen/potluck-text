@@ -168,7 +168,13 @@ class SnippetDataWidget extends WidgetType {
     const wrap = document.createElement("span");
     wrap.className = "rounded-r";
     wrap.setAttribute("aria-hidden", "true");
+    if (this.snippetData === undefined) {
+      return wrap;
+    }
     for (const [key, value] of Object.entries(this.snippetData)) {
+      if (value === undefined) {
+        continue;
+      }
       const token = document.createElement("span");
       token.className = `${ANNOTATION_TOKEN_CLASSNAME} ${
         ANNOTATION_COLOR[key] ?? "bg-blue-100"

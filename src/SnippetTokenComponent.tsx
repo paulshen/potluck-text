@@ -109,14 +109,17 @@ export const SnippetTokenComponent = observer(
             <Token isSelected={isSelected}>
               {snippetType.icon} {text}
               {/* todo: only show properties inline which are configured visible */}
-              {snippetType.properties.map((property) => (
-                <span
-                  className="font-mono text-xs ml-2 p-1 bg-white"
-                  key={property.id}
-                >
-                  {snippet.data[property.id]}
-                </span>
-              ))}
+              {snippetType.properties.map(
+                (property) =>
+                  snippet.data[property.id] !== undefined && (
+                    <span
+                      className="font-mono text-xs ml-2 p-1 bg-white"
+                      key={property.id}
+                    >
+                      {snippet.data[property.id]}
+                    </span>
+                  )
+              )}
             </Token>
           </HoverCard.Trigger>
 
