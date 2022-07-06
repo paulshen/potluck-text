@@ -15,10 +15,21 @@ import {
   getRectForSnippetToken,
 } from "./utils";
 
-export function useDragSpatialComponent(element: SpatialComponent) {
+export function useDragSpatialComponent(
+  rootRef: React.MutableRefObject<HTMLElement | null>,
+  element: SpatialComponent
+) {
   return useDrag(
     action<Handler<"drag">>(
-      ({ delta, first, last, event, cancel, xy, memo = {} }) => {
+      ({ delta, first, last, event, target, cancel, xy, memo = {} }) => {
+        if (
+          first &&
+          target instanceof Node &&
+          !rootRef.current!.contains(target)
+        ) {
+          cancel();
+          return;
+        }
         let activeComponents: SpatialComponent[] | undefined =
           memo.activeComponents;
         if (activeComponents === undefined) {

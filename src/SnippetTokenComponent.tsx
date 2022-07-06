@@ -1,3 +1,4 @@
+import * as HoverCard from "@radix-ui/react-hover-card";
 import { computed } from "mobx";
 import classNames from "classnames";
 import { observer } from "mobx-react-lite";
@@ -25,9 +26,29 @@ import {
   getPositionForSnippetInGroup,
   getSnippetForSnippetOnCanvas,
 } from "./utils";
+import { useRef } from "react";
+
+const SnippetTokenHovercardContent = observer(
+  ({ snippet }: { snippet: Snippet }) => {
+    const text = computed(() => {
+      return textEditorStateMobx
+        .get(snippet.textId)!
+        .sliceDoc(snippet.span[0], snippet.span[1]);
+    }).get();
+    return (
+      <HoverCard.Content
+        sideOffset={4}
+        className="border border-zinc-100 bg-white rounded-md shadow-lg"
+      >
+        <div className="p-8">This is the hovercard for {text}</div>
+      </HoverCard.Content>
+    );
+  }
+);
 
 export const SnippetTokenComponent = observer(
   ({ snippetOnCanvas }: { snippetOnCanvas: SnippetOnCanvas }) => {
+    const rootRef = useRef<HTMLDivElement | null>(null);
     const snippet: Snippet = computed(() =>
       getSnippetForSnippetOnCanvas(snippetOnCanvas)
     ).get();
@@ -55,7 +76,7 @@ export const SnippetTokenComponent = observer(
       return snippetTypesMobx.get(snippet.snippetTypeId);
     }).get()!;
 
-    const bindDrag = useDragSpatialComponent(snippetOnCanvas);
+    const bindDrag = useDragSpatialComponent(rootRef, snippetOnCanvas);
 
     let top;
     let left;
@@ -91,10 +112,16 @@ export const SnippetTokenComponent = observer(
               ? `${GROUP_COLUMN_WIDTH - GROUP_TOKEN_COLUMN_GAP}px`
               : undefined,
         }}
+        ref={rootRef}
       >
-        <Token isSelected={isSelected}>
-          {snippetType.icon} {text}
-        </Token>
+        <HoverCard.Root open={isBeingDragged ? false : undefined}>
+          <HoverCard.Trigger>
+            <Token isSelected={isSelected}>
+              {snippetType.icon} {text}
+            </Token>
+          </HoverCard.Trigger>
+          <SnippetTokenHovercardContent snippet={snippet} />
+        </HoverCard.Root>
         {snippetGroup &&
           snippetGroup.extraColumns.map((column, index) => {
             const data =

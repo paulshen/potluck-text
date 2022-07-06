@@ -2,7 +2,7 @@ import classNames from "classnames";
 import { action, computed, runInAction, set, untracked } from "mobx";
 import { observer } from "mobx-react-lite";
 import { nanoid } from "nanoid";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { formulaIsValid } from "./formulas";
 import {
   SnippetGroup,
@@ -17,7 +17,8 @@ import { useDragSpatialComponent } from "./useDragSpatialComponent";
 
 export const SnippetGroupComponent = observer(
   ({ group }: { group: SnippetGroup }) => {
-    const bindDrag = useDragSpatialComponent(group);
+    const rootRef = useRef<HTMLDivElement | null>(null);
+    const bindDrag = useDragSpatialComponent(rootRef, group);
     const [currentlyConfiguringColumn, setCurrentlyConfiguringColumn] =
       useState<string>();
     const isSelected = computed(() =>
@@ -47,6 +48,7 @@ export const SnippetGroupComponent = observer(
             width: `${rect[2]}px`,
             height: `${rect[3]}px`,
           }}
+          ref={rootRef}
         ></div>
         <button
           className={classNames("absolute touch-none text-gray-300")}
