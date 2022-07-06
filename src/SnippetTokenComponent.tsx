@@ -26,7 +26,7 @@ import {
   getPositionForSnippetInGroup,
   getSnippetForSnippetOnCanvas,
 } from "./utils";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 const SnippetTokenHovercardContent = observer(
   ({ snippet }: { snippet: Snippet }) => {
@@ -99,10 +99,17 @@ export const SnippetTokenComponent = observer(
         dragStateBox.get()?.spatialComponentIds.includes(snippetOnCanvas.id) ??
         false;
     }
+    const [disableHovercard, setDisableHovercard] = useState(false);
+    if (isBeingDragged && !disableHovercard) {
+      setDisableHovercard(true);
+    }
 
     return (
       <div
         {...bindDrag()}
+        onMouseEnter={() => {
+          setDisableHovercard(false);
+        }}
         className={classNames(
           "absolute touch-none",
           isBeingDragged ? "z-50" : undefined
@@ -117,7 +124,7 @@ export const SnippetTokenComponent = observer(
         }}
         ref={rootRef}
       >
-        <HoverCard.Root open={isBeingDragged ? false : undefined}>
+        <HoverCard.Root open={disableHovercard ? false : undefined}>
           <HoverCard.Trigger>
             <Token isSelected={isSelected}>
               {snippetType.icon} {text}
