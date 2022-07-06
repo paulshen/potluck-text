@@ -72,11 +72,9 @@ export function getSnippetForSnippetOnCanvas(
 }
 
 /** Given some snippet suggestions for a given text box,
- *  create snippets for those suggestions,
- *  and also create corresponding SnippetOnCanvas objects on the canvas.
- *  (Note: this side effects on the MobX state.)
+ *  create snippets for those suggestions.
  */
-export function createSnippetsOnCanvasForSuggestions(
+export function createSnippetsForSuggestions(
   textId: string,
   suggestions: SnippetSuggestion[]
 ) {
@@ -93,28 +91,8 @@ export function createSnippetsOnCanvasForSuggestions(
       data: snippetTypesMobx.get(INGREDIENT_TYPE)!.parse(textInSnippet),
     };
   });
-
-  const snippetsOnCanvas: SnippetOnCanvas[] = snippets.map((snippet, index) => {
-    return {
-      spatialComponentType: SpatialComponentType.Snippet,
-      id: nanoid(),
-      snippetId: snippet.id,
-      // Randomly scattered in a reasonable spot; todo: make nicer positions
-      position: [
-        700 + Math.random() * 10,
-        50 +
-          index * (TOKEN_HEIGHT + GROUP_TOKEN_ROW_GAP + 5) +
-          Math.random() * 5,
-      ],
-    };
-  });
-
   for (const snippet of snippets) {
     snippetsMobx.set(snippet.id, snippet);
-  }
-
-  for (const snippetOnCanvas of snippetsOnCanvas) {
-    spatialComponentsMobx.push(snippetOnCanvas);
   }
 }
 

@@ -27,7 +27,7 @@ import {
   INGREDIENT_TYPE,
 } from "./primitives";
 import {
-  createSnippetsOnCanvasForSuggestions,
+  createSnippetsForSuggestions,
   getParentByClassName,
   spanOverlaps,
 } from "./utils";
@@ -405,7 +405,7 @@ export const Editor = observer(({ textId }: { textId: string }) => {
         <button
           className="text-sm text-gray-400"
           onClick={() => {
-            createSnippetsOnCanvasForSuggestions(
+            createSnippetsForSuggestions(
               textId,
               suggestionsComputed.get()
             );
