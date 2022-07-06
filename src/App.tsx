@@ -178,6 +178,17 @@ export const App = observer(() => {
             }
             break;
           }
+          case "Backspace":
+          case "Delete": {
+            for (const componentId of selectedSpatialComponentsMobx) {
+              const component = spatialComponentsMobx.find(
+                (c) => c.id === componentId
+              );
+              if (component !== undefined) {
+                spatialComponentsMobx.remove(component);
+              }
+            }
+          }
         }
       }
     }
