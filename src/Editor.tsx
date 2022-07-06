@@ -25,6 +25,7 @@ import {
   textEditorStateMobx,
   snippetTypesMobx,
   INGREDIENT_TYPE,
+  snippetTypeViewConfigurationsMobx,
 } from "./primitives";
 import {
   createSnippetFromSpan,
@@ -34,6 +35,7 @@ import {
 } from "./utils";
 import ReactDOM from "react-dom/client";
 import { SnippetTokenHovercardContent } from "./SnippetTokenHovercardContent";
+import pick from "lodash/pick";
 
 const textIdFacet = Facet.define<string, string>({
   combine: (values) => values[0],
@@ -404,10 +406,30 @@ export const Editor = observer(({ textId }: { textId: string }) => {
         { equals: comparer.structural, fireImmediately: true }
       ),
       reaction(
-        () =>
-          [...snippetsMobx.values()].filter(
+        () => {
+          const snippets = [...snippetsMobx.values()].filter(
             (snippet) => snippet.textId === textId
-          ),
+          );
+          return snippets.map((snippet) => {
+            const snippetType = snippetTypesMobx.get(snippet.snippetTypeId)!;
+            const snippetTypeConfig = snippetTypeViewConfigurationsMobx.get(
+              snippet.snippetTypeId
+            )!;
+
+            // Get the inline properties that are visible,
+            // in the order that they're declared on the snippet type
+            const inlineProperties = snippetType.properties
+              .map((p) => p.id)
+              .filter((propertyId) =>
+                snippetTypeConfig.inlineVisiblePropertyIds.includes(propertyId)
+              );
+            const inlineVisibleData = pick(snippet.data, inlineProperties);
+            return {
+              ...snippet,
+              data: inlineVisibleData,
+            };
+          });
+        },
         (snippets) => {
           view.dispatch({
             effects: [setSnippetsEffect.of(snippets)],
