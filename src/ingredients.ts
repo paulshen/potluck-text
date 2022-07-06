@@ -396,30 +396,30 @@ const RECOGNIZED_INGREDIENTS = [
 ];
 
 const RECOGNIZED_AISLES: { [key: string]: string } = {
-  "ground chuck beef": "Produce",
-  "onion powder": "Produce",
-  salt: "Baking",
-  "garlic powder": "Spices",
-  "ipa beer": "Beverages",
-  "tomato sauce/puree": "Condiments",
-  "ground ancho chili powder": "Spices",
-  "ground cumin": "Spices",
-  paprika: "Spices",
-  "cocoa powder": "Baking",
-  "dried oregano": "Spices",
-  "ground cayenne pepper": "Spices",
-  "ground cinnamon": "Spices",
-  "poblano peppers": "Produce",
-  "kidney beans": "Canned Goods",
-  "black beans": "Canned Goods",
-  "grated cheddar": "Dairy",
-  avocado: "Produce",
-  "sour cream": "Dairy",
-  jalapeño: "Produce",
+  "ground chuck beef": "🥬 Produce",
+  "onion powder": "🥬 Produce",
+  salt: "🍞 Baking",
+  "garlic powder": "🧂 Spices",
+  "ipa beer": "🍺 Alcohol",
+  "tomato sauce/puree": "🥫 Canned Goods",
+  "ground ancho chili powder": "🧂 Spices",
+  "ground cumin": "🧂 Spices",
+  paprika: "🧂 Spices",
+  "cocoa powder": "🍞 Baking",
+  "dried oregano": "🧂 Spices",
+  "ground cayenne pepper": "🧂 Spices",
+  "ground cinnamon": "🧂 Spices",
+  "poblano peppers": "🥬 Produce",
+  "kidney beans": "🥫 Canned Goods",
+  "black beans": "🥫 Canned Goods",
+  "grated cheddar": "🐮 Dairy",
+  avocado: "🥬 Produce",
+  "sour cream": "🐮 Dairy",
+  jalapeño: "🥬 Produce",
   salsa: "Condiments",
-  "tortilla chips": "Snacks",
-  Fritos: "Snacks",
-  "corn bread": "Bakery",
+  "tortilla chips": "🍿 Snacks",
+  Fritos: "🍿 Snacks",
+  "corn bread": "🥪 Bakery",
 };
 
 export const ingredientSnippetType: SnippetType = {
@@ -450,9 +450,10 @@ export const ingredientSnippetType: SnippetType = {
 
   // TODO: this will parse out structured data for the ingredient
   parse: (text: string) => {
-    console.log("parsing", text);
     return {
       aisle: RECOGNIZED_AISLES[text] ?? "Unknown",
     };
   },
+
+  properties: [{ id: "aisle", name: "Aisle", type: "string" }],
 };

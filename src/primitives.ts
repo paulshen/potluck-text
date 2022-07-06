@@ -49,6 +49,12 @@ export enum SpatialComponentType {
   SnippetGroup,
 }
 
+export type SnippetProperty = {
+  id: string;
+  name: string;
+  type: "number" | "string" | "boolean";
+};
+
 export type SnippetType = {
   name: string;
   icon: string;
@@ -59,6 +65,8 @@ export type SnippetType = {
 
   /** Given text for a single snippet, return structured data for the snippet */
   parse: (text: string) => any;
+
+  properties: SnippetProperty[];
 };
 
 export type Snippet = {

@@ -40,8 +40,10 @@ const SnippetTokenHovercardContent = observer(
         sideOffset={4}
         className="border border-zinc-100 bg-white rounded-md shadow-lg"
       >
-        <div className="p-8">This is the hovercard for {text}</div>
-        <div>{JSON.stringify(snippet.data)}</div>
+        <div className="p-8">
+          This is the hovercard for {text}. Properties:{" "}
+          {JSON.stringify(snippet.data)}
+        </div>
       </HoverCard.Content>
     );
   }
@@ -119,6 +121,12 @@ export const SnippetTokenComponent = observer(
           <HoverCard.Trigger>
             <Token isSelected={isSelected}>
               {snippetType.icon} {text}
+              {/* todo: only show properties inline which are configured visible */}
+              {snippetType.properties.map((property) => (
+                <span className="font-mono text-xs ml-2 p-1 bg-white">
+                  {snippet.data[property.id]}
+                </span>
+              ))}
             </Token>
           </HoverCard.Trigger>
           <SnippetTokenHovercardContent snippet={snippet} />

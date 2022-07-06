@@ -16,6 +16,7 @@ import {
   SpatialComponentType,
   spatialComponentsMobx,
   Span,
+  snippetTypesMobx,
 } from "./primitives";
 
 // your favorite dumping ground of utility functions
@@ -80,13 +81,16 @@ export function createSnippetsOnCanvasForSuggestions(
   suggestions: SnippetSuggestion[]
 ) {
   const snippets: Snippet[] = suggestions.map((suggestion) => {
+    const textInSnippet = textEditorStateMobx
+      .get(textId)!
+      .sliceDoc(suggestion.span[0], suggestion.span[1])!;
     return {
       id: nanoid(),
       snippetTypeId: suggestion.snippetTypeId,
       textId,
       span: suggestion.span,
       type: "suggestion",
-      data: {},
+      data: snippetTypesMobx.get(INGREDIENT_TYPE)!.parse(textInSnippet),
     };
   });
 
