@@ -259,7 +259,8 @@ class SnippetDataWidget extends WidgetType {
     root.className = "relative";
     const wrap = document.createElement("span");
     root.appendChild(wrap);
-    wrap.className = "absolute bottom-full left-0 flex gap-1";
+    wrap.className =
+      "snippet-data-widget absolute bottom-full left-0 flex gap-1";
     wrap.setAttribute("aria-hidden", "true");
     if (this.snippetData === undefined) {
       return wrap;
@@ -426,6 +427,12 @@ export const Editor = observer(({ textId }: { textId: string }) => {
           },
           ".metakey-down & .cm-suggestion.cm-suggestion-active": {
             borderBottom: "2px dashed black",
+          },
+          ".snippet-data-widget": {
+            display: "none",
+          },
+          ".metakey-down & .snippet-data-widget": {
+            display: "flex",
           },
           ".metakey-down & .cm-suggestion": {
             borderBottom: "1px dashed black",
