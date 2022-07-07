@@ -3,6 +3,7 @@ import { EventEmitter } from "eventemitter3";
 import { observable } from "mobx";
 import { ingredientSnippetType } from "./snippetTypes/ingredients";
 import { quantitySnippetType } from "./snippetTypes/quantities";
+import {EditorView} from "codemirror";
 
 export type Position = [x: number, y: number];
 export type Rect = [x: number, y: number, width: number, height: number];
@@ -66,7 +67,8 @@ export type SnippetProperty = {
   id: string;
   name: string;
   type: "number" | "string" | "boolean";
-};
+  onClick?: (snippet: Snippet, view: EditorView) => void;
+}
 
 export type SnippetType = {
   name: string;

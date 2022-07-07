@@ -11,7 +11,7 @@ import {
   ViewUpdate,
   Decoration,
   WidgetType,
-  hoverTooltip,
+  hoverTooltip, DecorationSet,
 } from "@codemirror/view";
 import { EditorView, minimalSetup } from "codemirror";
 import { autorun, comparer, computed, reaction, runInAction } from "mobx";
@@ -215,6 +215,7 @@ class SnippetDataWidget extends WidgetType {
       } ml-1 align-top relative top-px text-gray-800 font-mono text-[10px] py-0.5 px-1 rounded-sm whitespace-nowrap`;
       token.innerText = value;
       token.setAttribute("data-snippet-id", this.snippetId);
+      token.setAttribute("data-snippet-property-name", key);
       wrap.appendChild(token);
     }
     return wrap;
@@ -228,28 +229,25 @@ class SnippetDataWidget extends WidgetType {
 const snippetAnnotationPlugin = ViewPlugin.define((view) => ({}), {
   eventHandlers: {
     mousedown(e, view) {
-      if (!e.metaKey) {
-        return false;
-      }
+
       const target = e.target as HTMLElement;
       const parentAnnotationToken = getParentByClassName(
         target,
         ANNOTATION_TOKEN_CLASSNAME
       );
+
       if (parentAnnotationToken !== undefined) {
         const snippetId = parentAnnotationToken.getAttribute("data-snippet-id");
         if (snippetId !== null) {
           const snippet = snippetsMobx.get(snippetId)!;
-          view.dispatch({
-            changes: ChangeSet.of(
-              {
-                // this currently inserts the annotation text after the snippet
-                from: snippet.span[1],
-                insert: ` ${parentAnnotationToken.innerText}`,
-              },
-              view.state.doc.length
-            ),
-          });
+          const snippetProperties = snippetTypesMobx.get(snippet.snippetTypeId)?.properties
+          const snippetPropertyName = parentAnnotationToken.getAttribute("data-snippet-property-name")
+          const property = snippetProperties && snippetProperties.find((p) => p.id === snippetPropertyName)
+
+          if (property?.onClick) {
+            property.onClick(snippet, view)
+          }
+
           return true;
         }
       }
