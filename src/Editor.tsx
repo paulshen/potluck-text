@@ -67,8 +67,10 @@ const suggestionDecorations = EditorView.decorations.from(
   snippetSuggestionsField,
   (suggestions) =>
     Decoration.set(
-      suggestions.map((suggestion) =>
-        suggestionMark.range(suggestion.span[0], suggestion.span[1])
+      suggestions.flatMap((suggestion) =>
+        suggestion.span[1] > suggestion.span[0]
+          ? [suggestionMark.range(suggestion.span[0], suggestion.span[1])]
+          : []
       ),
       true
     )
@@ -263,19 +265,23 @@ const snippetDecorations = EditorView.decorations.compute(
   (state) => {
     const spatialHoverSnippetId = state.field(spatialHoverSnippetIdField);
     return Decoration.set(
-      state.field(snippetsField).flatMap((snippet) => [
-        Decoration.mark({
-          class: `cm-snippet${
-            snippet.id === spatialHoverSnippetId
-              ? " cm-snippet-spatial-hover"
-              : ""
-          }`,
-        }).range(snippet.span[0], snippet.span[1]),
-        Decoration.widget({
-          widget: new SnippetDataWidget(snippet.id, snippet.data),
-          side: 1,
-        }).range(snippet.span[1]),
-      ]),
+      state.field(snippetsField).flatMap((snippet) =>
+        snippet.span[1] > snippet.span[0]
+          ? [
+              Decoration.mark({
+                class: `cm-snippet${
+                  snippet.id === spatialHoverSnippetId
+                    ? " cm-snippet-spatial-hover"
+                    : ""
+                }`,
+              }).range(snippet.span[0], snippet.span[1]),
+              Decoration.widget({
+                widget: new SnippetDataWidget(snippet.id, snippet.data),
+                side: 1,
+              }).range(snippet.span[1]),
+            ]
+          : []
+      ),
       true
     );
   }
