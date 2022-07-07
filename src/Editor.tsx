@@ -370,17 +370,16 @@ export const Editor = observer(({ textId }: { textId: string }) => {
             lineHeight: "1.35rem",
           },
           ".cm-suggestion": {
-            textDecoration: "underline",
-            textDecorationColor: "#aaaaaa",
-            textDecorationStyle: "dashed",
-            transition: "background-color 0.2s",
+            borderBottom: "1px dashed #bbb", // TODO: Use Tailwind color value
+            borderRadius: "2px",
+            transition: "background-color 0.1s",
           },
           ".cm-suggestion:hover": {
-            backgroundColor: "#facc1580",
+            backgroundColor: "#f9f9f9",
           },
           ".cm-snippet": {
-            backgroundColor: "#80808010",
-            transition: "background-color 0.2s",
+            backgroundColor: "black",
+            transition: "background-color 0.1s",
             margin: "0 -0.2rem",
             padding: "0 0.2rem",
             borderRadius: "2px",
