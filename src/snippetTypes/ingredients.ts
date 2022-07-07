@@ -4,20 +4,24 @@
 // Climate impact source: https://ourworldindata.org/environmental-impacts-of-food
 
 import {
-  INGREDIENT_TYPE,
+  INGREDIENT_TYPE, Snippet, snippetsMobx,
   SnippetSuggestion,
-  SnippetType,
+  SnippetType, snippetTypesMobx,
   Span,
 } from "../primitives";
 import { spanOverlaps } from "../utils";
 
 // @ts-ignore
 import rawIngredients from "./ingredients.csv";
+import {EditorView} from "codemirror";
+import {ChangeSet} from "@codemirror/state";
+import {nanoid} from "nanoid";
 
 type Ingredient = {
   name: string;
   aisle: string;
   climate: number;
+  veganAlternative: string;
 };
 
 const ingredients: Ingredient[] = rawIngredients.map((i: any) => {
@@ -63,6 +67,7 @@ export const ingredientSnippetType: SnippetType = {
         "ingredient--icon": "🥕",
         "ingredient--aisle": ingredient.aisle,
         "ingredient--climate": ingredient.climate,
+        "ingredient--veganAlternative": ingredient.veganAlternative
       };
     } else {
       return { "ingredient--icon": "🥕" };
@@ -73,5 +78,35 @@ export const ingredientSnippetType: SnippetType = {
     { id: "ingredient--icon", name: "Icon", type: "string" },
     { id: "ingredient--aisle", name: "Aisle", type: "string" },
     { id: "ingredient--climate", name: "Climate Impact", type: "number" },
+    {
+      id: "ingredient--veganAlternative",
+      name: "Vegan Alternative",
+      type: "string",
+      onClick: (snippet: Snippet, view: EditorView) => {
+        const alternative = snippet.data["ingredient--veganAlternative"]
+
+         view.dispatch({
+           changes: ChangeSet.of(
+             {
+               // this currently inserts the annotation text after the snippet
+               from: snippet.span[0],
+               to: snippet.span[1],
+               insert: alternative,
+             },
+             view.state.doc.length
+           ),
+         });
+
+        // reparse snippet
+
+        snippetsMobx.set(snippet.id, {
+          id: nanoid(),
+          snippetTypeId: snippet.snippetTypeId,
+          textId: snippet.textId,
+          span: [snippet.span[0], snippet.span[0] + alternative.length - 1],
+          data: ingredientSnippetType.parse(alternative),
+        })
+      },
+    }
   ],
 };
