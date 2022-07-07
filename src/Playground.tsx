@@ -1,39 +1,16 @@
-import { useState } from "react";
+import { PropertyList } from "./PropertyList";
 
-const Token = ({ value }: { value: string }) => {
-  const [open, setOpen] = useState(false);
-
-  function toggleProperties() {
-    console.log(open);
-    setOpen(!open);
-  }
-
-  return (
-    <div className="border-2 border-black inline-block px-2 rounded-l relative">
-      <div>{value}</div>
-      <div
-        className="absolute border-2 border-black rounded-r text-white right-[-28px] p-1 top-[-2px]"
-        onClick={toggleProperties}
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 16 16"
-          width="16"
-          height="16"
-        >
-          <path d="M8 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm13 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"></path>
-        </svg>
-      </div>
-
-      {open && <div>Hello World</div>}
-    </div>
-  );
-};
+const initialItems = [
+  { id: 1, name: "food name", value: "Beef, Lean 70%  v", show: false },
+  { id: 2, name: "aisle", value: "Produce", show: false },
+  { id: 3, name: "climate change", value: "5/5 Bad!", show: false },
+  { id: 4, name: "vegan substitute", value: "tofurkey", show: true },
+];
 
 export const Playground = () => {
   return (
-    <div className="p-12">
-      <Token value="i am a token" />
+    <div className="h-screen w-screen flex items-center justify-center">
+      <PropertyList items={initialItems} />
     </div>
   );
 };
