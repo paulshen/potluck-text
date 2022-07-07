@@ -369,33 +369,22 @@ export const Editor = observer(({ textId }: { textId: string }) => {
             fontSize: "1rem",
             lineHeight: "1.5em",
           },
-          ".cm-suggestion, .cm-snippet": {
-            margin: "0 -0.125rem",
-            padding: "0 0.125rem",
-            transition: "background-color 0.1s",
+          ".metakey-down & .cm-suggestion": {
+            borderBottom: "1px dashed #ddd",
           },
           ".metakey-down & .cm-suggestion:hover, .metakey-down & .cm-snippet:hover":
             {
               cursor: "pointer",
             },
-          ".cm-suggestion": {
-            borderBottom: "1px dashed #ddd",
-          },
-          ".metakey-down & .cm-suggestion": {
-            backgroundColor: "#e3e3e3",
-            borderRadius: "2px",
-            borderBottom: "none",
-          },
           ".cm-snippet": {
             borderBottom: "1px solid black",
-            transition: "background-color 0.1s",
           },
           ".metakey-down & .cm-snippet:hover": {
-            backgroundColor: "black",
-            color: "white",
+            cursor: "grab",
           },
           ".cm-snippet-spatial-hover": {
-            backgroundColor: "#facc1580",
+            backgroundColor: "black",
+            color: "white",
           },
           ".cm-snippet .cm-suggestion": {
             backgroundColor: "#80808015",
