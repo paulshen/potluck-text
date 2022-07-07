@@ -115,7 +115,7 @@ export const SnippetTokenComponent = observer(
         <HoverCard.Root open={disableHovercard ? false : undefined}>
           <HoverCard.Trigger>
             <Token isSelected={isSelected}>
-              {snippetType.icon} {text}
+              {text}
               {snippetType.properties
                 .filter((p) =>
                   snippetTypeViewConfiguration.inlineVisiblePropertyIds.includes(

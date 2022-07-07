@@ -61,6 +61,7 @@ export const ingredientSnippetType: SnippetType = {
     const ingredient = ingredients.find((i) => i.name === text);
     if (ingredient !== undefined) {
       return {
+        "ingredient--icon": "🥕",
         "ingredient--aisle": ingredient.aisle,
         "ingredient--climate": ingredient.climate,
       };
@@ -68,6 +69,7 @@ export const ingredientSnippetType: SnippetType = {
   },
 
   properties: [
+    { id: "ingredient--icon", name: "Icon", type: "string" },
     { id: "ingredient--aisle", name: "Aisle", type: "string" },
     { id: "ingredient--climate", name: "Climate Impact", type: "number" },
   ],

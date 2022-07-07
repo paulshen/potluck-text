@@ -9,6 +9,11 @@ import {
 
 export const SnippetTokenHovercardContent = observer(
   ({ snippet }: { snippet: Snippet }) => {
+    const text = computed(() => {
+      return textEditorStateMobx
+        .get(snippet.textId)!
+        .sliceDoc(snippet.span[0], snippet.span[1]);
+    }).get();
     const snippetType = snippetTypesMobx.get(snippet.snippetTypeId)!;
     const viewConfig = snippetTypeViewConfigurationsMobx.get(
       snippet.snippetTypeId
@@ -29,12 +34,16 @@ export const SnippetTokenHovercardContent = observer(
 
     return (
       <div className="p-4 text-sm">
+        <div className="my-1 font-bold text-gray-500">
+          {snippetType.icon} {snippetType.name}
+        </div>
+        <div className="text-md">{text}</div>
         <table>
           <thead>
             <tr>
               <th></th>
               <th></th>
-              <th className="text-gray-500 text-sm">Inline?</th>
+              <th className="text-gray-500 text-sm font-normal">show?</th>
             </tr>
           </thead>
           <tbody>
