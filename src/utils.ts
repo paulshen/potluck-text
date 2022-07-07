@@ -47,8 +47,8 @@ export function getRectForSnippetToken(snippetOnCanvas: SnippetOnCanvas): Rect {
     .get(snippet.textId)!
     .sliceDoc(snippet.span[0], snippet.span[1]);
   return [
-    snippetOnCanvas.position[0],
-    snippetOnCanvas.position[1],
+    snippetOnCanvas.position[0] - window.scrollX,
+    snippetOnCanvas.position[1] - window.scrollY,
     text.length * CHAR_WIDTH + 16,
     TOKEN_HEIGHT,
   ];
