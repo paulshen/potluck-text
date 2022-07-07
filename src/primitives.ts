@@ -3,28 +3,46 @@ import { EventEmitter } from "eventemitter3";
 import { observable } from "mobx";
 import { ingredientSnippetType } from "./snippetTypes/ingredients";
 import { quantitySnippetType } from "./snippetTypes/quantities";
-import {EditorView} from "codemirror";
+import { EditorView } from "codemirror";
 
 export type Position = [x: number, y: number];
 export type Rect = [x: number, y: number, width: number, height: number];
 export type Span = [from: number, to: number];
 
-const DEFAULT_EDITOR_CONTENT = `# Chili
+const DEFAULT_EDITOR_CONTENT = `Grilled Gochujang Pork With Fresh Sesame Kimchi
 
-Bring 2 pounds low fat (~90/10) ground chuck beef to room temperature, and season with 1 Tbsp onion powder, 2 tsp salt, and 3/8 tsp garlic powder.
+Pork shoulder is often prepared as a large roast, requiring hours of cooking until it’s tender. But if you slice it thinly and pound it, the meat quickly absorbs this savory gochujang marinade and cooks up in no time. The spicy pork is balanced by a cool and crisp sesame kimchi, eaten fresh like a salad rather than fermented like traditional preparations. Baby bok choy stands in for the usual napa cabbage, and it’s coated in a vibrant sauce of garlic, ginger, gochugaru, fish sauce and nutty sesame oil. Tuck any leftover pork and kimchi into sandwiches the next day, garnished with tomatoes and mayonnaise.
 
-Warm bacon fat or cooking oil in large pot over high heat, and add seasoned meat. Break meat into small pieces, and stir until meat is browned and liquid becomes gravy-like.
+2 tablespoons gochugaru
+2 tablespoons distilled white vinegar
+2 tablespoons toasted sesame oil
+3 teaspoons grated garlic
+2 teaspoons grated peeled ginger
+1 teaspoon kosher salt (such as Diamond Crystal), plus more for seasoning
+½ teaspoon fish sauce
+1 tablespoon plus ½ teaspoon granulated sugar
+1½ pounds baby bok choy, quartered lengthwise
+3 scallions, halved lengthwise and thinly sliced on the diagonal
+2 tablespoons gochujang (Korean chile paste)
+2 tablespoons neutral oil, such as safflower or canola
+1 tablespoon low-sodium soy sauce
+1 teaspoon ground black pepper, plus more for seasoning
+2 pounds pork shoulder, thinly sliced crosswise and pounded ⅛-inch-thick (see Tip)
+1 large white onion, peeled and sliced into ¼-inch-thick rings
+Steamed rice, for serving
 
-Add 12oz ipa beer or hop water, 8oz can tomato sauce/puree, 3 Tbl ground ancho chili powder, 1 tsp ground cumin, 1 tsp paprika, 1 tsp unsweetened cocoa powder, 1/4 tsp dried oregano, 1/4 tsp ground cayenne pepper, and 1/8 tsp ground cinnamon to meat mixture, and simmer over low heat for 2-3 hours, stirring regularly.
+Preparation
+Step 1
+In a large bowl, combine the gochugaru, vinegar, sesame oil, 1 teaspoon of the garlic, 1 teaspoon of the ginger, 1 teaspoon salt, the fish sauce and ½ teaspoon of the sugar; mix well. Add bok choy and scallions, and toss with your hands, working the sauce in between and all over the leaves.
 
-Add 1/8 Cup diced poblano peppers to mixture, and continue to simmer for 2 hours, stirring regularly.
+Step 2
+Heat a grill to medium-high or heat a stovetop griddle pan over medium-high. In a large bowl, combine the gochujang, neutral oil, soy sauce, 1 teaspoon black pepper and the remaining 2 teaspoons garlic, 1 teaspoon ginger and 1 tablespoon sugar; mix well. Very lightly season the pork with salt and pepper. Add pork and onion to the marinade and toss, gently massaging the marinade all over the meat (The meat does not need to rest in the marinade before it is grilled, but it can be marinated for up to 3 hours.)
 
-Optionally rinse 1 can red kidney beans and 1 can black beans with water and drain. Gently stir beans into mixture, keeping the beans intact.
+Step 3
+Grill the pork and onion, in batches if necessary, until nicely charred and caramelized around the edges, and the pork is cooked through, about 3 minutes per side. Transfer to a serving platter.
 
-Simmer on low until liquid as evaporated. Chili is ready once flavors are blended and texture is to your liking.
-
-Serve in bowl and garnish to taste with grated cheddar, avocado, sour cream, jalapeño, salsa, tortilla chips, Fritos, or corn bread.
-`;
+Step 4
+Serve the grilled pork and onions with the fresh sesame kimchi and rice on the side.`;
 
 export const INGREDIENT_TYPE = "ingredient";
 export const QUANTITY_TYPE = "quantity";
@@ -68,7 +86,7 @@ export type SnippetProperty = {
   name: string;
   type: "number" | "string" | "boolean";
   onClick?: (snippet: Snippet, view: EditorView) => void;
-}
+};
 
 export type SnippetType = {
   name: string;
@@ -135,9 +153,8 @@ export const snippetTypeViewConfigurationsMobx = observable.map<
 
 export const spatialComponentsMobx = observable.array<SpatialComponent>([]);
 export const selectedSpatialComponentsMobx = observable.array<string>([]);
-export const spatialHoverSnippetIdBox = observable.box<string | undefined>(
-  undefined
-);
+export const spatialHoverSnippetIdBox =
+  observable.box<string | undefined>(undefined);
 
 export type DragState = {
   spatialComponentIds: string[];
