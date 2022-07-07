@@ -3,7 +3,7 @@ import * as Checkbox from "@radix-ui/react-checkbox";
 import { useState } from "react";
 import { Snippet, SnippetPropertyAction } from "./primitives";
 
-interface PropertyListItem {
+export interface PropertyListItem {
   id: string;
   name: string;
   value: string;

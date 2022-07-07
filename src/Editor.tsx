@@ -332,11 +332,6 @@ const snippetAnnotationPlugin = ViewPlugin.define((view) => ({}), {
           const property =
             snippetProperties &&
             snippetProperties.find((p) => p.id === snippetPropertyName);
-
-          if (property?.onClick) {
-            property.onClick(snippet, view);
-            return true;
-          }
         }
       }
       return false;
