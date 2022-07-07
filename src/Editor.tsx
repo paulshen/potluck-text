@@ -292,9 +292,9 @@ export const Editor = observer(({ textId }: { textId: string }) => {
   const editorRef = useRef(null);
   const suggestionsComputed = computed(() => {
     const text = computed(() => textEditorStateMobx.get(textId)!.sliceDoc(0));
-    const suggestions: SnippetSuggestion[] = snippetTypesMobx
-      .get(INGREDIENT_TYPE)!
-      .suggest(text.get());
+    const suggestions: SnippetSuggestion[] = [
+      ...snippetTypesMobx.values(),
+    ].flatMap((st) => st.suggest(text.get()));
     const existingSnippets = [...snippetsMobx.values()].filter(
       (snippet) => snippet.textId === textId
     );

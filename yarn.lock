@@ -1223,10 +1223,22 @@ normalize-range@^0.1.2:
   resolved "https://registry.yarnpkg.com/normalize-range/-/normalize-range-0.1.2.tgz#2d10c06bdfd312ea9777695a4d28439456b75942"
   integrity sha512-bdok/XvKII3nUpklnV6P2hxtMNrCboOjAcyBuQnWEhO665FwrSNRxU+AqpsyvO6LgGYPspN+lu5CLtw4jPRKNA==
 
+numeric-quantity@^1.0.2:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/numeric-quantity/-/numeric-quantity-1.0.4.tgz#13c571742925b36eb9c8a19ee26aa56c0ee9f37c"
+  integrity sha512-FT7tD29l3vf35bXykhVgW7foq1SxSpm0k34RQort6l6ilFEKAXYrJcnFHBIg59MTs2s9yZXr29hKq23xjGw6pw==
+
 object-hash@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/object-hash/-/object-hash-3.0.0.tgz#73f97f753e7baffc0e2cc9d6e079079744ac82e9"
   integrity sha512-RSn9F68PjH9HqtltsSnqYC1XXoWe9Bju5+213R98cNGttag9q9yAOTzdbsqvIa7aNm5WffBZFpWYr2aWrklWAw==
+
+parse-ingredient@^0.5.0:
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/parse-ingredient/-/parse-ingredient-0.5.0.tgz#326bbe1c9a852ab12aac1aa00aa30185a0696f78"
+  integrity sha512-QoQBey50xn+RYegDgpoBLAnF/qyLexA38uV003NbSPsRziw8MKiZL9X8aZaJyfgrU7PzqtmKt5fYmSJPYpUqcw==
+  dependencies:
+    numeric-quantity "^1.0.2"
 
 path-parse@^1.0.7:
   version "1.0.7"

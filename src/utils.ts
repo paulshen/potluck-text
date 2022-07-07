@@ -87,7 +87,9 @@ export function createSnippetsForSuggestions(
       textId,
       span: suggestion.span,
       type: "suggestion",
-      data: snippetTypesMobx.get(INGREDIENT_TYPE)!.parse(textInSnippet),
+      data: snippetTypesMobx
+        .get(suggestion.snippetTypeId)!
+        .parse(textInSnippet),
     };
   });
   runInAction(() => {

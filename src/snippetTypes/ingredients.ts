@@ -8,8 +8,8 @@ import {
   SnippetSuggestion,
   SnippetType,
   Span,
-} from "./primitives";
-import { spanOverlaps } from "./utils";
+} from "../primitives";
+import { spanOverlaps } from "../utils";
 
 // @ts-ignore
 import rawIngredients from "./ingredients.csv";

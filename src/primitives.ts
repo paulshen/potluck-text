@@ -1,7 +1,8 @@
 import { EditorState } from "@codemirror/state";
 import { EventEmitter } from "eventemitter3";
 import { observable } from "mobx";
-import { ingredientSnippetType } from "./ingredients";
+import { ingredientSnippetType } from "./snippetTypes/ingredients";
+import { quantitySnippetType } from "./snippetTypes/quantities";
 
 export type Position = [x: number, y: number];
 export type Rect = [x: number, y: number, width: number, height: number];
@@ -25,13 +26,18 @@ Serve in bowl and garnish to taste with grated cheddar, avocado, sour cream, jal
 `;
 
 export const INGREDIENT_TYPE = "ingredient";
+export const QUANTITY_TYPE = "quantity";
 const DEFAULT_SNIPPET_TYPES: { [key: string]: SnippetType } = {
   [INGREDIENT_TYPE]: ingredientSnippetType,
+  [QUANTITY_TYPE]: quantitySnippetType,
 };
 const DEFAULT_SNIPPET_TYPE_CONFIGURATION: {
   [key: string]: SnippetTypeViewConfiguration;
 } = {
   [INGREDIENT_TYPE]: {
+    inlineVisiblePropertyIds: [],
+  },
+  [QUANTITY_TYPE]: {
     inlineVisiblePropertyIds: [],
   },
 };
