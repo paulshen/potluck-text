@@ -215,7 +215,7 @@ class SnippetDataWidget extends WidgetType {
         continue;
       }
       const token = document.createElement("span");
-      token.className = `${ANNOTATION_TOKEN_CLASSNAME} text-gray-800 font-mono text-[8px] leading-[8px] whitespace-nowrap relative top-1`;
+      token.className = `${ANNOTATION_TOKEN_CLASSNAME} text-gray-500 text-[8px] leading-[8px] whitespace-nowrap relative top-0.5`;
       token.innerText = value;
       token.setAttribute("data-snippet-id", this.snippetId);
       token.setAttribute("data-snippet-property-name", key);
@@ -365,7 +365,7 @@ export const Editor = observer(({ textId }: { textId: string }) => {
           ".cm-scroller": {
             fontFamily: `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"`,
             fontSize: "1rem",
-            lineHeight: "1.5em",
+            lineHeight: "1.75em",
           },
           ".metakey-down & .cm-suggestion": {
             borderBottom: "1px dashed black",
