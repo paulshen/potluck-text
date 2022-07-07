@@ -21,5 +21,6 @@ const items = [
 ];
 
 Default.args = {
+  title: "🥕 Ingredient",
   items,
 };

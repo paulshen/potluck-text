@@ -69,14 +69,16 @@ const PropertyListItem = ({ item }: PropertyListItemProps) => {
 };
 
 interface PropertyListProps {
+  title: string;
   items: PropertyListItem[];
 }
 
-export const PropertyList = ({ items }: PropertyListProps) => {
+export const PropertyList = ({ title, items }: PropertyListProps) => {
   const [sortedItems, setSortedItems] = useState(items);
 
   return (
     <div className="bg-black text-white w-[300px] text-xs rounded">
+      <div className="p-2">{title}</div>
       <Reorder.Group axis="y" values={sortedItems} onReorder={setSortedItems}>
         {sortedItems.map((item, i) => (
           <PropertyListItem key={item.id} item={item} />
