@@ -14,10 +14,10 @@ const Template: ComponentStory<typeof PropertyList> = (args) => (
 export const Default = Template.bind({});
 
 const items = [
-  { id: 1, name: "food name", value: "Beef, Lean 70%  v", show: false },
+  { id: 1, name: "food", value: "Beef, Lean 70%  v", show: false },
   { id: 2, name: "aisle", value: "Produce", show: false },
-  { id: 3, name: "climate change", value: "5/5 Bad!", show: false },
-  { id: 4, name: "vegan substitute", value: "tofurkey", show: true },
+  { id: 3, name: "CO2 Score", value: "5/5 Bad!", show: false },
+  { id: 4, name: "vegan sub", value: "tofurkey", show: true },
 ];
 
 Default.args = {

@@ -60,7 +60,7 @@ const PropertyListItem = ({ item }: PropertyListItemProps) => {
           </Checkbox.Root>
         </div>
 
-        <div className="w-24">{item.name}</div>
+        <div className="w-24 text-gray-400">{item.name}</div>
 
         <div>{item.value}</div>
       </div>
