@@ -40,7 +40,7 @@ export function Pane({ children }: { children: React.ReactNode }) {
       <div
         {...bindDrag()}
         className={classNames(
-          "h-6 touch-none border-t-2 border-r-2 border-l-2 border-black rounded-t-lg flex flex-row justify-center items-center",
+          "bg-white h-6 touch-none border-t-2 border-r-2 border-l-2 border-black rounded-t-lg flex flex-row justify-center items-center",
           isGrabbing ? "cursor-grabbing" : "cursor-grab"
         )}
       >
