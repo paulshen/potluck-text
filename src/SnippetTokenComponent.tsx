@@ -1,5 +1,5 @@
 import * as HoverCard from "@radix-ui/react-hover-card";
-import { computed } from "mobx";
+import { action, computed } from "mobx";
 import classNames from "classnames";
 import { observer } from "mobx-react-lite";
 import { executeFormula } from "./formulas";
@@ -21,6 +21,7 @@ import {
   Snippet,
   SnippetTypeViewConfiguration,
   snippetTypeViewConfigurationsMobx,
+  spatialHoverSnippetIdBox,
 } from "./primitives";
 import { Token } from "./Token";
 import { useDragSpatialComponent } from "./useDragSpatialComponent";
@@ -114,7 +115,20 @@ export const SnippetTokenComponent = observer(
       >
         <HoverCard.Root open={disableHovercard ? false : undefined}>
           <HoverCard.Trigger>
-            <Token isSelected={isSelected}>
+            <Token
+              onMouseEnter={action(() => {
+                spatialHoverSnippetIdBox.set(snippetOnCanvas.snippetId);
+              })}
+              onMouseLeave={action(() => {
+                spatialHoverSnippetIdBox.set(undefined);
+              })}
+              isSelected={isSelected}
+              className={
+                !isSelected
+                  ? "hover:bg-yellow-400 hover:bg-opacity-50 transition"
+                  : undefined
+              }
+            >
               {text}
               {snippetType.properties
                 .filter((p) =>

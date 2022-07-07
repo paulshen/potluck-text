@@ -131,8 +131,11 @@ export const snippetTypeViewConfigurationsMobx = observable.map<
   SnippetTypeViewConfiguration
 >(DEFAULT_SNIPPET_TYPE_CONFIGURATION);
 
-export const spatialComponentsMobx = observable<SpatialComponent>([]);
-export const selectedSpatialComponentsMobx = observable<string>([]);
+export const spatialComponentsMobx = observable.array<SpatialComponent>([]);
+export const selectedSpatialComponentsMobx = observable.array<string>([]);
+export const spatialHoverSnippetIdBox = observable.box<string | undefined>(
+  undefined
+);
 
 export type DragState = {
   spatialComponentIds: string[];

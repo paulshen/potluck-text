@@ -14,7 +14,7 @@ import {
   hoverTooltip,
 } from "@codemirror/view";
 import { EditorView, minimalSetup } from "codemirror";
-import { comparer, computed, reaction, runInAction } from "mobx";
+import { autorun, comparer, computed, reaction, runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
 import { useRef, useEffect } from "react";
 import {
@@ -26,6 +26,7 @@ import {
   snippetTypesMobx,
   INGREDIENT_TYPE,
   snippetTypeViewConfigurationsMobx,
+  spatialHoverSnippetIdBox,
 } from "./primitives";
 import {
   createSnippetFromSpan,
@@ -61,7 +62,6 @@ const snippetSuggestionsField = StateField.define<SnippetSuggestion[]>({
     }));
   },
 });
-
 const suggestionMark = Decoration.mark({ class: "cm-suggestion" });
 const suggestionDecorations = EditorView.decorations.from(
   snippetSuggestionsField,
@@ -92,6 +92,21 @@ const snippetsField = StateField.define<Snippet[]>({
         tr.changes.mapPos(snippet.span[1]),
       ],
     }));
+  },
+});
+
+const setSpatialHoverSnippetId = StateEffect.define<string | undefined>();
+const spatialHoverSnippetIdField = StateField.define<string | undefined>({
+  create() {
+    return undefined;
+  },
+  update(hoverSnippetId, tr) {
+    for (let e of tr.effects) {
+      if (e.is(setSpatialHoverSnippetId)) {
+        return e.value;
+      }
+    }
+    return hoverSnippetId;
   },
 });
 
@@ -243,22 +258,27 @@ const snippetAnnotationPlugin = ViewPlugin.define((view) => ({}), {
   },
 });
 
-const snippetDecorations = EditorView.decorations.from(
-  snippetsField,
-  (snippets) =>
-    Decoration.set(
-      snippets.flatMap((snippet) => [
-        Decoration.mark({ class: "cm-snippet" }).range(
-          snippet.span[0],
-          snippet.span[1]
-        ),
+const snippetDecorations = EditorView.decorations.compute(
+  [snippetsField, spatialHoverSnippetIdField],
+  (state) => {
+    const spatialHoverSnippetId = state.field(spatialHoverSnippetIdField);
+    return Decoration.set(
+      state.field(snippetsField).flatMap((snippet) => [
+        Decoration.mark({
+          class: `cm-snippet${
+            snippet.id === spatialHoverSnippetId
+              ? " cm-snippet-spatial-hover"
+              : ""
+          }`,
+        }).range(snippet.span[0], snippet.span[1]),
         Decoration.widget({
           widget: new SnippetDataWidget(snippet.id, snippet.data),
           side: 1,
         }).range(snippet.span[1]),
       ]),
       true
-    )
+    );
+  }
 );
 
 const snippetHover = hoverTooltip((view, pos, side) => {
@@ -349,6 +369,9 @@ export const Editor = observer(({ textId }: { textId: string }) => {
           ".cm-snippet:hover": {
             backgroundColor: "#facc1580",
           },
+          ".cm-snippet-spatial-hover": {
+            backgroundColor: "#facc1580",
+          },
           ".cm-snippet .cm-suggestion": {
             backgroundColor: "#80808015",
             textDecoration: "none",
@@ -367,6 +390,7 @@ export const Editor = observer(({ textId }: { textId: string }) => {
         snippetDecorations,
         snippetAnnotationPlugin,
         snippetHover,
+        spatialHoverSnippetIdField,
       ],
       parent: editorRef.current!,
       dispatch(transaction) {
@@ -439,6 +463,13 @@ export const Editor = observer(({ textId }: { textId: string }) => {
         },
         { equals: comparer.structural }
       ),
+      autorun(() => {
+        view.dispatch({
+          effects: [
+            setSpatialHoverSnippetId.of(spatialHoverSnippetIdBox.get()),
+          ],
+        });
+      }),
     ];
     return () => {
       view.destroy();
