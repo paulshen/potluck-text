@@ -32,7 +32,7 @@ const DEFAULT_SNIPPET_TYPE_CONFIGURATION: {
   [key: string]: SnippetTypeViewConfiguration;
 } = {
   [INGREDIENT_TYPE]: {
-    inlineVisiblePropertyIds: ["ingredient--aisle"],
+    inlineVisiblePropertyIds: [],
   },
 };
 
