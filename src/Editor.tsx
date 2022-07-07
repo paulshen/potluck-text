@@ -367,25 +367,32 @@ export const Editor = observer(({ textId }: { textId: string }) => {
           ".cm-scroller": {
             fontFamily: `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"`,
             fontSize: "1rem",
-            lineHeight: "1.35rem",
+            lineHeight: "1.5em",
           },
-          ".cm-suggestion": {
-            borderBottom: "1px dashed #bbb", // TODO: Use Tailwind color value
-            borderRadius: "2px",
+          ".cm-suggestion, .cm-snippet": {
+            margin: "0 -0.125rem",
+            padding: "0 0.125rem",
             transition: "background-color 0.1s",
           },
-          ".cm-suggestion:hover": {
-            backgroundColor: "#f9f9f9",
+          ".metakey-down & .cm-suggestion:hover, .metakey-down & .cm-snippet:hover":
+            {
+              cursor: "pointer",
+            },
+          ".cm-suggestion": {
+            borderBottom: "1px dashed #ddd",
+          },
+          ".metakey-down & .cm-suggestion": {
+            backgroundColor: "#e3e3e3",
+            borderRadius: "2px",
+            borderBottom: "none",
           },
           ".cm-snippet": {
-            backgroundColor: "black",
+            borderBottom: "1px solid black",
             transition: "background-color 0.1s",
-            margin: "0 -0.2rem",
-            padding: "0 0.2rem",
-            borderRadius: "2px",
           },
-          ".cm-snippet:hover": {
-            backgroundColor: "#facc1580",
+          ".metakey-down & .cm-snippet:hover": {
+            backgroundColor: "black",
+            color: "white",
           },
           ".cm-snippet-spatial-hover": {
             backgroundColor: "#facc1580",
