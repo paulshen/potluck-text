@@ -139,6 +139,7 @@ const dragSnippetPlugin = ViewPlugin.fromClass(
               span: [range.from, range.to],
               mouseOffset: [left - event.clientX, top - event.clientY],
               text: view.state.sliceDoc(range.from, range.to),
+              shiftKey: event.shiftKey,
             });
             // We only want to drag out a single snippet
             return true;

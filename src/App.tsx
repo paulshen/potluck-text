@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { action, runInAction } from "mobx";
+import { action, runInAction, values } from "mobx";
 import { observer } from "mobx-react-lite";
 import { nanoid } from "nanoid";
 import { CanvasBackground } from "./CanvasBackground";
@@ -48,27 +48,30 @@ const SpatialComponents = observer(() => {
   );
 });
 
+const MULTI_DRAG_SNIPPET_TOKEN_OFFSET = 40;
 function NewDragSnippetComponent() {
   const [dragSnippet, setDragSnippet] = useState<
     | {
         spanPosition: [x: number, y: number] | undefined;
         span: Span;
-        text: string;
+        previewTexts: string[];
       }
     | undefined
   >(undefined);
 
   useEffect(() => {
-    let dragSnippetId: string | undefined;
-    let dragSnippetSpan: [textId: string, span: Span] | undefined;
+    let dragSnippetTextId: string | undefined;
+    let dragSnippetIds: string[] | undefined;
+    let dragNonSnippetTextSpan: Span | undefined;
     let mouseOffset: [x: number, y: number] | undefined;
     let didMouseMove = false;
     function cleanup() {
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
       setDragSnippet(undefined);
-      dragSnippetId = undefined;
-      dragSnippetSpan = undefined;
+      dragSnippetTextId = undefined;
+      dragSnippetIds = undefined;
+      dragNonSnippetTextSpan = undefined;
       mouseOffset = undefined;
     }
     function onMouseMove(e: MouseEvent) {
@@ -84,22 +87,25 @@ function NewDragSnippetComponent() {
     }
     function onMouseUp(e: MouseEvent) {
       runInAction(() => {
-        let snippetId = dragSnippetId;
-        if (snippetId === undefined) {
-          snippetId = createSnippetFromSpan(
-            dragSnippetSpan![0],
-            dragSnippetSpan![1]
-          );
+        let snippetIds = dragSnippetIds;
+        if (snippetIds === undefined) {
+          snippetIds = [
+            createSnippetFromSpan(dragSnippetTextId!, dragNonSnippetTextSpan!),
+          ];
         }
         if (didMouseMove) {
-          spatialComponentsMobx.push({
-            spatialComponentType: SpatialComponentType.Snippet,
-            id: nanoid(),
-            snippetId,
-            position: [
-              e.clientX + mouseOffset![0],
-              e.clientY + mouseOffset![1],
-            ],
+          snippetIds.forEach((snippetId, i) => {
+            spatialComponentsMobx.push({
+              spatialComponentType: SpatialComponentType.Snippet,
+              id: nanoid(),
+              snippetId,
+              position: [
+                e.clientX + mouseOffset![0],
+                e.clientY +
+                  mouseOffset![1] +
+                  i * MULTI_DRAG_SNIPPET_TOKEN_OFFSET,
+              ],
+            });
           });
         }
       });
@@ -112,6 +118,7 @@ function NewDragSnippetComponent() {
       span,
       mouseOffset: mouseOffsetArg,
       text,
+      shiftKey,
     }: {
       snippetId: string | undefined;
       textId: string;
@@ -119,15 +126,37 @@ function NewDragSnippetComponent() {
       span: Span;
       mouseOffset: [x: number, y: number];
       text: string;
+      shiftKey: boolean;
     }) {
-      dragSnippetId = snippetId;
-      dragSnippetSpan = [textId, span];
+      dragSnippetTextId = textId;
+      let previewTexts: string[];
+      if (snippetId !== undefined) {
+        if (shiftKey) {
+          const snippetTypeId = snippetsMobx.get(snippetId)!.snippetTypeId;
+          const snippetsOfTypeInText = values(snippetsMobx).filter(
+            (snippet) =>
+              snippet.textId === textId &&
+              snippet.snippetTypeId === snippetTypeId
+          );
+          dragSnippetIds = snippetsOfTypeInText.map((snippet) => snippet.id);
+          const editorState = textEditorStateMobx.get(textId)!;
+          previewTexts = snippetsOfTypeInText.map((snippet) =>
+            editorState.sliceDoc(snippet.span[0], snippet.span[1])
+          );
+        } else {
+          dragSnippetIds = snippetId !== undefined ? [snippetId] : [];
+          previewTexts = [text];
+        }
+      } else {
+        dragNonSnippetTextSpan = span;
+        previewTexts = [text];
+      }
       mouseOffset = mouseOffsetArg;
       setDragSnippet({
         // we won't render the preview until user has moved the mouse
         spanPosition: undefined,
         span,
-        text,
+        previewTexts,
       });
       window.addEventListener("mousemove", onMouseMove);
       window.addEventListener("mouseup", onMouseUp);
@@ -143,7 +172,7 @@ function NewDragSnippetComponent() {
     return null;
   }
 
-  const { spanPosition, text } = dragSnippet;
+  const { spanPosition, previewTexts } = dragSnippet;
   return (
     <div
       className="fixed"
@@ -152,7 +181,17 @@ function NewDragSnippetComponent() {
         top: `${spanPosition[1]}px`,
       }}
     >
-      <Token>{text}</Token>
+      {previewTexts.map((tokenText, i) => (
+        <div
+          className="absolute left-0"
+          style={{
+            top: `${i * MULTI_DRAG_SNIPPET_TOKEN_OFFSET}px`,
+          }}
+          key={i}
+        >
+          <Token>{tokenText}</Token>
+        </div>
+      ))}
     </div>
   );
 }
