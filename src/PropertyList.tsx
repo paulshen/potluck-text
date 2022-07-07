@@ -73,7 +73,9 @@ const PropertyListItem = ({
 
         <div className="w-24 text-gray-400">{item.name}</div>
 
-        <div>{item.value}</div>
+        <div>
+          {item.value ?? <span className="text-gray-500">Unknown</span>}
+        </div>
 
         <div className="flex gap-1 items-start">
           {item.actions.map((action, i) => {
