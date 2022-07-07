@@ -1,3 +1,4 @@
+import { sortBy } from "lodash";
 import { computed, runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
 import {
@@ -6,14 +7,10 @@ import {
   snippetTypeViewConfigurationsMobx,
   textEditorStateMobx,
 } from "./primitives";
+import { PropertyList } from "./PropertyList";
 
 export const SnippetTokenHovercardContent = observer(
   ({ snippet }: { snippet: Snippet }) => {
-    const text = computed(() => {
-      return textEditorStateMobx
-        .get(snippet.textId)!
-        .sliceDoc(snippet.span[0], snippet.span[1]);
-    }).get();
     const snippetType = snippetTypesMobx.get(snippet.snippetTypeId)!;
     const viewConfig = snippetTypeViewConfigurationsMobx.get(
       snippet.snippetTypeId
@@ -32,42 +29,29 @@ export const SnippetTokenHovercardContent = observer(
       });
     };
 
+    const reorderProperties = (ids: string[]) => {
+      runInAction(() => {
+        snippetType.properties = ids.map(
+          (id) => snippetType.properties.find((p) => p.id === id)!
+        );
+      });
+    };
+
+    const propertyListItems = snippetType.properties.map((property) => ({
+      id: property.id,
+      name: property.name,
+      value: snippet.data[property.id],
+      show: viewConfig.inlineVisiblePropertyIds.includes(property.id),
+    }));
+
     return (
-      <div className="p-4 text-sm">
-        <div className="my-1 font-bold text-gray-500">
-          {snippetType.icon} {snippetType.name}
-        </div>
-        <div className="text-md">{text}</div>
-        <table>
-          <thead>
-            <tr>
-              <th></th>
-              <th></th>
-              <th className="text-gray-500 text-sm font-normal">show?</th>
-            </tr>
-          </thead>
-          <tbody>
-            {snippetType.properties.map((property) => (
-              <tr key={property.id}>
-                <td className="px-2">{property.name}</td>
-                <td className="px-2">
-                  {snippet.data[property.id] ?? (
-                    <span className="text-gray-400">Unknown</span>
-                  )}
-                </td>
-                <td className="px-2">
-                  <input
-                    type="checkbox"
-                    checked={viewConfig.inlineVisiblePropertyIds.includes(
-                      property.id
-                    )}
-                    onChange={() => togglePropertyVisible(property.id)}
-                  ></input>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div>
+        <PropertyList
+          title={`${snippetType.icon} ${snippetType.name}`}
+          items={propertyListItems}
+          togglePropertyVisible={togglePropertyVisible}
+          reorderItems={reorderProperties}
+        />
       </div>
     );
   }

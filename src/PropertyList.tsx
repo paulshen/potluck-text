@@ -3,7 +3,7 @@ import * as Checkbox from "@radix-ui/react-checkbox";
 import { useState } from "react";
 
 interface PropertyListItem {
-  id: number; // TODO: This should be a unique ID.
+  id: string;
   name: string;
   value: string;
   show: boolean;
@@ -11,9 +11,13 @@ interface PropertyListItem {
 
 interface PropertyListItemProps {
   item: PropertyListItem;
+  togglePropertyVisible: (propertyId: string) => void;
 }
 
-const PropertyListItem = ({ item }: PropertyListItemProps) => {
+const PropertyListItem = ({
+  item,
+  togglePropertyVisible,
+}: PropertyListItemProps) => {
   const controls = useDragControls();
 
   return (
@@ -41,7 +45,10 @@ const PropertyListItem = ({ item }: PropertyListItemProps) => {
         </div>
 
         <div>
-          <Checkbox.Root defaultChecked={item.show}>
+          <Checkbox.Root
+            checked={item.show}
+            onCheckedChange={() => togglePropertyVisible(item.id)}
+          >
             <div className="bg-white rounded h-[16px] w-[16px]">
               <Checkbox.Indicator>
                 <svg
@@ -71,17 +78,30 @@ const PropertyListItem = ({ item }: PropertyListItemProps) => {
 interface PropertyListProps {
   title: string;
   items: PropertyListItem[];
+  togglePropertyVisible: (id: string) => void;
+  reorderItems: (ids: string[]) => void;
 }
 
-export const PropertyList = ({ title, items }: PropertyListProps) => {
-  const [sortedItems, setSortedItems] = useState(items);
-
+export const PropertyList = ({
+  title,
+  items,
+  togglePropertyVisible,
+  reorderItems,
+}: PropertyListProps) => {
   return (
     <div className="bg-black text-white w-[300px] text-xs rounded">
       <div className="p-2">{title}</div>
-      <Reorder.Group axis="y" values={sortedItems} onReorder={setSortedItems}>
-        {sortedItems.map((item, i) => (
-          <PropertyListItem key={item.id} item={item} />
+      <Reorder.Group
+        axis="y"
+        values={items}
+        onReorder={(items) => reorderItems(items.map((i) => i.id))}
+      >
+        {items.map((item, i) => (
+          <PropertyListItem
+            key={item.id}
+            item={item}
+            togglePropertyVisible={togglePropertyVisible}
+          />
         ))}
       </Reorder.Group>
     </div>

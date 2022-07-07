@@ -23,7 +23,6 @@ import {
   SnippetSuggestion,
   textEditorStateMobx,
   snippetTypesMobx,
-  INGREDIENT_TYPE,
   snippetTypeViewConfigurationsMobx,
   spatialHoverSnippetIdBox,
 } from "./primitives";
@@ -75,26 +74,29 @@ const suggestionDecorations = EditorView.decorations.from(
     )
 );
 
-const setSnippetsEffect = StateEffect.define<Snippet[]>();
-const snippetsField = StateField.define<Snippet[]>({
-  create() {
-    return [];
-  },
-  update(snippets, tr) {
-    for (let e of tr.effects) {
-      if (e.is(setSnippetsEffect)) {
-        return e.value;
+const setSnippetsEffect =
+  StateEffect.define<(Snippet & { properties: string[] })[]>();
+const snippetsField = StateField.define<(Snippet & { properties: string[] })[]>(
+  {
+    create() {
+      return [];
+    },
+    update(snippets, tr) {
+      for (let e of tr.effects) {
+        if (e.is(setSnippetsEffect)) {
+          return e.value;
+        }
       }
-    }
-    return snippets.map((snippet) => ({
-      ...snippet,
-      span: [
-        tr.changes.mapPos(snippet.span[0]),
-        tr.changes.mapPos(snippet.span[1]),
-      ],
-    }));
-  },
-});
+      return snippets.map((snippet) => ({
+        ...snippet,
+        span: [
+          tr.changes.mapPos(snippet.span[0]),
+          tr.changes.mapPos(snippet.span[1]),
+        ],
+      }));
+    },
+  }
+);
 
 const setSpatialHoverSnippetId = StateEffect.define<string | undefined>();
 const spatialHoverSnippetIdField = StateField.define<string | undefined>({
@@ -187,7 +189,8 @@ const ANNOTATION_TOKEN_CLASSNAME = "annotation-token";
 class SnippetDataWidget extends WidgetType {
   constructor(
     readonly snippetId: string,
-    readonly snippetData: { [key: string]: string }
+    readonly snippetData: { [key: string]: string },
+    readonly snippetProperties: string[]
   ) {
     super();
   }
@@ -195,7 +198,8 @@ class SnippetDataWidget extends WidgetType {
   eq(other: WidgetType): boolean {
     return (
       other instanceof SnippetDataWidget &&
-      comparer.structural(this.snippetData, other.snippetData)
+      comparer.structural(this.snippetData, other.snippetData) &&
+      comparer.structural(this.snippetProperties, other.snippetProperties)
     );
   }
 
@@ -281,7 +285,11 @@ const snippetDecorations = EditorView.decorations.compute(
                 }`,
               }).range(snippet.span[0], snippet.span[1]),
               Decoration.widget({
-                widget: new SnippetDataWidget(snippet.id, snippet.data),
+                widget: new SnippetDataWidget(
+                  snippet.id,
+                  snippet.data,
+                  snippet.properties
+                ),
                 side: 1,
               }).range(snippet.span[1]),
             ]
@@ -464,6 +472,7 @@ export const Editor = observer(({ textId }: { textId: string }) => {
             return {
               ...snippet,
               data: inlineVisibleData,
+              properties: inlineProperties,
             };
           });
         },
