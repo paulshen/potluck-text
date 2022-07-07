@@ -118,7 +118,11 @@ export const spanOverlaps = ([from, to]: Span, [from2, to2]: Span) => {
   return (from <= from2 && to >= from2) || (from2 <= from && to2 >= from);
 };
 
-export function createSnippetFromSpan(textId: string, span: Span): string {
+export function createSnippetFromSpan(
+  textId: string,
+  span: Span,
+  snippetTypeId: string
+): string {
   const textInSnippet = textEditorStateMobx
     .get(textId)
     ?.sliceDoc(span[0], span[1])!;
@@ -126,7 +130,7 @@ export function createSnippetFromSpan(textId: string, span: Span): string {
   runInAction(() => {
     snippetsMobx.set(snippetId, {
       id: snippetId,
-      snippetTypeId: INGREDIENT_TYPE,
+      snippetTypeId,
       textId,
       span,
       data: snippetTypesMobx.get(INGREDIENT_TYPE)!.parse(textInSnippet),

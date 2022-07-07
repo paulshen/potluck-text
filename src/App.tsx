@@ -50,14 +50,15 @@ const SpatialComponents = observer(() => {
 
 const MULTI_DRAG_SNIPPET_TOKEN_OFFSET = 40;
 function NewDragSnippetComponent() {
-  const [dragSnippet, setDragSnippet] = useState<
-    | {
-        spanPosition: [x: number, y: number] | undefined;
-        span: Span;
-        previewTexts: string[];
-      }
-    | undefined
-  >(undefined);
+  const [dragSnippet, setDragSnippet] =
+    useState<
+      | {
+          spanPosition: [x: number, y: number] | undefined;
+          span: Span;
+          previewTexts: string[];
+        }
+      | undefined
+    >(undefined);
 
   useEffect(() => {
     let dragSnippetTextId: string | undefined;
@@ -90,7 +91,11 @@ function NewDragSnippetComponent() {
         let snippetIds = dragSnippetIds;
         if (snippetIds === undefined) {
           snippetIds = [
-            createSnippetFromSpan(dragSnippetTextId!, dragNonSnippetTextSpan!),
+            createSnippetFromSpan(
+              dragSnippetTextId!,
+              dragNonSnippetTextSpan!,
+              INGREDIENT_TYPE
+            ),
           ];
         }
         if (didMouseMove) {

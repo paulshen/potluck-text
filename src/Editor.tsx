@@ -4,6 +4,7 @@ import {
   EditorSelection,
   StateEffect,
   StateField,
+  Prec,
 } from "@codemirror/state";
 import {
   ViewPlugin,
@@ -36,6 +37,14 @@ import ReactDOM from "react-dom/client";
 import { SnippetTokenHovercardContent } from "./SnippetTokenHovercardContent";
 import pick from "lodash/pick";
 
+// Cursor is inside the suggestion or just a little to the right
+const suggestionActive = (
+  suggestion: SnippetSuggestion,
+  cursorPosition: number
+) =>
+  cursorPosition >= suggestion.span[0] &&
+  cursorPosition <= suggestion.span[1] + 1;
+
 const textIdFacet = Facet.define<string, string>({
   combine: (values) => values[0],
 });
@@ -61,17 +70,27 @@ const snippetSuggestionsField = StateField.define<SnippetSuggestion[]>({
   },
 });
 const suggestionMark = Decoration.mark({ class: "cm-suggestion" });
+const activeSuggestionMark = Decoration.mark({
+  class: "cm-suggestion cm-suggestion-active",
+});
 const suggestionDecorations = EditorView.decorations.from(
   snippetSuggestionsField,
-  (suggestions) =>
-    Decoration.set(
-      suggestions.flatMap((suggestion) =>
-        suggestion.span[1] > suggestion.span[0]
-          ? [suggestionMark.range(suggestion.span[0], suggestion.span[1])]
-          : []
-      ),
+  (suggestions) => (view) => {
+    const pos = view.state.selection.asSingle().main.anchor;
+
+    return Decoration.set(
+      suggestions.flatMap((suggestion) => {
+        if (suggestion.span[1] <= suggestion.span[0]) {
+          return [];
+        }
+        const active = suggestionActive(suggestion, pos);
+        return active
+          ? [activeSuggestionMark.range(suggestion.span[0], suggestion.span[1])]
+          : [suggestionMark.range(suggestion.span[0], suggestion.span[1])];
+      }),
       true
-    )
+    );
+  }
 );
 
 const setSnippetsEffect =
@@ -112,6 +131,37 @@ const spatialHoverSnippetIdField = StateField.define<string | undefined>({
     return hoverSnippetId;
   },
 });
+
+const acceptSuggestionsPlugin = ViewPlugin.fromClass(
+  class {
+    constructor(view: EditorView) {}
+    update(update: ViewUpdate) {}
+    destroy() {}
+  },
+  {
+    eventHandlers: {
+      keydown(event, view) {
+        if (event.key === "Enter" && event.metaKey) {
+          event.preventDefault();
+
+          const textId = view.state.facet(textIdFacet);
+          const pos = view.state.selection.asSingle().main.anchor;
+          const suggestions = view.state.field(snippetSuggestionsField);
+          const suggestionNearPos = suggestions.find((suggestion) =>
+            suggestionActive(suggestion, pos)
+          );
+          if (suggestionNearPos) {
+            createSnippetFromSpan(
+              textId,
+              suggestionNearPos.span,
+              suggestionNearPos.snippetTypeId
+            );
+          }
+        }
+      },
+    },
+  }
+);
 
 const dragSnippetPlugin = ViewPlugin.fromClass(
   class {
@@ -171,7 +221,11 @@ const dragSnippetPlugin = ViewPlugin.fromClass(
             if (suggestionAtPos !== undefined) {
               const textId = view.state.facet(textIdFacet);
               runInAction(() => {
-                createSnippetFromSpan(textId, suggestionAtPos.span);
+                createSnippetFromSpan(
+                  textId,
+                  suggestionAtPos.span,
+                  suggestionAtPos.snippetTypeId
+                );
               });
               return true;
             }
@@ -367,6 +421,12 @@ export const Editor = observer(({ textId }: { textId: string }) => {
             fontSize: "1rem",
             lineHeight: "1.75em",
           },
+          ".cm-suggestion-active": {
+            borderBottom: "1px dashed black",
+          },
+          ".metakey-down & .cm-suggestion.cm-suggestion-active": {
+            borderBottom: "2px dashed black",
+          },
           ".metakey-down & .cm-suggestion": {
             borderBottom: "1px dashed black",
           },
@@ -403,6 +463,7 @@ export const Editor = observer(({ textId }: { textId: string }) => {
         snippetAnnotationPlugin,
         snippetHover,
         spatialHoverSnippetIdField,
+        Prec.high(acceptSuggestionsPlugin), // high priority so we can intercept enter events early
       ],
       parent: editorRef.current!,
       dispatch(transaction) {
