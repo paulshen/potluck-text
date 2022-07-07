@@ -203,6 +203,10 @@ const TEXT_ID = nanoid();
 export const App = observer(() => {
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Meta") {
+        document.querySelector("body")?.classList.add("metakey-down");
+      }
+
       runInAction(() => {
         if (e.target === document.body) {
           switch (e.key) {
@@ -244,9 +248,16 @@ export const App = observer(() => {
         }
       });
     }
+    function onKeyUp(e: KeyboardEvent) {
+      if (e.key === "Meta") {
+        document.querySelector("body")?.classList.remove("metakey-down");
+      }
+    }
     window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keyup", onKeyUp);
     return () => {
       window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keyup", onKeyUp);
     };
   }, []);
 
