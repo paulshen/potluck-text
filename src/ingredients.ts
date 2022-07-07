@@ -56,7 +56,6 @@ export const ingredientSnippetType: SnippetType = {
     }));
   },
 
-  // TODO: this will parse out structured data for the ingredient
   parse: (text: string) => {
     const ingredient = ingredients.find((i) => i.name === text);
     if (ingredient !== undefined) {
@@ -65,6 +64,8 @@ export const ingredientSnippetType: SnippetType = {
         "ingredient--aisle": ingredient.aisle,
         "ingredient--climate": ingredient.climate,
       };
+    } else {
+      return { "ingredient--icon": "🥕" };
     }
   },
 
