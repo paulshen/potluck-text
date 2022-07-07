@@ -17,13 +17,13 @@ import { spanOverlaps } from "../utils";
 import rawIngredients from "./ingredients.csv";
 import { EditorView } from "codemirror";
 import { ChangeSet } from "@codemirror/state";
-import { nanoid } from "nanoid";
 
 type Ingredient = {
   name: string;
   aisle: string;
   climate: number;
   veganAlternative: string;
+  description: string;
 };
 
 const ingredients: Ingredient[] = rawIngredients.map((i: any) => {
@@ -63,13 +63,16 @@ export const ingredientSnippetType: SnippetType = {
   },
 
   parse: (text: string) => {
-    const ingredient = ingredients.find((i) => i.name === text);
+    const ingredient = ingredients.find(
+      (i) => i.name.toLowerCase() === text.toLowerCase()
+    );
     if (ingredient !== undefined) {
       return {
         "ingredient--icon": "🥕",
         "ingredient--aisle": ingredient.aisle,
         "ingredient--climate": ingredient.climate,
         "ingredient--veganAlternative": ingredient.veganAlternative,
+        "ingredient--description": ingredient.description,
       };
     } else {
       return { "ingredient--icon": "🥕" };
@@ -109,5 +112,6 @@ export const ingredientSnippetType: SnippetType = {
         });
       },
     },
+    { id: "ingredient--description", name: "Description", type: "string" },
   ],
 };
