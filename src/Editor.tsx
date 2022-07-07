@@ -4,14 +4,13 @@ import {
   EditorSelection,
   StateEffect,
   StateField,
-  ChangeSet,
 } from "@codemirror/state";
 import {
   ViewPlugin,
   ViewUpdate,
   Decoration,
   WidgetType,
-  hoverTooltip, DecorationSet,
+  hoverTooltip,
 } from "@codemirror/view";
 import { EditorView, minimalSetup } from "codemirror";
 import { autorun, comparer, computed, reaction, runInAction } from "mobx";
@@ -231,6 +230,9 @@ class SnippetDataWidget extends WidgetType {
 const snippetAnnotationPlugin = ViewPlugin.define((view) => ({}), {
   eventHandlers: {
     mousedown(e, view) {
+      if (!e.metaKey) {
+        return;
+      }
 
       const target = e.target as HTMLElement;
       const parentAnnotationToken = getParentByClassName(
@@ -242,15 +244,20 @@ const snippetAnnotationPlugin = ViewPlugin.define((view) => ({}), {
         const snippetId = parentAnnotationToken.getAttribute("data-snippet-id");
         if (snippetId !== null) {
           const snippet = snippetsMobx.get(snippetId)!;
-          const snippetProperties = snippetTypesMobx.get(snippet.snippetTypeId)?.properties
-          const snippetPropertyName = parentAnnotationToken.getAttribute("data-snippet-property-name")
-          const property = snippetProperties && snippetProperties.find((p) => p.id === snippetPropertyName)
+          const snippetProperties = snippetTypesMobx.get(
+            snippet.snippetTypeId
+          )?.properties;
+          const snippetPropertyName = parentAnnotationToken.getAttribute(
+            "data-snippet-property-name"
+          );
+          const property =
+            snippetProperties &&
+            snippetProperties.find((p) => p.id === snippetPropertyName);
 
           if (property?.onClick) {
-            property.onClick(snippet, view)
+            property.onClick(snippet, view);
+            return true;
           }
-
-          return true;
         }
       }
       return false;

@@ -4,18 +4,20 @@
 // Climate impact source: https://ourworldindata.org/environmental-impacts-of-food
 
 import {
-  INGREDIENT_TYPE, Snippet, snippetsMobx,
+  INGREDIENT_TYPE,
+  Snippet,
+  snippetsMobx,
   SnippetSuggestion,
-  SnippetType, snippetTypesMobx,
+  SnippetType,
   Span,
 } from "../primitives";
 import { spanOverlaps } from "../utils";
 
 // @ts-ignore
 import rawIngredients from "./ingredients.csv";
-import {EditorView} from "codemirror";
-import {ChangeSet} from "@codemirror/state";
-import {nanoid} from "nanoid";
+import { EditorView } from "codemirror";
+import { ChangeSet } from "@codemirror/state";
+import { nanoid } from "nanoid";
 
 type Ingredient = {
   name: string;
@@ -67,7 +69,7 @@ export const ingredientSnippetType: SnippetType = {
         "ingredient--icon": "🥕",
         "ingredient--aisle": ingredient.aisle,
         "ingredient--climate": ingredient.climate,
-        "ingredient--veganAlternative": ingredient.veganAlternative
+        "ingredient--veganAlternative": ingredient.veganAlternative,
       };
     } else {
       return { "ingredient--icon": "🥕" };
@@ -83,30 +85,29 @@ export const ingredientSnippetType: SnippetType = {
       name: "Vegan Alternative",
       type: "string",
       onClick: (snippet: Snippet, view: EditorView) => {
-        const alternative = snippet.data["ingredient--veganAlternative"]
+        const alternative = snippet.data["ingredient--veganAlternative"];
 
-         view.dispatch({
-           changes: ChangeSet.of(
-             {
-               // this currently inserts the annotation text after the snippet
-               from: snippet.span[0],
-               to: snippet.span[1],
-               insert: alternative,
-             },
-             view.state.doc.length
-           ),
-         });
+        view.dispatch({
+          changes: ChangeSet.of(
+            {
+              from: snippet.span[0],
+              to: snippet.span[1],
+              insert: alternative,
+            },
+            view.state.doc.length
+          ),
+        });
 
         // reparse snippet
 
         snippetsMobx.set(snippet.id, {
-          id: nanoid(),
+          id: snippet.id,
           snippetTypeId: snippet.snippetTypeId,
           textId: snippet.textId,
-          span: [snippet.span[0], snippet.span[0] + alternative.length - 1],
+          span: [snippet.span[0], snippet.span[0] + alternative.length],
           data: ingredientSnippetType.parse(alternative),
-        })
+        });
       },
-    }
+    },
   ],
 };
