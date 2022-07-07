@@ -10,6 +10,7 @@ import {
   SnippetSuggestion,
   SnippetType,
   Span,
+  textEditorViewsMap,
 } from "../primitives";
 import { spanOverlaps } from "../utils";
 
@@ -87,30 +88,40 @@ export const ingredientSnippetType: SnippetType = {
       id: "ingredient--veganAlternative",
       name: "Vegan Alternative",
       type: "string",
-      onClick: (snippet: Snippet, view: EditorView) => {
-        const alternative = snippet.data["ingredient--veganAlternative"];
+      actions: [
+        {
+          label: "replace",
+          available: (snippet: Snippet) => {
+            const alternative = snippet.data["ingredient--veganAlternative"];
+            return alternative !== undefined;
+          },
+          handler: (snippet: Snippet) => {
+            const alternative = snippet.data["ingredient--veganAlternative"];
 
-        view.dispatch({
-          changes: ChangeSet.of(
-            {
-              from: snippet.span[0],
-              to: snippet.span[1],
-              insert: alternative,
-            },
-            view.state.doc.length
-          ),
-        });
+            const view = textEditorViewsMap[snippet.textId];
+            view.dispatch({
+              changes: ChangeSet.of(
+                {
+                  from: snippet.span[0],
+                  to: snippet.span[1],
+                  insert: alternative,
+                },
+                view.state.doc.length
+              ),
+            });
 
-        // reparse snippet
+            // reparse snippet
 
-        snippetsMobx.set(snippet.id, {
-          id: snippet.id,
-          snippetTypeId: snippet.snippetTypeId,
-          textId: snippet.textId,
-          span: [snippet.span[0], snippet.span[0] + alternative.length],
-          data: ingredientSnippetType.parse(alternative),
-        });
-      },
+            snippetsMobx.set(snippet.id, {
+              id: snippet.id,
+              snippetTypeId: snippet.snippetTypeId,
+              textId: snippet.textId,
+              span: [snippet.span[0], snippet.span[0] + alternative.length],
+              data: ingredientSnippetType.parse(alternative),
+            });
+          },
+        },
+      ],
     },
     { id: "ingredient--description", name: "Description", type: "string" },
   ],

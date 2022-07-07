@@ -41,12 +41,14 @@ export const SnippetTokenHovercardContent = observer(
       id: property.id,
       name: property.name,
       value: snippet.data[property.id],
+      actions: property.actions ?? [],
       show: viewConfig.inlineVisiblePropertyIds.includes(property.id),
     }));
 
     return (
       <div>
         <PropertyList
+          snippet={snippet}
           title={`${snippetType.icon} ${snippetType.name}`}
           items={propertyListItems}
           togglePropertyVisible={togglePropertyVisible}

@@ -26,6 +26,7 @@ import {
   snippetTypesMobx,
   snippetTypeViewConfigurationsMobx,
   spatialHoverSnippetIdBox,
+  textEditorViewsMap,
 } from "./primitives";
 import {
   createSnippetFromSpan,
@@ -372,7 +373,7 @@ const snippetHover = hoverTooltip((view, pos, side) => {
           ReactDOM.createRoot(dom).render(
             <SnippetTokenHovercardContent snippet={snippet} />
           );
-          return { dom };
+          return { dom, offset: { x: 0, y: -8 } };
         },
       };
     }
@@ -490,6 +491,7 @@ export const Editor = observer(({ textId }: { textId: string }) => {
         });
       },
     });
+    textEditorViewsMap[textId] = view;
 
     runInAction(() => {
       textEditorStateMobx.set(textId, view.state);
@@ -548,6 +550,7 @@ export const Editor = observer(({ textId }: { textId: string }) => {
     return () => {
       view.destroy();
       unsubscribes.forEach((unsubscribe) => unsubscribe());
+      delete textEditorViewsMap[textId];
     };
   }, []);
 

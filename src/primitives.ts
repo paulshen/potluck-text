@@ -68,6 +68,7 @@ export const textEditorStateMobx = observable.map<string, EditorState>(
   },
   { deep: false }
 );
+export const textEditorViewsMap: { [textId: string]: EditorView } = {};
 export const dragNewSnippetEmitter = new EventEmitter();
 
 export type ColumnDefinition = {
@@ -81,11 +82,17 @@ export enum SpatialComponentType {
   SnippetGroup,
 }
 
+export type SnippetPropertyAction = {
+  label: string;
+  available: (snippet: Snippet) => boolean;
+  handler: (snippet: Snippet) => void;
+};
+
 export type SnippetProperty = {
   id: string;
   name: string;
   type: "number" | "string" | "boolean";
-  onClick?: (snippet: Snippet, view: EditorView) => void;
+  actions?: SnippetPropertyAction[];
 };
 
 export type SnippetType = {

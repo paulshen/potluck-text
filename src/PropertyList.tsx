@@ -1,22 +1,26 @@
 import { Reorder, useDragControls } from "framer-motion";
 import * as Checkbox from "@radix-ui/react-checkbox";
 import { useState } from "react";
+import { Snippet, SnippetPropertyAction } from "./primitives";
 
 interface PropertyListItem {
   id: string;
   name: string;
   value: string;
+  actions: SnippetPropertyAction[];
   show: boolean;
 }
 
 interface PropertyListItemProps {
   item: PropertyListItem;
   togglePropertyVisible: (propertyId: string) => void;
+  snippet: Snippet;
 }
 
 const PropertyListItem = ({
   item,
   togglePropertyVisible,
+  snippet,
 }: PropertyListItemProps) => {
   const controls = useDragControls();
 
@@ -70,12 +74,32 @@ const PropertyListItem = ({
         <div className="w-24 text-gray-400">{item.name}</div>
 
         <div>{item.value}</div>
+
+        <div className="flex gap-1 items-start">
+          {item.actions.map((action, i) => {
+            if (!action.available(snippet)) {
+              return null;
+            }
+            return (
+              <button
+                onClick={() => {
+                  action.handler(snippet);
+                }}
+                className="bg-white bg-opacity-25 px-1 rounded"
+                key={i}
+              >
+                {action.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
     </Reorder.Item>
   );
 };
 
 interface PropertyListProps {
+  snippet: Snippet;
   title: string;
   items: PropertyListItem[];
   togglePropertyVisible: (id: string) => void;
@@ -83,6 +107,7 @@ interface PropertyListProps {
 }
 
 export const PropertyList = ({
+  snippet,
   title,
   items,
   togglePropertyVisible,
@@ -101,6 +126,7 @@ export const PropertyList = ({
             key={item.id}
             item={item}
             togglePropertyVisible={togglePropertyVisible}
+            snippet={snippet}
           />
         ))}
       </Reorder.Group>
