@@ -40,10 +40,20 @@ export function Pane({ children }: { children: React.ReactNode }) {
       <div
         {...bindDrag()}
         className={classNames(
-          "h-3 bg-zinc-200 touch-none border-t-2 border-r-2 border-l-2 border-black rounded-t-lg",
+          "h-6 touch-none border-t-2 border-r-2 border-l-2 border-black rounded-t-lg flex flex-row justify-center items-center",
           isGrabbing ? "cursor-grabbing" : "cursor-grab"
         )}
-      ></div>
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 16 16"
+          width="16"
+          height="16"
+          className="block"
+        >
+          <path d="M8 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm13 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"></path>
+        </svg>
+      </div>
       {children}
     </div>
   );
