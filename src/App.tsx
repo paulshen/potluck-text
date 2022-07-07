@@ -119,6 +119,7 @@ function NewDragSnippetComponent() {
       mouseOffset: mouseOffsetArg,
       text,
       shiftKey,
+      altKey,
     }: {
       snippetId: string | undefined;
       textId: string;
@@ -127,11 +128,12 @@ function NewDragSnippetComponent() {
       mouseOffset: [x: number, y: number];
       text: string;
       shiftKey: boolean;
+      altKey: boolean;
     }) {
       dragSnippetTextId = textId;
       let previewTexts: string[];
       if (snippetId !== undefined) {
-        if (shiftKey) {
+        if (shiftKey || altKey) {
           const snippetTypeId = snippetsMobx.get(snippetId)!.snippetTypeId;
           const snippetsOfTypeInText = values(snippetsMobx).filter(
             (snippet) =>
