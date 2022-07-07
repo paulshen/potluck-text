@@ -211,6 +211,9 @@ export const App = observer(() => {
       if (e.key === "Meta") {
         document.querySelector("body")?.classList.add("metakey-down");
       }
+      if (e.key === "Shift") {
+        document.querySelector("body")?.classList.add("shiftkey-down");
+      }
 
       runInAction(() => {
         if (e.target === document.body) {
@@ -256,6 +259,9 @@ export const App = observer(() => {
     function onKeyUp(e: KeyboardEvent) {
       if (e.key === "Meta") {
         document.querySelector("body")?.classList.remove("metakey-down");
+      }
+      if (e.key === "Shift") {
+        document.querySelector("body")?.classList.remove("shiftkey-down");
       }
     }
     window.addEventListener("keydown", onKeyDown);

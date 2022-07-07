@@ -133,6 +133,7 @@ const spatialHoverSnippetIdField = StateField.define<string | undefined>({
   },
 });
 
+// Accept suggestions (just the one near the cursor, or all) with keyboard shortcuts
 const acceptSuggestionsPlugin = ViewPlugin.fromClass(
   class {
     constructor(view: EditorView) {}
@@ -142,7 +143,28 @@ const acceptSuggestionsPlugin = ViewPlugin.fromClass(
   {
     eventHandlers: {
       keydown(event, view) {
-        if (event.key === "Enter" && event.metaKey) {
+        // Cmd-shift-enter will accept all suggestions if no range selected,
+        // or accept within the selected range if there is one
+        if (event.key === "Enter" && event.metaKey && event.shiftKey) {
+          event.preventDefault();
+
+          const textId = view.state.facet(textIdFacet);
+          const suggestions = view.state.field(snippetSuggestionsField);
+
+          const selection = view.state.selection.main;
+          const rangeSelected = selection.from !== selection.to;
+
+          if (rangeSelected) {
+            createSnippetsForSuggestions(
+              textId,
+              suggestions.filter((suggestion) =>
+                spanOverlaps(suggestion.span, [selection.from, selection.to])
+              )
+            );
+          } else {
+            createSnippetsForSuggestions(textId, suggestions);
+          }
+        } else if (event.key === "Enter" && event.metaKey) {
           event.preventDefault();
 
           const textId = view.state.facet(textIdFacet);
@@ -435,6 +457,9 @@ export const Editor = observer(({ textId }: { textId: string }) => {
             {
               cursor: "pointer",
             },
+          ".metakey-down.shiftkey-down & .cm-suggestion": {
+            borderBottom: "2px dashed black",
+          },
           ".cm-snippet": {
             borderBottom: "1px solid black",
           },
@@ -555,21 +580,9 @@ export const Editor = observer(({ textId }: { textId: string }) => {
   }, []);
 
   return (
-    <div>
-      <div
-        className="text-lg h-[480px] bg-white border-black border-b-2 border-l-2 border-r-2 rounded-b-lg overflow-auto"
-        ref={editorRef}
-      ></div>
-      {numSuggestions > 0 && (
-        <button
-          className="text-sm text-gray-400"
-          onClick={() => {
-            createSnippetsForSuggestions(textId, suggestionsComputed.get());
-          }}
-        >
-          Create {numSuggestions} suggested snippets
-        </button>
-      )}
-    </div>
+    <div
+      className="text-lg h-[480px] bg-white border-black border-b-2 border-l-2 border-r-2 rounded-b-lg overflow-auto"
+      ref={editorRef}
+    ></div>
   );
 });
