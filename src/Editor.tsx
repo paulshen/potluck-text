@@ -370,7 +370,7 @@ export const Editor = observer(({ textId }: { textId: string }) => {
             lineHeight: "1.5em",
           },
           ".metakey-down & .cm-suggestion": {
-            borderBottom: "1px dashed #ddd",
+            borderBottom: "1px dashed black",
           },
           ".metakey-down & .cm-suggestion:hover, .metakey-down & .cm-snippet:hover":
             {
