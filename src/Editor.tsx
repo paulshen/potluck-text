@@ -181,9 +181,6 @@ const dragSnippetPlugin = ViewPlugin.fromClass(
     },
   }
 );
-const ANNOTATION_COLOR: Record<string, string> = {
-  aisle: "bg-green-100",
-};
 
 const ANNOTATION_TOKEN_CLASSNAME = "annotation-token";
 class SnippetDataWidget extends WidgetType {
@@ -204,8 +201,11 @@ class SnippetDataWidget extends WidgetType {
   }
 
   toDOM() {
+    const root = document.createElement("span");
+    root.className = "relative";
     const wrap = document.createElement("span");
-    wrap.className = "rounded-r";
+    root.appendChild(wrap);
+    wrap.className = "absolute bottom-full left-0 flex gap-1";
     wrap.setAttribute("aria-hidden", "true");
     if (this.snippetData === undefined) {
       return wrap;
@@ -215,15 +215,13 @@ class SnippetDataWidget extends WidgetType {
         continue;
       }
       const token = document.createElement("span");
-      token.className = `${ANNOTATION_TOKEN_CLASSNAME} ${
-        ANNOTATION_COLOR[key] ?? "bg-blue-100"
-      } ml-1 align-top relative top-px text-gray-800 font-mono text-[10px] py-0.5 px-1 rounded-sm whitespace-nowrap`;
+      token.className = `${ANNOTATION_TOKEN_CLASSNAME} text-gray-800 font-mono text-[8px] leading-[8px] whitespace-nowrap relative top-1`;
       token.innerText = value;
       token.setAttribute("data-snippet-id", this.snippetId);
       token.setAttribute("data-snippet-property-name", key);
       wrap.appendChild(token);
     }
-    return wrap;
+    return root;
   }
 
   ignoreEvent(event: Event): boolean {
@@ -291,7 +289,7 @@ const snippetDecorations = EditorView.decorations.compute(
                   snippet.properties
                 ),
                 side: 1,
-              }).range(snippet.span[1]),
+              }).range(snippet.span[0]),
             ]
           : []
       ),
