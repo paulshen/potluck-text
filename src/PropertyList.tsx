@@ -2,7 +2,18 @@ import { Reorder, useDragControls } from "framer-motion";
 import * as Checkbox from "@radix-ui/react-checkbox";
 import { useState } from "react";
 
-const PropertyListItem = ({ item }) => {
+interface PropertyListItem {
+  id: number; // TODO: This should be a unique ID.
+  name: string;
+  value: string;
+  show: boolean;
+}
+
+interface PropertyListItemProps {
+  item: PropertyListItem;
+}
+
+const PropertyListItem = ({ item }: PropertyListItemProps) => {
   const controls = useDragControls();
 
   return (
@@ -57,7 +68,11 @@ const PropertyListItem = ({ item }) => {
   );
 };
 
-export const PropertyList = ({ items }) => {
+interface PropertyListProps {
+  items: PropertyListItem[];
+}
+
+export const PropertyList = ({ items }: PropertyListProps) => {
   const [sortedItems, setSortedItems] = useState(items);
 
   return (
