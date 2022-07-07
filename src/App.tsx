@@ -203,44 +203,46 @@ const TEXT_ID = nanoid();
 export const App = observer(() => {
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
-      if (e.target === document.body) {
-        switch (e.key) {
-          case "g": {
-            const selectedTokens: SnippetOnCanvas[] =
-              selectedSpatialComponentsMobx
-                .flatMap((id) =>
-                  spatialComponentsMobx.filter(
-                    (spatialComponent): spatialComponent is SnippetOnCanvas =>
-                      spatialComponent.id === id &&
-                      spatialComponent.spatialComponentType ===
-                        SpatialComponentType.Snippet
+      runInAction(() => {
+        if (e.target === document.body) {
+          switch (e.key) {
+            case "g": {
+              const selectedTokens: SnippetOnCanvas[] =
+                selectedSpatialComponentsMobx
+                  .flatMap((id) =>
+                    spatialComponentsMobx.filter(
+                      (spatialComponent): spatialComponent is SnippetOnCanvas =>
+                        spatialComponent.id === id &&
+                        spatialComponent.spatialComponentType ===
+                          SpatialComponentType.Snippet
+                    )
                   )
-                )
-                .sort((a, b) => a.position[1] - b.position[1]);
-            if (selectedTokens.length > 0) {
-              spatialComponentsMobx.push({
-                spatialComponentType: SpatialComponentType.SnippetGroup,
-                id: nanoid(),
-                position: selectedTokens[0].position,
-                snippetIds: selectedTokens.map((token) => token.id),
-                extraColumns: [],
-              });
+                  .sort((a, b) => a.position[1] - b.position[1]);
+              if (selectedTokens.length > 0) {
+                spatialComponentsMobx.push({
+                  spatialComponentType: SpatialComponentType.SnippetGroup,
+                  id: nanoid(),
+                  position: selectedTokens[0].position,
+                  snippetIds: selectedTokens.map((token) => token.id),
+                  extraColumns: [],
+                });
+              }
+              break;
             }
-            break;
-          }
-          case "Backspace":
-          case "Delete": {
-            for (const componentId of selectedSpatialComponentsMobx) {
-              const component = spatialComponentsMobx.find(
-                (c) => c.id === componentId
-              );
-              if (component !== undefined) {
-                spatialComponentsMobx.remove(component);
+            case "Backspace":
+            case "Delete": {
+              for (const componentId of selectedSpatialComponentsMobx) {
+                const component = spatialComponentsMobx.find(
+                  (c) => c.id === componentId
+                );
+                if (component !== undefined) {
+                  spatialComponentsMobx.remove(component);
+                }
               }
             }
           }
         }
-      }
+      });
     }
     window.addEventListener("keydown", onKeyDown);
     return () => {
