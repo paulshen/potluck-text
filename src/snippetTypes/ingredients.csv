@@ -1,5 +1,6 @@
-name,aisle,climate,,,,
-ground chuck beef,🥩 Meat,99.48,,,,
+name,aisle,climate,veganAlternative,,,
+ground chuck beef,🥩 Meat,99.48,jackfruit,,,
+jackfruit, 🥬 Produce,,,,,
 onion powder,🧂 Spices,,,,,
 salt,🧂 Spices,,,,,
 garlic powder,🧂 Spices,,,,,

@@ -18,6 +18,7 @@ type Ingredient = {
   name: string;
   aisle: string;
   climate: number;
+  veganAlternative: string;
 };
 
 const ingredients: Ingredient[] = rawIngredients.map((i: any) => {
@@ -63,6 +64,7 @@ export const ingredientSnippetType: SnippetType = {
         "ingredient--icon": "🥕",
         "ingredient--aisle": ingredient.aisle,
         "ingredient--climate": ingredient.climate,
+        "ingredient--veganAlternative": ingredient.veganAlternative
       };
     } else {
       return { "ingredient--icon": "🥕" };
@@ -73,5 +75,6 @@ export const ingredientSnippetType: SnippetType = {
     { id: "ingredient--icon", name: "Icon", type: "string" },
     { id: "ingredient--aisle", name: "Aisle", type: "string" },
     { id: "ingredient--climate", name: "Climate Impact", type: "number" },
+    { id: "ingredient--veganAlternative", name: "Vegan Alternative", type: "string"}
   ],
 };
