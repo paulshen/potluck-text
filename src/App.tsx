@@ -48,7 +48,7 @@ const SpatialComponents = observer(() => {
   );
 });
 
-const MULTI_DRAG_SNIPPET_TOKEN_OFFSET = 40;
+const MULTI_DRAG_SNIPPET_TOKEN_OFFSET = 48;
 function NewDragSnippetComponent() {
   const [dragSnippet, setDragSnippet] =
     useState<

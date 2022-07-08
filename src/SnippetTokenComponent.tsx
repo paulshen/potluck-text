@@ -93,6 +93,12 @@ export const SnippetTokenComponent = observer(
       setDisableHovercard(true);
     }
 
+    const propertiesToShow = snippetType.properties.filter(
+      (p) =>
+        snippetTypeViewConfiguration.inlineVisiblePropertyIds.includes(p.id) &&
+        snippet.data[p.id] !== undefined
+    );
+
     return (
       <div
         {...bindDrag()}
@@ -130,23 +136,21 @@ export const SnippetTokenComponent = observer(
               }
             >
               {text}
-              {snippetType.properties
-                .filter((p) =>
-                  snippetTypeViewConfiguration.inlineVisiblePropertyIds.includes(
-                    p.id
-                  )
-                )
-                .map(
-                  (property) =>
-                    snippet.data[property.id] !== undefined && (
-                      <span
-                        className="font-mono text-xs ml-2 p-1 bg-white"
-                        key={property.id}
-                      >
-                        {snippet.data[property.id]}
-                      </span>
-                    )
-                )}
+              {propertiesToShow.length > 0 ? (
+                <div className="absolute left-0 bottom-full mb-0.5 flex gap-2">
+                  {propertiesToShow.map(
+                    (property) =>
+                      snippet.data[property.id] !== undefined && (
+                        <span
+                          className="text-[9px] text-gray-500 leading-[9px]"
+                          key={property.id}
+                        >
+                          {snippet.data[property.id]}
+                        </span>
+                      )
+                  )}
+                </div>
+              ) : null}
             </Token>
           </HoverCard.Trigger>
 
