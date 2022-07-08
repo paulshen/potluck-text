@@ -369,16 +369,23 @@ const scalerPlugin = ViewPlugin.fromClass(class {
   dom: any
 
   constructor(view: EditorView) {
+    const container : any = document.createElement("div")
     const slider : any = document.createElement("input")
+    const buttons: any = document.createElement("div")
+    const restoreButton : any = document.createElement("button")
 
-    slider.type = "range"
-    slider.min = 1
-    slider.max = 10
-    slider.value = 1;
-    slider.stepSize = 0.5
+    restoreButton.style.visibility = "hidden"
 
-    slider.oninput = (evt :any) => {
-      const scale = parseFloat(evt.target.value)
+    buttons.appendChild(restoreButton)
+
+    const scaleQuantities = (scale : number) => {
+      slider.value = scale;
+
+      if (scale !== 1) {
+        restoreButton.style.visibility = "inherit"
+      } else {
+        restoreButton.style.visibility = "hidden"
+      }
 
       const changes: ChangeSpec[] = []
 
@@ -395,9 +402,31 @@ const scalerPlugin = ViewPlugin.fromClass(class {
       view.dispatch({changes})
     }
 
-    this.dom = view.dom.appendChild(slider)
-    this.dom.style.cssText =
-      "position: absolute; inset-block-start: 2px; inset-inline-end: 5px;"
+    restoreButton.onclick = () => {
+      scaleQuantities(1)
+    }
+
+    slider.type = "range"
+    slider.min = 0.5
+    slider.max = 10
+    slider.value = 1;
+    slider.stepSize = 0.5
+
+    slider.oninput = (evt :any) => {
+      const scale = parseFloat(evt.target.value)
+
+
+      scaleQuantities(scale)
+    }
+
+    container.className = "flex absolute bottom-0 justify-between p-2 left-0 right-0"
+    restoreButton.className = "p-1 bg-gray-200 rounded"
+    restoreButton.innerText = "restore"
+
+    container.appendChild(buttons)
+    container.appendChild(slider)
+
+    this.dom = view.dom.appendChild(container)
   }
 
   update(update: ViewUpdate) {
