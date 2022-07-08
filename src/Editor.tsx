@@ -384,7 +384,7 @@ const snippetHover = hoverTooltip((view, pos, side) => {
         create(view) {
           let dom = document.createElement("div");
           dom.className =
-            "border border-zinc-100 bg-white rounded-md shadow-lg";
+            "border border-zinc-100 bg-white rounded-md shadow-lg mt-1";
           // You can't handle when a codemirror tooltip unmounts so this is going
           // to be dangling for now.
           ReactDOM.createRoot(dom).render(
