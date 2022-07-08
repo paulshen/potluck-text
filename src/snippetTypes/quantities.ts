@@ -19,7 +19,7 @@ export const quantitySnippetType: SnippetType = {
   suggest: (text: string): SnippetSuggestion[] => {
     let matches: Span[] = [];
     for (const match of text.matchAll(
-      /\b(\d|\/|½|)+\s?(oz|tsp|Tbsp|pounds|Cup|can|teaspoons|teaspoon|tablespoons|tablespoon)\b/gi
+      /(\d|\/|½)+\s?(oz|tsp|Tbsp|pounds|Cup|can|teaspoons|teaspoon|tablespoons|tablespoon)\b/gi
     )) {
       const from = match.index ?? 0;
       const to = from + match[0].length;
@@ -66,13 +66,19 @@ export const quantitySnippetType: SnippetType = {
       )} g`;
     }
 
-    if (data.unitOfMeasure === "teaspoons") {
+    if (
+      data.unitOfMeasure === "teaspoons" ||
+      data.unitOfMeasure === "teaspoon"
+    ) {
       snippetData["quantity--standardMetric"] = `${Math.round(
         data.quantity * 4.93
       )} ml`;
     }
 
-    if (data.unitOfMeasure === "tablespoons") {
+    if (
+      data.unitOfMeasure === "tablespoons" ||
+      data.unitOfMeasure === "tablespoon"
+    ) {
       snippetData["quantity--standardMetric"] = `${Math.round(
         data.quantity * 14.79
       )} ml`;
