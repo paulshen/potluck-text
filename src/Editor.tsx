@@ -4,7 +4,7 @@ import {
   EditorSelection,
   StateEffect,
   StateField,
-  Prec,
+  Prec, TransactionSpec, ChangeSpec,
 } from "@codemirror/state";
 import {
   ViewPlugin,
@@ -29,7 +29,7 @@ import {
   textEditorViewsMap,
   Span,
   spatialComponentsMobx,
-  SpatialComponentType,
+  SpatialComponentType, QUANTITY_TYPE,
 } from "./primitives";
 import {
   createSnippetFromSpan,
@@ -378,7 +378,21 @@ const scalerPlugin = ViewPlugin.fromClass(class {
     slider.stepSize = 0.5
 
     slider.oninput = (evt :any) => {
-      console.log(parseFloat(evt.target.value))
+      const scale = parseFloat(evt.target.value)
+
+      const changes: ChangeSpec[] = []
+
+      for (const snippet of snippetsMobx.values()) {
+        if (snippet.snippetTypeId === QUANTITY_TYPE) {
+          changes.push({
+            from: snippet.span[0],
+            to: snippet.span[1],
+            insert: `${snippet.data['quantity--quantity'] * scale} ${snippet.data['quantity--unitOfMeasure']}`
+          })
+        }
+      }
+
+      view.dispatch({changes})
     }
 
     this.dom = view.dom.appendChild(slider)
