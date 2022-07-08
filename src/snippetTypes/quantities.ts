@@ -26,7 +26,7 @@ export const quantitySnippetType: SnippetType = {
   suggest: (text: string): SnippetSuggestion[] => {
     let matches: Span[] = [];
     for (const match of text.matchAll(
-      /(\d|\/|½|)+\s?(oz|tsp|Tbsp|pounds|Cup|can|teaspoons|teaspoon|tablespoons|tablespoon)/gi
+      /\b(\d|\/|½|)+\s?(oz|tsp|Tbsp|pounds|Cup|can|teaspoons|teaspoon|tablespoons|tablespoon)\b/gi
     )) {
       const from = match.index ?? 0;
       const to = from + match[0].length;

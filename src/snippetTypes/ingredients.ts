@@ -46,7 +46,9 @@ export const ingredientSnippetType: SnippetType = {
     // We could probably do this faster if we combined all the known strings into one regex,
     // but this is simpler to reason about and seems fast enough for now.
     for (const stringTemplate of ingredients.map((i) => i.name)) {
-      for (const match of text.matchAll(new RegExp(stringTemplate, "ig"))) {
+      for (const match of text.matchAll(
+        new RegExp(`\\b${stringTemplate}\\b`, "ig")
+      )) {
         const from = match.index ?? 0;
         const to = from + match[0].length;
         // Only add the match if it doesn't overlap with other existing matches.
@@ -83,7 +85,7 @@ export const ingredientSnippetType: SnippetType = {
   properties: [
     { id: "ingredient--icon", name: "Icon", type: "string" },
     { id: "ingredient--aisle", name: "Aisle", type: "string" },
-    { id: "ingredient--climate", name: "Climate Impact", type: "number" },
+    { id: "ingredient--climate", name: "CO2 Emissions", type: "number" },
     {
       id: "ingredient--veganAlternative",
       name: "Vegan Alternative",
