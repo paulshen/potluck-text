@@ -18,7 +18,7 @@ Pork shoulder is often prepared as a large roast, requiring hours of cooking unt
 2 tablespoons toasted sesame oil
 3 teaspoons grated garlic
 2 teaspoons grated peeled ginger
-1 teaspoon kosher salt (such as Diamond Crystal), plus more for seasoning
+1 teaspoon kosher salt, plus more for seasoning
 ½ teaspoon fish sauce
 1 tablespoon plus ½ teaspoon granulated sugar
 1½ pounds baby bok choy, quartered lengthwise
@@ -27,7 +27,7 @@ Pork shoulder is often prepared as a large roast, requiring hours of cooking unt
 2 tablespoons neutral oil, such as safflower or canola
 1 tablespoon low-sodium soy sauce
 1 teaspoon ground black pepper, plus more for seasoning
-2 pounds pork shoulder, thinly sliced crosswise and pounded ⅛-inch-thick (see Tip)
+2 pounds pork shoulder, thinly sliced crosswise and pounded
 1 large white onion, peeled and sliced into ¼-inch-thick rings
 Steamed rice, for serving
 

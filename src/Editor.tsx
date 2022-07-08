@@ -604,7 +604,7 @@ export const Editor = observer(({ textId }: { textId: string }) => {
 
   return (
     <div
-      className="text-lg h-[480px] bg-white border-black border-b-2 border-l-2 border-r-2 rounded-b-lg overflow-auto"
+      className="text-lg h-[500px] bg-white border-black border-b-2 border-l-2 border-r-2 rounded-b-lg overflow-auto"
       ref={editorRef}
     ></div>
   );

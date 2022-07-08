@@ -131,7 +131,7 @@ export const SnippetTokenComponent = observer(
               isSelected={isSelected}
               className={
                 !isSelected
-                  ? "hover:bg-yellow-400 hover:bg-opacity-50 transition"
+                  ? "hover:bg-black hover:text-white transition"
                   : undefined
               }
             >
