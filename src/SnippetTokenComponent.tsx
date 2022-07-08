@@ -98,9 +98,6 @@ export const SnippetTokenComponent = observer(
         snippetTypeViewConfiguration.inlineVisiblePropertyIds.includes(p.id)
     );
 
-
-    console.log('show', JSON.stringify(propertiesToShow))
-
     return (
       <div
         {...bindDrag()}

@@ -291,9 +291,6 @@ class SnippetDataWidget extends WidgetType {
   }
 
   toDOM() {
-
-    console.log('data', this.snippetData)
-
     const root = document.createElement("span");
     root.className = "relative";
     const wrap = document.createElement("span");
@@ -372,8 +369,6 @@ const snippetDecorations = EditorView.decorations.compute(
             }
           }
         }
-
-        console.log('my data', data)
 
         return (
           snippet.span[1] > snippet.span[0]

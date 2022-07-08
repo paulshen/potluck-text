@@ -9,7 +9,7 @@ import {
   snippetsMobx,
   SnippetSuggestion,
   SnippetType,
-  Span,
+  Span, textEditorStateMobx,
   textEditorViewsMap,
 } from "../primitives";
 import {spanOverlaps} from "../utils";
@@ -36,6 +36,22 @@ const ingredients: Ingredient[] = rawIngredients.map((i: any) => {
   }
   return result;
 });
+
+
+function getPreviousAmount(snippet: Snippet) {
+  let previousAmountSnippet;
+
+  for (const otherSnippet of snippetsMobx.values()) {
+    if (otherSnippet.span[1] < snippet.span[1] &&
+      (!previousAmountSnippet || (otherSnippet.span[1] > previousAmountSnippet.span[1]))) {
+      previousAmountSnippet = otherSnippet
+    }
+  }
+
+  if (previousAmountSnippet && previousAmountSnippet.snippetTypeId === QUANTITY_TYPE) {
+    return `${previousAmountSnippet.data["quantity--quantity"]} ${previousAmountSnippet.data["quantity--unitOfMeasure"]}`
+  }
+}
 
 export const ingredientSnippetType: SnippetType = {
   name: "Ingredient",
@@ -91,17 +107,40 @@ export const ingredientSnippetType: SnippetType = {
       name: "Amount",
       type: "string",
       computation: (snippet: Snippet) => {
-        let previousSnippet = null;
+        const previousAmount = getPreviousAmount(snippet)
 
-        for (const otherSnippet of snippetsMobx.values()) {
-          if (otherSnippet.span[1] < snippet.span[1] &&
-            (!previousSnippet || (otherSnippet.span[1] > previousSnippet.span[1]))) {
-            previousSnippet = otherSnippet
-          }
+        if (previousAmount !== undefined) {
+          return previousAmount
         }
 
-        if (previousSnippet && previousSnippet.snippetTypeId === QUANTITY_TYPE) {
-          return `${previousSnippet.data["quantity--quantity"]} ${previousSnippet.data["quantity--unitOfMeasure"]}`
+        const text = textEditorStateMobx
+          .get(snippet.textId)!
+          .sliceDoc(snippet.span[0], snippet.span[1])
+          .toLowerCase()
+
+        for (const otherSnippet of snippetsMobx.values()) {
+          if (
+            otherSnippet.textId !== snippet.textId ||
+            snippet.snippetTypeId !== otherSnippet.snippetTypeId ||
+            snippet.id === otherSnippet.id
+          ) {
+            continue
+          }
+
+          const otherText = textEditorStateMobx
+            .get(otherSnippet.textId)!
+            .sliceDoc(otherSnippet.span[0], otherSnippet.span[1])
+            .toLowerCase()
+
+          if (!otherText.includes(text)) {
+            continue
+          }
+
+          const otherSnippetPreviousAmount = getPreviousAmount(otherSnippet)
+
+          if (otherSnippetPreviousAmount !== undefined) {
+            return otherSnippetPreviousAmount
+          }
         }
       }
     },
