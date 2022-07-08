@@ -172,5 +172,5 @@ export const dragStateBox = observable.box<DragState | undefined>(undefined);
 export const CHAR_WIDTH = 8.5;
 export const GROUP_COLUMN_WIDTH = 192;
 export const TOKEN_HEIGHT = 28;
-export const GROUP_TOKEN_ROW_GAP = 4;
+export const GROUP_TOKEN_ROW_GAP = 8;
 export const GROUP_TOKEN_COLUMN_GAP = 4;
