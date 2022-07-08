@@ -33,16 +33,16 @@ const PropertyListItem = ({
       <div className="flex items-center gap-2">
         <div onPointerDown={(e) => controls.start(e)} className="cursor-grab">
           <svg
-            width="4"
-            height="5"
-            viewBox="0 0 4 5"
+            width="11"
+            height="11"
+            viewBox="0 0 11 11"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
             className="block"
           >
-            <rect width="4" height="1" fill="#575757" />
-            <rect y="2" width="4" height="1" fill="#575757" />
-            <rect y="4" width="4" height="1" fill="#575757" />
+            <rect x="3" y="3" width="5" height="1" fill="#575757" />
+            <rect x="3" y="5" width="5" height="1" fill="#575757" />
+            <rect x="3" y="7" width="5" height="1" fill="#575757" />
           </svg>
         </div>
 
