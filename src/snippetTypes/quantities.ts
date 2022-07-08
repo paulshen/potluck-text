@@ -12,13 +12,6 @@ import {
 } from "../primitives";
 import { spanOverlaps } from "../utils";
 
-type Quantity = {
-  quantity: number | null;
-  quantity2: number | null;
-  unitOfMeasureID: string | null;
-  unitOfMeasure: string | null;
-};
-
 export const quantitySnippetType: SnippetType = {
   name: "Quantity",
   icon: "⚖️",
@@ -50,16 +43,38 @@ export const quantitySnippetType: SnippetType = {
     if (data === undefined) {
       return {};
     }
-    return {
+
+    let snippetData: any = {
       "quantity--quantity": data.quantity,
       "quantity--quantity2": data.quantity2,
       "quantity--unitOfMeasure": data.unitOfMeasure,
     };
+
+    if (
+      data.unitOfMeasure === "pounds" &&
+      data.quantity &&
+      typeof data.quantity === "number"
+    ) {
+      const weightInGrams = data.quantity * 453.592;
+      snippetData["quantity--weightInGrams"] = `${Math.round(weightInGrams)} g`;
+    }
+
+    if (
+      data.unitOfMeasure === "ounces" &&
+      data.quantity &&
+      typeof data.quantity === "number"
+    ) {
+      const weightInGrams = data.quantity * 28.34;
+      snippetData["quantity--weightInGrams"] = `${Math.round(weightInGrams)} g`;
+    }
+
+    return snippetData;
   },
 
   properties: [
     { id: "quantity--quantity", name: "Quantity", type: "number" },
     { id: "quantity--quantity2", name: "Secondary quantity", type: "number" },
     { id: "quantity--unitOfMeasure", name: "Unit", type: "string" },
+    { id: "quantity--weightInGrams", name: "Weight in grams", type: "string" },
   ],
 };
