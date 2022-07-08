@@ -95,9 +95,11 @@ export const SnippetTokenComponent = observer(
 
     const propertiesToShow = snippetType.properties.filter(
       (p) =>
-        snippetTypeViewConfiguration.inlineVisiblePropertyIds.includes(p.id) &&
-        snippet.data[p.id] !== undefined
+        snippetTypeViewConfiguration.inlineVisiblePropertyIds.includes(p.id)
     );
+
+
+    console.log('show', JSON.stringify(propertiesToShow))
 
     return (
       <div
@@ -139,16 +141,26 @@ export const SnippetTokenComponent = observer(
               {propertiesToShow.length > 0 ? (
                 <div className="absolute left-0 bottom-full mb-0.5 flex gap-2">
                   {propertiesToShow.map(
-                    (property) =>
-                      snippet.data[property.id] !== undefined && (
-                        <span
-                          className="text-[9px] text-gray-500 leading-[9px]"
-                          key={property.id}
-                        >
-                          {snippet.data[property.id]}
-                        </span>
+                    (property) => {
+                      const propertyDefinition = snippetType.properties.find(({id}) => id === property.id)
+
+                      const value = (
+                        (propertyDefinition && propertyDefinition.computation)
+                          ? propertyDefinition.computation(snippet)
+                          : snippet.data[property.id]
                       )
-                  )}
+
+                      if (value !== undefined) {
+                        return (
+                          <span
+                            className="text-[9px] text-gray-500 leading-[9px]"
+                            key={property.id}
+                          >
+                          {value}
+                        </span>
+                        )
+                      }
+                    })}
                 </div>
               ) : null}
             </Token>

@@ -4,7 +4,7 @@
 // Climate impact source: https://ourworldindata.org/environmental-impacts-of-food
 
 import {
-  INGREDIENT_TYPE,
+  INGREDIENT_TYPE, QUANTITY_TYPE,
   Snippet,
   snippetsMobx,
   SnippetSuggestion,
@@ -12,12 +12,12 @@ import {
   Span,
   textEditorViewsMap,
 } from "../primitives";
-import { spanOverlaps } from "../utils";
+import {spanOverlaps} from "../utils";
 
 // @ts-ignore
 import rawIngredients from "./ingredients.csv";
-import { EditorView } from "codemirror";
-import { ChangeSet } from "@codemirror/state";
+import {EditorView} from "codemirror";
+import {ChangeSet} from "@codemirror/state";
 
 type Ingredient = {
   name: string;
@@ -86,6 +86,25 @@ export const ingredientSnippetType: SnippetType = {
     { id: "ingredient--icon", name: "Icon", type: "string" },
     { id: "ingredient--aisle", name: "Aisle", type: "string" },
     { id: "ingredient--climate", name: "CO2 Emissions", type: "number" },
+    {
+      id: "ingredient--amont",
+      name: "Amount",
+      type: "string",
+      computation: (snippet: Snippet) => {
+        let previousSnippet = null;
+
+        for (const otherSnippet of snippetsMobx.values()) {
+          if (otherSnippet.span[1] < snippet.span[1] &&
+            (!previousSnippet || (otherSnippet.span[1] > previousSnippet.span[1]))) {
+            previousSnippet = otherSnippet
+          }
+        }
+
+        if (previousSnippet && previousSnippet.snippetTypeId === QUANTITY_TYPE) {
+          return `${previousSnippet.data["quantity--quantity"]} ${previousSnippet.data["quantity--unitOfMeasure"]}`
+        }
+      }
+    },
     {
       id: "ingredient--veganAlternative",
       name: "Vegan Alternative",

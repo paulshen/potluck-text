@@ -291,6 +291,9 @@ class SnippetDataWidget extends WidgetType {
   }
 
   toDOM() {
+
+    console.log('data', this.snippetData)
+
     const root = document.createElement("span");
     root.className = "relative";
     const wrap = document.createElement("span");
@@ -357,8 +360,23 @@ const snippetDecorations = EditorView.decorations.compute(
   (state) => {
     const spatialHoverSnippetId = state.field(spatialHoverSnippetIdField);
     return Decoration.set(
-      state.field(snippetsField).flatMap((snippet) =>
-        snippet.span[1] > snippet.span[0]
+      state.field(snippetsField).flatMap((snippet) => {
+        const snippetTypeDef = snippetTypesMobx.get(snippet.snippetTypeId)
+
+        const data : any = {...snippet.data}
+
+        if (snippetTypeDef) {
+          for (const prop of snippetTypeDef.properties) {
+            if (prop.computation && snippet.properties.includes(prop.id)) {
+              data[prop.id] = prop.computation(snippet)
+            }
+          }
+        }
+
+        console.log('my data', data)
+
+        return (
+          snippet.span[1] > snippet.span[0]
           ? [
               Decoration.mark({
                 class: `cm-snippet${
@@ -370,14 +388,14 @@ const snippetDecorations = EditorView.decorations.compute(
               Decoration.widget({
                 widget: new SnippetDataWidget(
                   snippet.id,
-                  snippet.data,
+                  data,
                   snippet.properties
                 ),
                 side: 1,
               }).range(snippet.span[0]),
             ]
           : []
-      ),
+      )}),
       true
     );
   }

@@ -40,7 +40,8 @@ export const SnippetTokenHovercardContent = observer(
     const propertyListItems = snippetType.properties.map((property) => ({
       id: property.id,
       name: property.name,
-      value: snippet.data[property.id],
+      value: property.computation ?
+        property.computation(snippet) : snippet.data[property.id],
       actions: property.actions ?? [],
       show: viewConfig.inlineVisiblePropertyIds.includes(property.id),
     }));

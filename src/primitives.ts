@@ -92,6 +92,7 @@ export type SnippetProperty = {
   id: string;
   name: string;
   type: "number" | "string" | "boolean";
+  computation?: (snippet: Snippet) => any;
   actions?: SnippetPropertyAction[];
 };
 
