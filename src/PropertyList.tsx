@@ -28,22 +28,21 @@ const PropertyListItem = ({
       dragControls={controls}
       dragListener={false}
       value={item}
-      className="bg-black rounded p-2"
+      className="bg-black rounded py-1 px-2"
     >
-      <div className="flex gap-2">
+      <div className="flex items-center gap-2">
         <div onPointerDown={(e) => controls.start(e)} className="cursor-grab">
           <svg
+            width="4"
+            height="5"
+            viewBox="0 0 4 5"
+            fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 16 16"
-            width="16"
-            height="16"
             className="block"
           >
-            <path
-              className="fill-white"
-              fillRule="evenodd"
-              d="M1 2.75A.75.75 0 011.75 2h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 2.75zm0 5A.75.75 0 011.75 7h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 7.75zM1.75 12a.75.75 0 100 1.5h12.5a.75.75 0 100-1.5H1.75z"
-            ></path>
+            <rect width="4" height="1" fill="#575757" />
+            <rect y="2" width="4" height="1" fill="#575757" />
+            <rect y="4" width="4" height="1" fill="#575757" />
           </svg>
         </div>
 
@@ -51,19 +50,25 @@ const PropertyListItem = ({
           <Checkbox.Root
             checked={item.show}
             onCheckedChange={() => togglePropertyVisible(item.id)}
+            className="block"
           >
-            <div className="bg-white rounded h-[16px] w-[16px]">
-              <Checkbox.Indicator>
+            <div className="border border-white rounded-[3px] h-[11px] w-[11px]">
+              <Checkbox.Indicator className="block bg-white">
                 <svg
+                  width="9"
+                  height="9"
+                  viewBox="0 0 9 9"
+                  fill="none"
                   xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 16 16"
-                  width="16"
-                  height="16"
+                  className="block"
                 >
                   <path
-                    fillRule="evenodd"
-                    d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"
-                  ></path>
+                    d="M1 5L3 7L8 2"
+                    stroke="black"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
                 </svg>
               </Checkbox.Indicator>
             </div>
@@ -117,6 +122,7 @@ export const PropertyList = ({
   return (
     <div className="bg-black text-white w-[300px] text-xs rounded">
       <div className="p-2">{title}</div>
+
       <Reorder.Group
         axis="y"
         values={items}
