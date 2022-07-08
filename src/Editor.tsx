@@ -13,10 +13,10 @@ import {
   WidgetType,
   hoverTooltip,
 } from "@codemirror/view";
-import { EditorView, minimalSetup } from "codemirror";
-import { autorun, comparer, computed, reaction, runInAction } from "mobx";
-import { observer } from "mobx-react-lite";
-import { useRef, useEffect } from "react";
+import {EditorView, minimalSetup} from "codemirror";
+import {autorun, comparer, computed, reaction, runInAction} from "mobx";
+import {observer} from "mobx-react-lite";
+import {useRef, useEffect, DOMElement} from "react";
 import {
   dragNewSnippetEmitter,
   snippetsMobx,
@@ -38,7 +38,7 @@ import {
   spanOverlaps,
 } from "./utils";
 import ReactDOM from "react-dom/client";
-import { SnippetTokenHovercardContent } from "./SnippetTokenHovercardContent";
+import {SnippetTokenHovercardContent} from "./SnippetTokenHovercardContent";
 import pick from "lodash/pick";
 
 // Cursor is inside the suggestion or just a little to the right
@@ -94,13 +94,13 @@ const suggestionDecorations = EditorView.decorations.from(
         return suggestionActive(suggestion, pos)
           ? [activeSuggestionMark.range(suggestion.span[0], suggestion.span[1])]
           : range.empty || spanOverlaps(suggestion.span, [range.from, range.to])
-          ? [
+            ? [
               suggestionMarkInShiftRange.range(
                 suggestion.span[0],
                 suggestion.span[1]
               ),
             ]
-          : [suggestionMark.range(suggestion.span[0], suggestion.span[1])];
+            : [suggestionMark.range(suggestion.span[0], suggestion.span[1])];
       }),
       true
     );
@@ -149,9 +149,14 @@ const spatialHoverSnippetIdField = StateField.define<string | undefined>({
 // Accept suggestions (just the one near the cursor, or all) with keyboard shortcuts
 const acceptSuggestionsPlugin = ViewPlugin.fromClass(
   class {
-    constructor(view: EditorView) {}
-    update(update: ViewUpdate) {}
-    destroy() {}
+    constructor(view: EditorView) {
+    }
+
+    update(update: ViewUpdate) {
+    }
+
+    destroy() {
+    }
   },
   {
     eventHandlers: {
@@ -202,11 +207,16 @@ const acceptSuggestionsPlugin = ViewPlugin.fromClass(
 const dragSnippetPlugin = ViewPlugin.fromClass(
   class {
     lastUpdate: any;
-    constructor(view: EditorView) {}
+
+    constructor(view: EditorView) {
+    }
+
     update(update: ViewUpdate) {
       this.lastUpdate = update;
     }
-    destroy() {}
+
+    destroy() {
+    }
   },
   {
     eventHandlers: {
@@ -273,6 +283,7 @@ const dragSnippetPlugin = ViewPlugin.fromClass(
 );
 
 const ANNOTATION_TOKEN_CLASSNAME = "annotation-token";
+
 class SnippetDataWidget extends WidgetType {
   constructor(
     readonly snippetId: string,
@@ -352,6 +363,36 @@ const snippetAnnotationPlugin = ViewPlugin.define((view) => ({}), {
   },
 });
 
+
+const scalerPlugin = ViewPlugin.fromClass(class {
+
+  dom: any
+
+  constructor(view: EditorView) {
+    const slider : any = document.createElement("input")
+
+    slider.type = "range"
+    slider.min = 1
+    slider.max = 10
+    slider.value = 1;
+    slider.stepSize = 0.5
+
+    slider.oninput = (evt :any) => {
+      console.log(parseFloat(evt.target.value))
+    }
+
+    this.dom = view.dom.appendChild(slider)
+    this.dom.style.cssText =
+      "position: absolute; inset-block-start: 2px; inset-inline-end: 5px;"
+  }
+
+  update(update: ViewUpdate) {
+
+  }
+
+  destroy() { this.dom.remove() }
+})
+
 const snippetDecorations = EditorView.decorations.compute(
   [snippetsField, spatialHoverSnippetIdField],
   (state) => {
@@ -360,7 +401,7 @@ const snippetDecorations = EditorView.decorations.compute(
       state.field(snippetsField).flatMap((snippet) => {
         const snippetTypeDef = snippetTypesMobx.get(snippet.snippetTypeId)
 
-        const data : any = {...snippet.data}
+        const data: any = { ...snippet.data }
 
         if (snippetTypeDef) {
           for (const prop of snippetTypeDef.properties) {
@@ -372,7 +413,7 @@ const snippetDecorations = EditorView.decorations.compute(
 
         return (
           snippet.span[1] > snippet.span[0]
-          ? [
+            ? [
               Decoration.mark({
                 class: `cm-snippet${
                   snippet.id === spatialHoverSnippetId
@@ -389,8 +430,9 @@ const snippetDecorations = EditorView.decorations.compute(
                 side: 1,
               }).range(snippet.span[0]),
             ]
-          : []
-      )}),
+            : []
+        )
+      }),
       true
     );
   }
@@ -414,7 +456,7 @@ const snippetHover = hoverTooltip((view, pos, side) => {
           // You can't handle when a codemirror tooltip unmounts so this is going
           // to be dangling for now.
           ReactDOM.createRoot(dom).render(
-            <SnippetTokenHovercardContent snippet={snippet} />
+            <SnippetTokenHovercardContent snippet={snippet}/>
           );
           return { dom, offset: { x: 0, y: -8 } };
         },
@@ -510,6 +552,7 @@ export const Editor = observer(({ textId }: { textId: string }) => {
         snippetAnnotationPlugin,
         snippetHover,
         spatialHoverSnippetIdField,
+        scalerPlugin,
         Prec.high(acceptSuggestionsPlugin), // high priority so we can intercept enter events early
       ],
       parent: editorRef.current!,
@@ -529,7 +572,7 @@ export const Editor = observer(({ textId }: { textId: string }) => {
                     (s) =>
                       !(
                         s.spatialComponentType ===
-                          SpatialComponentType.Snippet &&
+                        SpatialComponentType.Snippet &&
                         s.snippetId === snippet.id
                       )
                   )
