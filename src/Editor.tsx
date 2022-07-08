@@ -77,19 +77,29 @@ const suggestionMark = Decoration.mark({ class: "cm-suggestion" });
 const activeSuggestionMark = Decoration.mark({
   class: "cm-suggestion cm-suggestion-active",
 });
+const suggestionMarkInShiftRange = Decoration.mark({
+  class: "cm-suggestion cm-suggestion-shift-range",
+});
 const suggestionDecorations = EditorView.decorations.from(
   snippetSuggestionsField,
   (suggestions) => (view) => {
     const pos = view.state.selection.asSingle().main.anchor;
+    const range = view.state.selection.ranges[0];
 
     return Decoration.set(
       suggestions.flatMap((suggestion) => {
         if (suggestion.span[1] <= suggestion.span[0]) {
           return [];
         }
-        const active = suggestionActive(suggestion, pos);
-        return active
+        return suggestionActive(suggestion, pos)
           ? [activeSuggestionMark.range(suggestion.span[0], suggestion.span[1])]
+          : range.empty || spanOverlaps(suggestion.span, [range.from, range.to])
+          ? [
+              suggestionMarkInShiftRange.range(
+                suggestion.span[0],
+                suggestion.span[1]
+              ),
+            ]
           : [suggestionMark.range(suggestion.span[0], suggestion.span[1])];
       }),
       true
@@ -455,7 +465,7 @@ export const Editor = observer(({ textId }: { textId: string }) => {
             {
               cursor: "pointer",
             },
-          ".metakey-down.shiftkey-down & .cm-suggestion": {
+          ".metakey-down.shiftkey-down & .cm-suggestion-shift-range": {
             borderBottom: "2px dashed black",
           },
           ".cm-snippet": {
