@@ -384,9 +384,6 @@ const scalerPlugin = ViewPlugin.fromClass(class {
     const scaleQuantities = (scale : number) => {
       slider.value = scale;
 
-
-
-
       if (scale !== 1) {
         scaleText.innerText = `x ${scale}`
         restoreButton.style.visibility = "inherit"
@@ -618,7 +615,6 @@ export const Editor = observer(({ textId }: { textId: string }) => {
         snippetAnnotationPlugin,
         snippetHover,
         spatialHoverSnippetIdField,
-        scalerPlugin,
         Prec.high(acceptSuggestionsPlugin), // high priority so we can intercept enter events early
       ],
       parent: editorRef.current!,

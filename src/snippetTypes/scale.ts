@@ -1,11 +1,12 @@
 import {
+  QUANTITY_TYPE,
   SCALE_TYPE, Snippet, snippetsMobx,
   SnippetSuggestion,
   SnippetType,
   Span, textEditorViewsMap,
 } from "../primitives";
 import {spanOverlaps} from "../utils";
-import {ChangeSet} from "@codemirror/state";
+import {ChangeSet, ChangeSpec} from "@codemirror/state";
 
 export const scaleSnippetType: SnippetType = {
   name: "Scale",
@@ -69,25 +70,64 @@ export const scaleSnippetType: SnippetType = {
 };
 
 
-function changeScaleValue (snippet: Snippet, amount: number) {
+function changeScaleValue(snippet: Snippet, amount: number) {
 
   const currentValue = snippet.data['scale--value']
+
+  let originalValue = snippet.data['__scale--originalValue']
+
+  if (!originalValue) {
+    originalValue = snippet.data['__scale--originalValue'] = currentValue
+  }
 
   if ((currentValue + amount) < 1) {
     return
   }
 
-  snippet.data['scale--value'] += amount
+  // update value
+
+  const newValue = snippet.data['scale--value'] += amount
+
+  const scale = newValue / originalValue
 
   const view = textEditorViewsMap[snippet.textId];
-  view.dispatch({
-    changes: ChangeSet.of(
-      {
+
+  const changes: ChangeSpec[] = []
+
+  // update text of scale
+
+  changes.push({
+    from: snippet.span[0],
+    to: snippet.span[1],
+    insert: `= ${snippet.data['scale--value']} ${snippet.data['scale--unit']}`,
+  })
+  
+  // update quantities
+
+  for (const snippet of snippetsMobx.values()) {
+    if (snippet.snippetTypeId === QUANTITY_TYPE) {
+
+      let originalQuantity = snippet.data['__quantity--original-quantity']
+
+      if (!originalQuantity) {
+        originalQuantity = snippet.data['__quantity--original-quantity'] = snippet.data['quantity--quantity']
+      }
+
+      const newQuantity = snippet.data['quantity--quantity'] = scale * originalQuantity
+
+
+      changes.push({
         from: snippet.span[0],
         to: snippet.span[1],
-        insert: `= ${snippet.data['scale--value']} ${snippet.data['scale--unit']}`,
-      },
-      view.state.doc.length
-    ),
-  });
+        insert: `${newQuantity} ${snippet.data['quantity--unitOfMeasure']}`
+      })
+    }
+  }
+
+  console.log(changes)
+
+  view.dispatch({ changes })
+
+
 }
+
