@@ -28,7 +28,7 @@ const PropertyListItem = ({
       dragControls={controls}
       dragListener={false}
       value={item}
-      className="bg-black rounded py-1 px-2"
+      className="bg-black rounded py-1 px-2 select-none"
     >
       <div className="flex items-center gap-2">
         <div onPointerDown={(e) => controls.start(e)} className="cursor-grab">
