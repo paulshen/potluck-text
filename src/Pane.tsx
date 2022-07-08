@@ -46,13 +46,15 @@ export function Pane({ children }: { children: React.ReactNode }) {
         )}
       >
         <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 16 16"
           width="16"
-          height="16"
-          className="block"
+          height="4"
+          viewBox="0 0 16 4"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
         >
-          <path d="M8 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm13 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"></path>
+          <circle cx="2" cy="2" r="2" fill="black" />
+          <circle cx="8" cy="2" r="2" fill="black" />
+          <circle cx="14" cy="2" r="2" fill="black" />
         </svg>
       </div>
       {children}
