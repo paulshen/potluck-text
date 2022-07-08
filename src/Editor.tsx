@@ -27,6 +27,9 @@ import {
   snippetTypeViewConfigurationsMobx,
   spatialHoverSnippetIdBox,
   textEditorViewsMap,
+  Span,
+  spatialComponentsMobx,
+  SpatialComponentType,
 } from "./primitives";
 import {
   createSnippetFromSpan,
@@ -492,10 +495,25 @@ export const Editor = observer(({ textId }: { textId: string }) => {
         runInAction(() => {
           for (const snippet of snippetsMobx.values()) {
             if (snippet.textId === textId) {
-              snippet.span = [
+              const newSpan: Span = [
                 transaction.changes.mapPos(snippet.span[0]),
                 transaction.changes.mapPos(snippet.span[1]),
               ];
+              if (newSpan[0] === newSpan[1]) {
+                snippetsMobx.delete(snippet.id);
+                spatialComponentsMobx.replace(
+                  spatialComponentsMobx.filter(
+                    (s) =>
+                      !(
+                        s.spatialComponentType ===
+                          SpatialComponentType.Snippet &&
+                        s.snippetId === snippet.id
+                      )
+                  )
+                );
+              } else {
+                snippet.span = newSpan;
+              }
             }
           }
           const snippetSuggestions = suggestionsComputed.get();

@@ -1,6 +1,6 @@
 import { EditorState } from "@codemirror/state";
 import { EventEmitter } from "eventemitter3";
-import { observable } from "mobx";
+import { observable, reaction } from "mobx";
 import { ingredientSnippetType } from "./snippetTypes/ingredients";
 import { quantitySnippetType } from "./snippetTypes/quantities";
 import { EditorView } from "codemirror";
