@@ -50,22 +50,32 @@ export const quantitySnippetType: SnippetType = {
       "quantity--unitOfMeasure": data.unitOfMeasure,
     };
 
-    if (
-      data.unitOfMeasure === "pounds" &&
-      data.quantity &&
-      typeof data.quantity === "number"
-    ) {
-      const weightInGrams = data.quantity * 453.592;
-      snippetData["quantity--weightInGrams"] = `${Math.round(weightInGrams)} g`;
+    if (data.quantity === undefined || typeof data.quantity !== "number") {
+      return snippetData;
     }
 
-    if (
-      data.unitOfMeasure === "ounces" &&
-      data.quantity &&
-      typeof data.quantity === "number"
-    ) {
-      const weightInGrams = data.quantity * 28.34;
-      snippetData["quantity--weightInGrams"] = `${Math.round(weightInGrams)} g`;
+    if (data.unitOfMeasure === "pounds") {
+      snippetData["quantity--standardMetric"] = `${Math.round(
+        data.quantity * 453.592
+      )} g`;
+    }
+
+    if (data.unitOfMeasure === "ounces") {
+      snippetData["quantity--standardMetric"] = `${Math.round(
+        data.quantity * 28.34
+      )} g`;
+    }
+
+    if (data.unitOfMeasure === "teaspoons") {
+      snippetData["quantity--standardMetric"] = `${Math.round(
+        data.quantity * 4.93
+      )} ml`;
+    }
+
+    if (data.unitOfMeasure === "tablespoons") {
+      snippetData["quantity--standardMetric"] = `${Math.round(
+        data.quantity * 14.79
+      )} ml`;
     }
 
     return snippetData;
@@ -75,6 +85,6 @@ export const quantitySnippetType: SnippetType = {
     { id: "quantity--quantity", name: "Quantity", type: "number" },
     { id: "quantity--quantity2", name: "Secondary quantity", type: "number" },
     { id: "quantity--unitOfMeasure", name: "Unit", type: "string" },
-    { id: "quantity--weightInGrams", name: "Weight in grams", type: "string" },
+    { id: "quantity--standardMetric", name: "Metric units", type: "string" },
   ],
 };
