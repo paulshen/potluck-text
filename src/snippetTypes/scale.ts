@@ -72,54 +72,72 @@ export const scaleSnippetType: SnippetType = {
 
 function changeScaleValue(snippet: Snippet, amount: number) {
 
+  // calculate scale
+
   const currentValue = snippet.data['scale--value']
 
-  let originalValue = snippet.data['__scale--originalValue']
+  let originalValue = snippet.data['__scale--original-value']
 
   if (!originalValue) {
-    originalValue = snippet.data['__scale--originalValue'] = currentValue
+    originalValue = snippet.data['__scale--original-value'] = currentValue
   }
 
-  if ((currentValue + amount) < 1) {
+  const newValue = (currentValue + amount)
+
+  if (newValue < 1) {
     return
   }
-
-  // update value
-
-  const newValue = snippet.data['scale--value'] += amount
 
   const scale = newValue / originalValue
 
   const view = textEditorViewsMap[snippet.textId];
+  
+
+  // update snippets
 
   const changes: ChangeSpec[] = []
 
-  // update text of scale
 
-  changes.push({
-    from: snippet.span[0],
-    to: snippet.span[1],
-    insert: `= ${snippet.data['scale--value']} ${snippet.data['scale--unit']}`,
-  })
-  
-  // update quantities
+  for (const otherSnippet of snippetsMobx.values()) {
 
-  for (const snippet of snippetsMobx.values()) {
-    if (snippet.snippetTypeId === QUANTITY_TYPE) {
+    if (otherSnippet.textId !== snippet.textId) {
+      continue
+    }
 
-      let originalQuantity = snippet.data['__quantity--original-quantity']
+    // ... scale
 
-      if (!originalQuantity) {
-        originalQuantity = snippet.data['__quantity--original-quantity'] = snippet.data['quantity--quantity']
+    if (otherSnippet.snippetTypeId === SCALE_TYPE) {
+      let originalValue = otherSnippet.data['__scale--original-value']
+
+      if (!originalValue) {
+        originalValue = otherSnippet.data['__scale--original-value'] = otherSnippet.data['scale--value']
       }
 
-      const newQuantity = snippet.data['quantity--quantity'] = scale * originalQuantity
+      const newValue = otherSnippet.data['scale--value'] = originalValue * scale
+
+      changes.push({
+        from: otherSnippet.span[0],
+        to: otherSnippet.span[1],
+        insert: `= ${newValue} ${otherSnippet.data['scale--unit']}`,
+      })
+    }
+
+    // ... quantities
+
+    if (otherSnippet.snippetTypeId === QUANTITY_TYPE) {
+      let originalQuantity = otherSnippet.data['__quantity--original-quantity']
+
+      if (!originalQuantity) {
+        originalQuantity = otherSnippet.data['__quantity--original-quantity'] = otherSnippet.data['quantity--quantity']
+      }
+
+      const newQuantity = otherSnippet.data['quantity--quantity'] = scale * originalQuantity
 
 
       changes.push({
-        from: snippet.span[0],
-        to: snippet.span[1],
-        insert: `${newQuantity} ${snippet.data['quantity--unitOfMeasure']}`
+        from: otherSnippet.span[0],
+        to: otherSnippet.span[1],
+        insert: `${newQuantity} ${otherSnippet.data['quantity--unitOfMeasure']}`
       })
     }
   }
