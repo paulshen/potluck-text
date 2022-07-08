@@ -25,8 +25,9 @@ export function Pane({ children }: { children: React.ReactNode }) {
 
   return (
     <div
-      className="w-[36rem] absolute top-0 left-0"
+      className="w-[36rem] absolute top-0 left-0 rounded-lg"
       style={{
+        boxShadow: `8px 8px 20px rgba(0, 0, 0, 0.15)`,
         top: `${position[1]}px`,
         left: `${position[0]}px`,
         zIndex: `${maxPaneZIndex}`,
