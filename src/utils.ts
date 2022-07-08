@@ -133,7 +133,7 @@ export function createSnippetFromSpan(
       snippetTypeId,
       textId,
       span,
-      data: snippetTypesMobx.get(INGREDIENT_TYPE)!.parse(textInSnippet),
+      data: snippetTypesMobx.get(snippetTypeId)!.parse(textInSnippet),
     });
   });
   return snippetId;
