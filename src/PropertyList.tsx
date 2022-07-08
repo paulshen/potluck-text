@@ -1,6 +1,5 @@
 import { Reorder, useDragControls } from "framer-motion";
 import * as Checkbox from "@radix-ui/react-checkbox";
-import { useState } from "react";
 import { Snippet, SnippetPropertyAction } from "./primitives";
 
 export interface PropertyListItem {
