@@ -371,20 +371,30 @@ const scalerPlugin = ViewPlugin.fromClass(class {
   constructor(view: EditorView) {
     const container : any = document.createElement("div")
     const slider : any = document.createElement("input")
+    const sliderContainer : any = document.createElement("div")
+    const scaleText : any = document.createElement("div")
     const buttons: any = document.createElement("div")
     const restoreButton : any = document.createElement("button")
+    const saveButton : any = document.createElement("button")
 
     restoreButton.style.visibility = "hidden"
+    saveButton.style.visibility = "hidden"
 
-    buttons.appendChild(restoreButton)
 
     const scaleQuantities = (scale : number) => {
       slider.value = scale;
 
+
+
+
       if (scale !== 1) {
+        scaleText.innerText = `x ${scale}`
         restoreButton.style.visibility = "inherit"
+        saveButton.style.visibility = "inherit"
       } else {
+        scaleText.innerText = ""
         restoreButton.style.visibility = "hidden"
+        saveButton.style.visibility = "hidden"
       }
 
       const changes: ChangeSpec[] = []
@@ -407,10 +417,10 @@ const scalerPlugin = ViewPlugin.fromClass(class {
     }
 
     slider.type = "range"
-    slider.min = 0.5
+    slider.min = 1
     slider.max = 10
     slider.value = 1;
-    slider.stepSize = 0.5
+    slider.stepSize = 1
 
     slider.oninput = (evt :any) => {
       const scale = parseFloat(evt.target.value)
@@ -419,12 +429,25 @@ const scalerPlugin = ViewPlugin.fromClass(class {
       scaleQuantities(scale)
     }
 
-    container.className = "flex absolute bottom-0 justify-between p-2 left-0 right-0"
-    restoreButton.className = "p-1 bg-gray-200 rounded"
-    restoreButton.innerText = "restore"
+    sliderContainer.className = "flex gap-1 items-center"
 
+    buttons.className = "flex gap-1"
+    container.className = "flex absolute bottom-0 justify-between p-2 left-0 right-0 bg-gray-100 rounded m-2"
+    restoreButton.className = "p-1 bg-gray-200 rounded"
+    saveButton.className = "p-1 bg-gray-200 rounded"
+    restoreButton.innerText = "restore"
+    saveButton.innerText = "save"
+
+    buttons.appendChild(restoreButton)
+    buttons.appendChild(saveButton)
+
+
+    sliderContainer.append(slider)
+    sliderContainer.append(scaleText)
+
+    container.appendChild(sliderContainer)
     container.appendChild(buttons)
-    container.appendChild(slider)
+
 
     this.dom = view.dom.appendChild(container)
   }
