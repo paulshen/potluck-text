@@ -121,7 +121,9 @@ export const PropertyList = ({
 }: PropertyListProps) => {
   return (
     <div className="bg-black text-white w-[300px] text-xs rounded">
-      <div className="p-2">{title}</div>
+      <div className="border-b px-2 py-1.5" style={{ borderColor: "#575757" }}>
+        {title}
+      </div>
 
       <Reorder.Group
         axis="y"
