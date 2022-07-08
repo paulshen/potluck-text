@@ -4,6 +4,7 @@ import { observable, reaction } from "mobx";
 import { ingredientSnippetType } from "./snippetTypes/ingredients";
 import { quantitySnippetType } from "./snippetTypes/quantities";
 import { EditorView } from "codemirror";
+import {scaleSnippetType} from "./snippetTypes/scale";
 
 export type Position = [x: number, y: number];
 export type Rect = [x: number, y: number, width: number, height: number];
@@ -12,6 +13,8 @@ export type Span = [from: number, to: number];
 const DEFAULT_EDITOR_CONTENT = `Grilled Gochujang Pork With Fresh Sesame Kimchi
 
 Pork shoulder is often prepared as a large roast, requiring hours of cooking until it’s tender. But if you slice it thinly and pound it, the meat quickly absorbs this savory gochujang marinade and cooks up in no time. The spicy pork is balanced by a cool and crisp sesame kimchi, eaten fresh like a salad rather than fermented like traditional preparations. Baby bok choy stands in for the usual napa cabbage, and it’s coated in a vibrant sauce of garlic, ginger, gochugaru, fish sauce and nutty sesame oil. Tuck any leftover pork and kimchi into sandwiches the next day, garnished with tomatoes and mayonnaise.
+
+= 4 servings
 
 2 tablespoons gochugaru
 2 tablespoons distilled white vinegar
@@ -46,9 +49,11 @@ Serve the grilled pork and onions with the fresh sesame kimchi and rice on the s
 
 export const INGREDIENT_TYPE = "ingredient";
 export const QUANTITY_TYPE = "quantity";
+export const SCALE_TYPE = "scale";
 const DEFAULT_SNIPPET_TYPES: { [key: string]: SnippetType } = {
   [INGREDIENT_TYPE]: ingredientSnippetType,
   [QUANTITY_TYPE]: quantitySnippetType,
+  [SCALE_TYPE]: scaleSnippetType
 };
 const DEFAULT_SNIPPET_TYPE_CONFIGURATION: {
   [key: string]: SnippetTypeViewConfiguration;
@@ -59,6 +64,9 @@ const DEFAULT_SNIPPET_TYPE_CONFIGURATION: {
   [QUANTITY_TYPE]: {
     inlineVisiblePropertyIds: [],
   },
+  [SCALE_TYPE]: {
+    inlineVisiblePropertyIds: []
+  }
 };
 
 export const FIRST_TEXT_ID = "text-id-1";
