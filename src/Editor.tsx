@@ -29,7 +29,7 @@ import {
   textEditorViewsMap,
   Span,
   spatialComponentsMobx,
-  SpatialComponentType, QUANTITY_TYPE,
+  SpatialComponentType, QUANTITY_TYPE, SCALE_TYPE,
 } from "./primitives";
 import {
   createSnippetFromSpan,
@@ -364,97 +364,163 @@ const snippetAnnotationPlugin = ViewPlugin.define((view) => ({}), {
 });
 
 
-const scalerPlugin = ViewPlugin.fromClass(class {
+const restoreChangePlugin = ViewPlugin.fromClass(class {
 
   dom: any
 
+  text: any
+
+  view: EditorView
+
+
   constructor(view: EditorView) {
-    const container : any = document.createElement("div")
-    const slider : any = document.createElement("input")
-    const sliderContainer : any = document.createElement("div")
-    const scaleText : any = document.createElement("div")
+
+    this.view = view
+
+    const container: any = document.createElement("div")
+    const text: any = this.text = document.createElement("div")
+
     const buttons: any = document.createElement("div")
-    const restoreButton : any = document.createElement("button")
-    const saveButton : any = document.createElement("button")
 
-    restoreButton.style.visibility = "hidden"
-    saveButton.style.visibility = "hidden"
-
-
-    const scaleQuantities = (scale : number) => {
-      slider.value = scale;
-
-      if (scale !== 1) {
-        scaleText.innerText = `x ${scale}`
-        restoreButton.style.visibility = "inherit"
-        saveButton.style.visibility = "inherit"
-      } else {
-        scaleText.innerText = ""
-        restoreButton.style.visibility = "hidden"
-        saveButton.style.visibility = "hidden"
-      }
-
-      const changes: ChangeSpec[] = []
-
-      for (const snippet of snippetsMobx.values()) {
-        if (snippet.snippetTypeId === QUANTITY_TYPE) {
-          changes.push({
-            from: snippet.span[0],
-            to: snippet.span[1],
-            insert: `${snippet.data['quantity--quantity'] * scale} ${snippet.data['quantity--unitOfMeasure']}`
-          })
-        }
-      }
-
-      view.dispatch({changes})
-    }
+    const restoreButton: any = document.createElement("button")
+    const saveButton: any = document.createElement("button")
 
     restoreButton.onclick = () => {
-      scaleQuantities(1)
+      restoreScale(this.view)
     }
 
-    slider.type = "range"
-    slider.min = 1
-    slider.max = 10
-    slider.value = 1;
-    slider.stepSize = 1
-
-    slider.oninput = (evt :any) => {
-      const scale = parseFloat(evt.target.value)
-
-
-      scaleQuantities(scale)
+    saveButton.onclick = () => {
+      saveScale(this.view)
     }
 
-    sliderContainer.className = "flex gap-1 items-center"
 
-    buttons.className = "flex gap-1"
-    container.className = "flex absolute bottom-0 justify-between p-2 left-0 right-0 bg-gray-100 rounded m-2"
-    restoreButton.className = "p-1 bg-gray-200 rounded"
-    saveButton.className = "p-1 bg-gray-200 rounded"
+    buttons.className = "flex gap-2"
+    container.className = "flex absolute bottom-0 justify-between py-1 px-2 left-0 right-0 bg-gray-400 rounded m-2 bg-opacity-90 text-white shadow"
+    restoreButton.className = "text-white underline"
+    saveButton.className = "text-white underline"
     restoreButton.innerText = "restore"
     saveButton.innerText = "save"
+    text.innerText = "scaled by 1x"
 
     buttons.appendChild(restoreButton)
     buttons.appendChild(saveButton)
 
-
-    sliderContainer.append(slider)
-    sliderContainer.append(scaleText)
-
-    container.appendChild(sliderContainer)
+    container.appendChild(text)
     container.appendChild(buttons)
 
-
     this.dom = view.dom.appendChild(container)
+
+    this.refreshView();
+  }
+
+
+  refreshView() {
+    const textId = this.view.state.facet(textIdFacet);
+
+    for (const snippet of snippetsMobx.values()) {
+
+      if (snippet.textId === textId &&
+        snippet.snippetTypeId === SCALE_TYPE &&
+        snippet.data['__scale--original-value'] !== undefined
+      ) {
+        const scale = snippet.data['scale--value'] / snippet.data['__scale--original-value']
+
+        this.text.innerText = `recipe was scaled x ${scale}`
+        this.dom.style.visibility = 'inherit'
+
+        return;
+      }
+    }
+
+    this.dom.style.visibility = 'hidden'
+
   }
 
   update(update: ViewUpdate) {
-
+    // todo: we could be smarter about this
+    this.refreshView()
   }
 
-  destroy() { this.dom.remove() }
+  destroy() {
+    this.dom.remove()
+  }
 })
+
+function restoreScale(view: EditorView) {
+  const textId = view.state.facet(textIdFacet);
+
+  const changes: ChangeSpec[] = []
+
+  for (const snippet of snippetsMobx.values()) {
+
+    if (snippet.textId !== textId) {
+      continue
+    }
+
+    // ... scale
+
+    if (snippet.snippetTypeId === SCALE_TYPE) {
+      let originalValue = snippet.data['__scale--original-value']
+
+      if (originalValue !== undefined) {
+        delete snippet.data['__scale--original-value']
+        snippet.data['scale--value'] = originalValue
+
+        changes.push({
+          from: snippet.span[0],
+          to: snippet.span[1],
+          insert: `= ${originalValue} ${snippet.data['scale--unit']}`,
+        })
+      }
+    }
+
+    // ... quantities
+
+    if (snippet.snippetTypeId === QUANTITY_TYPE) {
+      let originalQuantity = snippet.data['__quantity--original-quantity']
+
+      if (originalQuantity !== undefined) {
+        delete snippet.data['__quantity--original-quantity']
+        snippet.data['quantity--quantity'] = originalQuantity
+
+        changes.push({
+          from: snippet.span[0],
+          to: snippet.span[1],
+          insert: `${originalQuantity} ${snippet.data['quantity--unitOfMeasure']}`
+        })
+      }
+    }
+  }
+
+  view.dispatch({ changes })
+}
+
+function saveScale(view: EditorView) {
+  const textId = view.state.facet(textIdFacet);
+
+  const changes: ChangeSpec[] = []
+
+  for (const snippet of snippetsMobx.values()) {
+
+    if (snippet.textId !== textId) {
+      continue
+    }
+
+    // ... scale
+
+    if (snippet.snippetTypeId === SCALE_TYPE) {
+      delete snippet.data['__scale--original-value']
+    }
+
+    // ... quantities
+
+    if (snippet.snippetTypeId === QUANTITY_TYPE) {
+      delete snippet.data['__quantity--original-quantity']
+    }
+  }
+
+  view.dispatch({ changes })
+}
 
 const snippetDecorations = EditorView.decorations.compute(
   [snippetsField, spatialHoverSnippetIdField],
@@ -616,6 +682,7 @@ export const Editor = observer(({ textId }: { textId: string }) => {
         snippetHover,
         spatialHoverSnippetIdField,
         Prec.high(acceptSuggestionsPlugin), // high priority so we can intercept enter events early
+        restoreChangePlugin
       ],
       parent: editorRef.current!,
       dispatch(transaction) {
