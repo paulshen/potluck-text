@@ -45,6 +45,7 @@ Step 4
 Serve the grilled pork and onions with the fresh sesame kimchi and rice on the side.`;
 
 export const INGREDIENT_TYPE = "ingredient";
+export const INGREDIENT_REFERENCE_TYPE = "ingredient_reference";
 export const QUANTITY_TYPE = "quantity";
 const DEFAULT_SNIPPET_TYPES: { [key: string]: SnippetType } = {
   [INGREDIENT_TYPE]: ingredientSnippetType,

@@ -30,6 +30,9 @@ import {
   Span,
   spatialComponentsMobx,
   SpatialComponentType,
+  INGREDIENT_TYPE,
+  INGREDIENT_REFERENCE_TYPE,
+  QUANTITY_TYPE,
 } from "./primitives";
 import {
   createSnippetFromSpan,
@@ -73,34 +76,32 @@ const snippetSuggestionsField = StateField.define<SnippetSuggestion[]>({
     }));
   },
 });
-const suggestionMark = Decoration.mark({ class: "cm-suggestion" });
-const activeSuggestionMark = Decoration.mark({
-  class: "cm-suggestion cm-suggestion-active",
-});
-const suggestionMarkInShiftRange = Decoration.mark({
-  class: "cm-suggestion cm-suggestion-shift-range",
-});
+
+const suggestionMarks: { [key: string]: Decoration } = {
+  [INGREDIENT_TYPE]: Decoration.mark({
+    class: "cm-suggestion cm-suggestion-ingredient",
+  }),
+  [INGREDIENT_REFERENCE_TYPE]: Decoration.mark({
+    class: "cm-suggestion cm-suggestion-ingredient-reference",
+  }),
+  [QUANTITY_TYPE]: Decoration.mark({
+    class: "cm-suggestion cm-suggestion-quantity",
+  }),
+};
+
 const suggestionDecorations = EditorView.decorations.from(
   snippetSuggestionsField,
   (suggestions) => (view) => {
-    const pos = view.state.selection.asSingle().main.anchor;
-    const range = view.state.selection.ranges[0];
-
     return Decoration.set(
       suggestions.flatMap((suggestion) => {
         if (suggestion.span[1] <= suggestion.span[0]) {
           return [];
         }
-        return suggestionActive(suggestion, pos)
-          ? [activeSuggestionMark.range(suggestion.span[0], suggestion.span[1])]
-          : range.empty || spanOverlaps(suggestion.span, [range.from, range.to])
-          ? [
-              suggestionMarkInShiftRange.range(
-                suggestion.span[0],
-                suggestion.span[1]
-              ),
-            ]
-          : [suggestionMark.range(suggestion.span[0], suggestion.span[1])];
+        const markType = suggestionMarks[suggestion.snippetTypeId];
+        if (markType === undefined) {
+          return [];
+        }
+        return [markType.range(suggestion.span[0], suggestion.span[1])];
       }),
       true
     );
@@ -429,7 +430,6 @@ export const Editor = observer(({ textId }: { textId: string }) => {
     });
     return filteredSuggestions;
   });
-  const numSuggestions = computed(() => suggestionsComputed.get().length).get();
 
   useEffect(() => {
     const view = new EditorView({
@@ -452,8 +452,17 @@ export const Editor = observer(({ textId }: { textId: string }) => {
             fontSize: "1rem",
             lineHeight: "1.75em",
           },
-          ".cm-suggestion-active": {
-            borderBottom: "1px dashed black",
+          ".cm-suggestion": {
+            "font-weight": 600,
+          },
+          ".cm-suggestion-ingredient": {
+            color: "#52a4ff",
+          },
+          ".cm-suggestion-ingredient-reference": {
+            color: "#30b413",
+          },
+          ".cm-suggestion-quantity": {
+            color: "#ff5d7a",
           },
           ".metakey-down & .cm-suggestion.cm-suggestion-active": {
             borderBottom: "2px dashed black",
@@ -602,10 +611,34 @@ export const Editor = observer(({ textId }: { textId: string }) => {
     };
   }, []);
 
+  const ingredientSuggestions = suggestionsComputed
+    .get()
+    .sort((a, b) => a.span[0] - b.span[0])
+    .filter((s) => s.snippetTypeId === INGREDIENT_TYPE)
+    .map((suggestion) =>
+      textEditorStateMobx
+        .get(textId)
+        ?.doc.sliceString(suggestion.span[0], suggestion.span[1])
+    );
+
   return (
-    <div
-      className="text-lg h-[500px] bg-white border-black border-b-2 border-l-2 border-r-2 rounded-b-lg overflow-auto"
-      ref={editorRef}
-    ></div>
+    <div>
+      <div
+        className="text-lg h-[500px] bg-white border-black border-b-2 border-l-2 border-r-2 rounded-b-lg overflow-auto"
+        ref={editorRef}
+      ></div>
+
+      {ingredientSuggestions.length > 0 && (
+        <div className="absolute left-[550px] top-0 w-[200px]">
+          <span className="font-bold text-sm text-gray-500">
+            🥕 Ingredients
+          </span>
+
+          {ingredientSuggestions.map((suggestion) => (
+            <div key={suggestion}>{suggestion}</div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 });
