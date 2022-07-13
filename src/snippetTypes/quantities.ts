@@ -4,8 +4,8 @@
 // Climate impact source: https://ourworldindata.org/environmental-impacts-of-food
 
 import { parseIngredient } from "parse-ingredient";
+import { createHighlighter, HighlighterType } from "../HighlightCreator";
 import { QUANTITY_TYPE, Highlight, SnippetType, Span } from "../primitives";
-import { spanOverlaps } from "../utils";
 
 const parse = (text: string) => {
   // This is super weird, but the quantity parsing library expects to parse a whole ingredient,
@@ -59,27 +59,19 @@ export const quantitySnippetType: SnippetType = {
   name: "Quantity",
   icon: "⚖️",
   color: "#ffc107",
-  highlight: (text: string): Highlight[] => {
-    let matches: Span[] = [];
-    for (const match of text.matchAll(
-      /(\d|\/|¼|½|¾|⅛|\.)+\s?(g|gram|oz|tsp|Tbsp|pound|cup|cup|can|teaspoon|tablespoon)s?\b/gi
-    )) {
-      const from = match.index ?? 0;
-      const to = from + match[0].length;
-      // Only add the match if it doesn't overlap with other existing matches.
-      // This prevents weird overlapping matches
-      if (!matches.some((existing) => spanOverlaps(existing, [from, to]))) {
-        matches.push([from, to]);
-      }
-    }
-
-    return matches.map(([from, to]) => ({
-      span: [from, to],
-      snippetTypeId: QUANTITY_TYPE,
-      data: parse(text.slice(from, to)),
-      refs: {},
-    }));
-  },
+  highlight: createHighlighter({
+    // TODO: untangle circular dependency so this can be QUANTITY_TYPE
+    id: "quantity",
+    type: HighlighterType.RegexHighlighter,
+    regex:
+      "(\\d|\\/|¼|½|¾|⅛|\\.)+\\s?(g|gram|oz|tsp|Tbsp|pound|cup|cup|can|teaspoon|tablespoon)s?\\b",
+    postProcess: (highlights, text) => {
+      return highlights.map((highlight) => ({
+        ...highlight,
+        data: parse(text.slice(highlight.span[0], highlight.span[1])),
+      }));
+    },
+  }),
 
   parse,
 
