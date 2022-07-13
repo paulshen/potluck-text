@@ -453,16 +453,19 @@ export const Editor = observer(({ textId }: { textId: string }) => {
             lineHeight: "1.75em",
           },
           ".cm-suggestion": {
-            "font-weight": 600,
+            padding: "0 2px",
           },
           ".cm-suggestion-ingredient": {
-            color: "#52a4ff",
+            color: "hsla(212, 42%, 40%, 1)",
+            backgroundColor: "#52a4ff11",
           },
           ".cm-suggestion-ingredient-reference": {
-            color: "#30b413",
+            color: "hsl(109deg 90% 27%)",
+            backgroundColor: "#30b41311",
           },
           ".cm-suggestion-quantity": {
-            color: "#ff5d7a",
+            color: "hsl(349deg 80% 48%)",
+            backgroundColor: "#ff5d7a11",
           },
           ".metakey-down & .cm-suggestion.cm-suggestion-active": {
             borderBottom: "2px dashed black",
@@ -630,12 +633,12 @@ export const Editor = observer(({ textId }: { textId: string }) => {
 
       {ingredientSuggestions.length > 0 && (
         <div className="absolute left-[550px] top-0 w-[200px]">
-          <span className="font-bold text-sm text-gray-500">
-            🥕 Ingredients
-          </span>
+          <span className="font-bold text-sm text-gray-400">Ingredients</span>
 
           {ingredientSuggestions.map((suggestion) => (
-            <div key={suggestion}>{suggestion}</div>
+            <div className="font-bold text-[#52a4ff]" key={suggestion}>
+              {suggestion}
+            </div>
           ))}
         </div>
       )}
