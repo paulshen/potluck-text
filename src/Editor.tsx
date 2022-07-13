@@ -96,7 +96,6 @@ const suggestionMarks: { [key: string]: Decoration } = {
 const suggestionDecorations = EditorView.decorations.from(
   snippetSuggestionsField,
   (suggestions) => (view) => {
-    console.log("compute marks");
     return Decoration.set(
       suggestions.flatMap((suggestion) => {
         if (suggestion.span[1] <= suggestion.span[0]) {
@@ -369,7 +368,6 @@ export const Editor = observer(({ textId }: { textId: string }) => {
   const suggestionsComputed = useMemo(
     () =>
       computed(() => {
-        console.log("computing suggestions");
         const text = computed(() =>
           textEditorStateMobx.get(textId)!.sliceDoc(0)
         );
@@ -515,7 +513,6 @@ export const Editor = observer(({ textId }: { textId: string }) => {
       reaction(
         () => suggestionsComputed.get(),
         (snippetSuggestions) => {
-          console.log("effect!!");
           view.dispatch({
             effects: [setSnippetSuggestionsEffect.of(snippetSuggestions)],
           });
