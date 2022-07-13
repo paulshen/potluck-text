@@ -12,7 +12,7 @@ import {
   textEditorStateMobx,
   snippetsMobx,
   Snippet,
-  SnippetSuggestion,
+  Highlight,
   INGREDIENT_TYPE,
   Span,
   snippetTypesMobx,
@@ -75,7 +75,7 @@ export function getSnippetForSnippetOnCanvas(
  */
 export function createSnippetsForSuggestions(
   textId: string,
-  suggestions: SnippetSuggestion[]
+  suggestions: Highlight[]
 ) {
   const snippets: Snippet[] = suggestions.map((suggestion) => {
     const textInSnippet = textEditorStateMobx
@@ -118,6 +118,8 @@ export const spanOverlaps = ([from, to]: Span, [from2, to2]: Span) => {
   return (from <= from2 && to >= from2) || (from2 <= from && to2 >= from);
 };
 
+export const spanEquals = (a: Span, b: Span) => a[0] === b[0] && a[1] === b[1];
+
 export function createSnippetFromSpan(
   textId: string,
   span: Span,
@@ -138,3 +140,35 @@ export function createSnippetFromSpan(
   });
   return snippetId;
 }
+
+// Find the nearest index to the left where a character occurs, starting from a given index
+export const findPreviousCharacter = (
+  index: number,
+  character: string,
+  text: string
+): number => {
+  let i = index;
+  while (i >= 0) {
+    if (text[i] === character) {
+      return i;
+    }
+    i--;
+  }
+  return 0;
+};
+
+// Find the nearest index to the right where a character occurs, starting from a given index
+export const findNextCharacter = (
+  index: number,
+  character: string,
+  text: string
+): number => {
+  let i = index;
+  while (i < text.length) {
+    if (text[i] === character) {
+      return i;
+    }
+    i++;
+  }
+  return text.length;
+};

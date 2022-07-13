@@ -21,7 +21,7 @@ import {
   dragNewSnippetEmitter,
   snippetsMobx,
   Snippet,
-  SnippetSuggestion,
+  Highlight,
   textEditorStateMobx,
   snippetTypesMobx,
   snippetTypeViewConfigurationsMobx,
@@ -33,11 +33,13 @@ import {
   INGREDIENT_TYPE,
   INGREDIENT_REFERENCE_TYPE,
   QUANTITY_TYPE,
+  INGREDIENT_WITH_QUANTITY_TYPE,
 } from "./primitives";
 import {
   createSnippetFromSpan,
   createSnippetsForSuggestions,
   getParentByClassName,
+  spanEquals,
   spanOverlaps,
 } from "./utils";
 import ReactDOM from "react-dom/client";
@@ -45,10 +47,7 @@ import { SnippetTokenHovercardContent } from "./SnippetTokenHovercardContent";
 import pick from "lodash/pick";
 
 // Cursor is inside the suggestion or just a little to the right
-const suggestionActive = (
-  suggestion: SnippetSuggestion,
-  cursorPosition: number
-) =>
+const suggestionActive = (suggestion: Highlight, cursorPosition: number) =>
   cursorPosition >= suggestion.span[0] &&
   cursorPosition <= suggestion.span[1] + 1;
 
@@ -56,8 +55,8 @@ const textIdFacet = Facet.define<string, string>({
   combine: (values) => values[0],
 });
 
-const setSnippetSuggestionsEffect = StateEffect.define<SnippetSuggestion[]>();
-const snippetSuggestionsField = StateField.define<SnippetSuggestion[]>({
+const setSnippetSuggestionsEffect = StateEffect.define<Highlight[]>();
+const snippetSuggestionsField = StateField.define<Highlight[]>({
   create() {
     return [];
   },
@@ -416,9 +415,14 @@ export const Editor = observer(({ textId }: { textId: string }) => {
   const editorRef = useRef(null);
   const suggestionsComputed = computed(() => {
     const text = computed(() => textEditorStateMobx.get(textId)!.sliceDoc(0));
-    const suggestions: SnippetSuggestion[] = [
-      ...snippetTypesMobx.values(),
-    ].flatMap((st) => st.suggest(text.get()));
+    const suggestions: Highlight[] = [...snippetTypesMobx.values()].reduce<
+      Highlight[]
+    >(
+      (suggestions, st) =>
+        suggestions.concat(st.highlight(text.get(), suggestions)),
+      []
+    );
+    console.log(suggestions);
     const existingSnippets = [...snippetsMobx.values()].filter(
       (snippet) => snippet.textId === textId
     );
@@ -614,15 +618,31 @@ export const Editor = observer(({ textId }: { textId: string }) => {
     };
   }, []);
 
-  const ingredientSuggestions = suggestionsComputed
-    .get()
+  const allSuggestions = suggestionsComputed.get();
+
+  const ingredientHighlights = allSuggestions
     .sort((a, b) => a.span[0] - b.span[0])
     .filter((s) => s.snippetTypeId === INGREDIENT_TYPE)
-    .map((suggestion) =>
-      textEditorStateMobx
+    .map((ingredientHighlight) => {
+      const ingredientWithQuantity = allSuggestions.find(
+        (otherSuggestion) =>
+          otherSuggestion.snippetTypeId === INGREDIENT_WITH_QUANTITY_TYPE &&
+          otherSuggestion.refs.ingredient === ingredientHighlight
+      );
+
+      const text = textEditorStateMobx
         .get(textId)
-        ?.doc.sliceString(suggestion.span[0], suggestion.span[1])
-    );
+        ?.doc.sliceString(
+          ingredientHighlight.span[0],
+          ingredientHighlight.span[1]
+        );
+
+      return {
+        ...ingredientHighlight,
+        text,
+        quantity: ingredientWithQuantity?.refs.quantity,
+      };
+    });
 
   return (
     <div>
@@ -631,13 +651,22 @@ export const Editor = observer(({ textId }: { textId: string }) => {
         ref={editorRef}
       ></div>
 
-      {ingredientSuggestions.length > 0 && (
-        <div className="absolute left-[550px] top-0 w-[200px]">
-          <span className="font-bold text-sm text-gray-400">Ingredients</span>
+      {ingredientHighlights.length > 0 && (
+        <div className="absolute left-[550px] top-0 w-[300px]">
+          <span className="font-bold text-sm text-gray-400">
+            Ingredients Summary
+          </span>
 
-          {ingredientSuggestions.map((suggestion) => (
-            <div className="font-bold text-[#52a4ff]" key={suggestion}>
-              {suggestion}
+          {ingredientHighlights.map((highlight) => (
+            <div
+              className="border-gray-300 border p-1 my-1 rounded-lg flex"
+              key={highlight.span[0]}
+            >
+              <div>{highlight.text} </div>
+              <div className="text-gray-400 ml-2 right">
+                {highlight.quantity &&
+                  `(${highlight.quantity.data["quantity--quantity"]} ${highlight.quantity.data["quantity--unitOfMeasure"]})`}
+              </div>
             </div>
           ))}
         </div>

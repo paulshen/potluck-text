@@ -3,6 +3,7 @@ import { EventEmitter } from "eventemitter3";
 import { observable, reaction } from "mobx";
 import { ingredientSnippetType } from "./snippetTypes/ingredients";
 import { quantitySnippetType } from "./snippetTypes/quantities";
+import { ingredientWithQuantityType } from "./snippetTypes/ingredientWithQuantity";
 import { EditorView } from "codemirror";
 
 export type Position = [x: number, y: number];
@@ -47,9 +48,12 @@ Serve the grilled pork and onions with the fresh sesame kimchi and rice on the s
 export const INGREDIENT_TYPE = "ingredient";
 export const INGREDIENT_REFERENCE_TYPE = "ingredient_reference";
 export const QUANTITY_TYPE = "quantity";
+export const INGREDIENT_WITH_QUANTITY_TYPE = "ingredient_with_quantity";
+
 const DEFAULT_SNIPPET_TYPES: { [key: string]: SnippetType } = {
-  [INGREDIENT_TYPE]: ingredientSnippetType,
   [QUANTITY_TYPE]: quantitySnippetType,
+  [INGREDIENT_TYPE]: ingredientSnippetType,
+  [INGREDIENT_WITH_QUANTITY_TYPE]: ingredientWithQuantityType,
 };
 const DEFAULT_SNIPPET_TYPE_CONFIGURATION: {
   [key: string]: SnippetTypeViewConfiguration;
@@ -58,6 +62,9 @@ const DEFAULT_SNIPPET_TYPE_CONFIGURATION: {
     inlineVisiblePropertyIds: [],
   },
   [QUANTITY_TYPE]: {
+    inlineVisiblePropertyIds: [],
+  },
+  [INGREDIENT_WITH_QUANTITY_TYPE]: {
     inlineVisiblePropertyIds: [],
   },
 };
@@ -101,8 +108,8 @@ export type SnippetType = {
   icon: string;
   color: string;
 
-  /** Given a whole document, suggest character indexes that could become snippets of this type */
-  suggest: (text: string) => SnippetSuggestion[];
+  /** Given a whole document, return highlights with structured data */
+  highlight: (text: string, existingSuggestions: Highlight[]) => Highlight[];
 
   /** Given text for a single snippet, return structured data for the snippet */
   parse: (text: string) => any;
@@ -140,9 +147,11 @@ export type SnippetGroup = {
   extraColumns: ColumnDefinition[];
 };
 
-export type SnippetSuggestion = {
+export type Highlight = {
   span: Span;
   snippetTypeId: string;
+  data: any;
+  refs: { [key: string]: Highlight };
 };
 
 export type SpatialComponent = SnippetOnCanvas | SnippetGroup;

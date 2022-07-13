@@ -8,7 +8,7 @@ import {
   INGREDIENT_TYPE,
   Snippet,
   snippetsMobx,
-  SnippetSuggestion,
+  Highlight,
   SnippetType,
   Span,
   textEditorViewsMap,
@@ -38,12 +38,29 @@ const ingredients: Ingredient[] = rawIngredients.map((i: any) => {
   return result;
 });
 
+const parse = (text: string) => {
+  const ingredient = ingredients.find(
+    (i) => i.name.toLowerCase() === text.toLowerCase()
+  );
+  if (ingredient !== undefined) {
+    return {
+      "ingredient--icon": "🥕",
+      "ingredient--aisle": ingredient.aisle,
+      "ingredient--climate": ingredient.climate,
+      "ingredient--veganAlternative": ingredient.veganAlternative,
+      "ingredient--description": ingredient.description,
+    };
+  } else {
+    return { "ingredient--icon": "🥕" };
+  }
+};
+
 export const ingredientSnippetType: SnippetType = {
   name: "Ingredient",
   icon: "🥕",
   color: "#ffc107",
-  suggest: (text: string): SnippetSuggestion[] => {
-    let matches: SnippetSuggestion[] = [];
+  highlight: (text: string): Highlight[] => {
+    let matches: Highlight[] = [];
     // We could probably do this faster if we combined all the known strings into one regex,
     // but this is simpler to reason about and seems fast enough for now.
     for (const stringTemplate of ingredients.map((i) => i.name)) {
@@ -71,6 +88,8 @@ export const ingredientSnippetType: SnippetType = {
           matches.push({
             span: [from, to],
             snippetTypeId: INGREDIENT_REFERENCE_TYPE,
+            data: parse(text.slice(from, to)),
+            refs: {},
           });
           continue;
         }
@@ -78,6 +97,8 @@ export const ingredientSnippetType: SnippetType = {
         matches.push({
           span: [from, to],
           snippetTypeId: INGREDIENT_TYPE,
+          data: parse(text.slice(from, to)),
+          refs: {},
         });
       }
     }
@@ -85,22 +106,7 @@ export const ingredientSnippetType: SnippetType = {
     return matches;
   },
 
-  parse: (text: string) => {
-    const ingredient = ingredients.find(
-      (i) => i.name.toLowerCase() === text.toLowerCase()
-    );
-    if (ingredient !== undefined) {
-      return {
-        "ingredient--icon": "🥕",
-        "ingredient--aisle": ingredient.aisle,
-        "ingredient--climate": ingredient.climate,
-        "ingredient--veganAlternative": ingredient.veganAlternative,
-        "ingredient--description": ingredient.description,
-      };
-    } else {
-      return { "ingredient--icon": "🥕" };
-    }
-  },
+  parse,
 
   properties: [
     { id: "ingredient--icon", name: "Icon", type: "string" },
