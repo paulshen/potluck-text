@@ -16,7 +16,7 @@ import {
 import { EditorView, minimalSetup } from "codemirror";
 import { autorun, comparer, computed, reaction, runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useMemo } from "react";
 import {
   dragNewSnippetEmitter,
   snippetsMobx,
@@ -66,6 +66,11 @@ const snippetSuggestionsField = StateField.define<Highlight[]>({
         return e.value;
       }
     }
+
+    if (!tr.docChanged) {
+      return suggestions;
+    }
+
     return suggestions.map((suggestion) => ({
       ...suggestion,
       span: [
@@ -91,6 +96,7 @@ const suggestionMarks: { [key: string]: Decoration } = {
 const suggestionDecorations = EditorView.decorations.from(
   snippetSuggestionsField,
   (suggestions) => (view) => {
+    console.log("compute marks");
     return Decoration.set(
       suggestions.flatMap((suggestion) => {
         if (suggestion.span[1] <= suggestion.span[0]) {
@@ -145,59 +151,6 @@ const spatialHoverSnippetIdField = StateField.define<string | undefined>({
     return hoverSnippetId;
   },
 });
-
-// Accept suggestions (just the one near the cursor, or all) with keyboard shortcuts
-const acceptSuggestionsPlugin = ViewPlugin.fromClass(
-  class {
-    constructor(view: EditorView) {}
-    update(update: ViewUpdate) {}
-    destroy() {}
-  },
-  {
-    eventHandlers: {
-      keydown(event, view) {
-        // Cmd-shift-enter will accept all suggestions if no range selected,
-        // or accept within the selected range if there is one
-        if (event.key === "Enter" && event.metaKey && event.shiftKey) {
-          event.preventDefault();
-
-          const textId = view.state.facet(textIdFacet);
-          const suggestions = view.state.field(snippetSuggestionsField);
-
-          const selection = view.state.selection.main;
-          const rangeSelected = selection.from !== selection.to;
-
-          if (rangeSelected) {
-            createSnippetsForSuggestions(
-              textId,
-              suggestions.filter((suggestion) =>
-                spanOverlaps(suggestion.span, [selection.from, selection.to])
-              )
-            );
-          } else {
-            createSnippetsForSuggestions(textId, suggestions);
-          }
-        } else if (event.key === "Enter" && event.metaKey) {
-          event.preventDefault();
-
-          const textId = view.state.facet(textIdFacet);
-          const pos = view.state.selection.asSingle().main.anchor;
-          const suggestions = view.state.field(snippetSuggestionsField);
-          const suggestionNearPos = suggestions.find((suggestion) =>
-            suggestionActive(suggestion, pos)
-          );
-          if (suggestionNearPos) {
-            createSnippetFromSpan(
-              textId,
-              suggestionNearPos.span,
-              suggestionNearPos.snippetTypeId
-            );
-          }
-        }
-      },
-    },
-  }
-);
 
 const dragSnippetPlugin = ViewPlugin.fromClass(
   class {
@@ -413,27 +366,34 @@ const snippetHover = hoverTooltip((view, pos, side) => {
 
 export const Editor = observer(({ textId }: { textId: string }) => {
   const editorRef = useRef(null);
-  const suggestionsComputed = computed(() => {
-    const text = computed(() => textEditorStateMobx.get(textId)!.sliceDoc(0));
-    const suggestions: Highlight[] = [...snippetTypesMobx.values()].reduce<
-      Highlight[]
-    >(
-      (suggestions, st) =>
-        suggestions.concat(st.highlight(text.get(), suggestions)),
-      []
-    );
-    console.log(suggestions);
-    const existingSnippets = [...snippetsMobx.values()].filter(
-      (snippet) => snippet.textId === textId
-    );
-    // Filter down to only the suggestions that do not overlap with an existing snippet's span
-    const filteredSuggestions = suggestions.filter((suggestion) => {
-      return existingSnippets.every(
-        (snippet) => !spanOverlaps(snippet.span, suggestion.span)
-      );
-    });
-    return filteredSuggestions;
-  });
+  const suggestionsComputed = useMemo(
+    () =>
+      computed(() => {
+        console.log("computing suggestions");
+        const text = computed(() =>
+          textEditorStateMobx.get(textId)!.sliceDoc(0)
+        );
+        const highlights: Highlight[] = [...snippetTypesMobx.values()].reduce<
+          Highlight[]
+        >(
+          (highlights, st) =>
+            highlights.concat(st.highlight(text.get(), highlights)),
+          []
+        );
+        // const pos = textEditorStateMobx.get(textId)?.selection.asSingle().main.from;
+        const existingSnippets = [...snippetsMobx.values()].filter(
+          (snippet) => snippet.textId === textId
+        );
+        // Filter down to only the suggestions that do not overlap with an existing snippet's span
+        const filteredSuggestions = highlights.filter((suggestion) => {
+          return existingSnippets.every(
+            (snippet) => !spanOverlaps(snippet.span, suggestion.span)
+          );
+        });
+        return filteredSuggestions;
+      }),
+    [textId]
+  );
 
   useEffect(() => {
     const view = new EditorView({
@@ -513,7 +473,6 @@ export const Editor = observer(({ textId }: { textId: string }) => {
         snippetAnnotationPlugin,
         snippetHover,
         spatialHoverSnippetIdField,
-        Prec.high(acceptSuggestionsPlugin), // high priority so we can intercept enter events early
       ],
       parent: editorRef.current!,
       dispatch(transaction) {
@@ -542,15 +501,7 @@ export const Editor = observer(({ textId }: { textId: string }) => {
               }
             }
           }
-          const snippetSuggestions = suggestionsComputed.get();
-          if (snippetSuggestions !== undefined) {
-            snippetSuggestions.forEach((suggestion) => {
-              suggestion.span = [
-                transaction.changes.mapPos(suggestion.span[0]),
-                transaction.changes.mapPos(suggestion.span[1]),
-              ];
-            });
-          }
+
           textEditorStateMobx.set(textId, transaction.state);
         });
       },
@@ -564,6 +515,7 @@ export const Editor = observer(({ textId }: { textId: string }) => {
       reaction(
         () => suggestionsComputed.get(),
         (snippetSuggestions) => {
+          console.log("effect!!");
           view.dispatch({
             effects: [setSnippetSuggestionsEffect.of(snippetSuggestions)],
           });
@@ -619,6 +571,7 @@ export const Editor = observer(({ textId }: { textId: string }) => {
   }, []);
 
   const allSuggestions = suggestionsComputed.get();
+  // const allSuggestions: Highlight[] = [];
 
   const ingredientHighlights = allSuggestions
     .sort((a, b) => a.span[0] - b.span[0])
