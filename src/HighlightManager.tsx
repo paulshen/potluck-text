@@ -6,7 +6,7 @@ import { Highlight } from "./primitives";
 import rawIngredients from "./snippetTypes/ingredients.csv";
 import { spanOverlaps } from "./utils";
 import * as Dialog from "@radix-ui/react-dialog";
-import { Cross2Icon, TrashIcon } from "@radix-ui/react-icons";
+import { CheckIcon, Cross2Icon, TrashIcon } from "@radix-ui/react-icons";
 
 export enum HighlighterType {
   ListMatchHighlighter,
@@ -65,6 +65,18 @@ const BUILT_IN_HIGHLIGHTERS: Highlighter[] = [
       type: HighlighterType.RegexHighlighter,
       regex:
         "(\\d|\\/|¼|½|¾|⅛|\\.)+\\s?(g|gram|oz|tsp|Tbsp|pound|cup|cup|can|teaspoon|tablespoon)s?\\b",
+    },
+  },
+  {
+    id: "ingredient_with_quantity",
+    name: "Ingredient with quantity",
+    icon: "",
+    color: "#059669",
+    parser: {
+      type: HighlighterType.NextToHighlighter,
+      firstHighlightTypeId: "quantity",
+      secondHighlightTypeId: "ingredient",
+      maxDistanceBetween: 50,
     },
   },
 ];
@@ -211,16 +223,18 @@ const AddHighlighterDialogContent = observer(() => {
   return (
     <Dialog.Description className="pt-4">
       {BUILT_IN_HIGHLIGHTERS.map((highlighter) => {
+        const isAlreadyEnabled = highlighterIds.includes(highlighter.id);
         return (
           <div className="mb-2" key={highlighter.id}>
             <button
               onClick={action(() => {
                 highlightersMobx.push(highlighter);
               })}
-              className="button"
-              disabled={highlighterIds.includes(highlighter.id)}
+              className="button flex items-center gap-1"
+              disabled={isAlreadyEnabled}
             >
               {highlighter.name}
+              {isAlreadyEnabled ? <CheckIcon /> : null}
             </button>
           </div>
         );
