@@ -99,7 +99,7 @@ export function parseWithHighlighter(
 
           matches.push({
             span: [from, to],
-            snippetTypeId: highlighter.id,
+            highlighterTypeId: highlighter.id,
             data: {},
             refs: {},
           });
@@ -114,7 +114,7 @@ export function parseWithHighlighter(
       while ((match = regex.exec(text)) !== null) {
         const length = match[0].length;
         matches.push({
-          snippetTypeId: highlighter.id,
+          highlighterTypeId: highlighter.id,
           span: [regex.lastIndex - length, regex.lastIndex],
           data: {},
           refs: {},
@@ -132,17 +132,17 @@ export function parseWithHighlighter(
       const sortedHighlights = existingHighlights
         .filter(
           (h) =>
-            h.snippetTypeId === firstHighlightTypeId ||
-            h.snippetTypeId === secondHighlightTypeId
+            h.highlighterTypeId === firstHighlightTypeId ||
+            h.highlighterTypeId === secondHighlightTypeId
         )
         .sort((a, b) => a.span[0] - b.span[0]);
       for (let i = 0; i < sortedHighlights.length - 1; i++) {
         const highlight = sortedHighlights[i];
-        if (highlight.snippetTypeId !== firstHighlightTypeId) {
+        if (highlight.highlighterTypeId !== firstHighlightTypeId) {
           continue;
         }
         const nextHighlight = sortedHighlights[i + 1];
-        if (nextHighlight.snippetTypeId !== secondHighlightTypeId) {
+        if (nextHighlight.highlighterTypeId !== secondHighlightTypeId) {
           continue;
         }
         if (
@@ -153,7 +153,7 @@ export function parseWithHighlighter(
         }
       }
       return rv.map(([first, second]) => ({
-        snippetTypeId: highlighter.id,
+        highlighterTypeId: highlighter.id,
         span: [first.span[0], second.span[1]],
         data: {},
         refs: {
