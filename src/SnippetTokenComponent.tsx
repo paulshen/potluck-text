@@ -17,7 +17,7 @@ import {
   getGroupWidth,
   dragStateBox,
   textEditorStateMobx,
-  SnippetType,
+  HighlighterType,
   Snippet,
   SnippetTypeViewConfiguration,
   snippetTypeViewConfigurationsMobx,
@@ -58,7 +58,7 @@ export const SnippetTokenComponent = observer(
         selectedSpatialComponentsMobx.includes(snippetOnCanvas.id)
     ).get();
 
-    const snippetType: SnippetType = computed(() => {
+    const snippetType: HighlighterType = computed(() => {
       return snippetTypesMobx.get(snippet.snippetTypeId);
     }).get()!;
 

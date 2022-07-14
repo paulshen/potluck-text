@@ -8,7 +8,7 @@ import {
   INGREDIENT_WITH_QUANTITY_TYPE,
   QUANTITY_TYPE,
   Highlight,
-  SnippetType,
+  HighlighterType,
 } from "../primitives";
 import {
   findNextCharacter,
@@ -29,7 +29,7 @@ type Ingredient = {
   description: string;
 };
 
-export const ingredientWithQuantityType: SnippetType = {
+export const ingredientWithQuantityType: HighlighterType = {
   name: "Ingredient with quantity",
   icon: "",
   color: "#ffc107",

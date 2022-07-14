@@ -9,7 +9,7 @@ import {
   Snippet,
   snippetsMobx,
   Highlight,
-  SnippetType,
+  HighlighterType,
   Span,
   textEditorViewsMap,
 } from "../primitives";
@@ -55,7 +55,7 @@ const parse = (text: string) => {
   }
 };
 
-export const ingredientSnippetType: SnippetType = {
+export const ingredientSnippetType: HighlighterType = {
   name: "Ingredient",
   icon: "🥕",
   color: "#ffc107",

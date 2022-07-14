@@ -1,7 +1,7 @@
 import { createHighlighter, HighlighterSchemaType } from "../HighlightCreator";
-import { SnippetType } from "../primitives";
+import { HighlighterType } from "../primitives";
 
-export const exerciseActivityType: SnippetType = {
+export const exerciseActivityType: HighlighterType = {
   name: "Exercise activity",
   icon: "",
   color: "#ffc107",

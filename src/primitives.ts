@@ -56,7 +56,7 @@ export const EXERCISE_NAME_TYPE = "exercise_name";
 export const SETS_AND_REPS_TYPE = "sets_and_reps";
 export const EXERCISE_ACTIVITY_TYPE = "exercise_activity";
 
-const DEFAULT_SNIPPET_TYPES: { [key: string]: SnippetType } = {
+const DEFAULT_SNIPPET_TYPES: { [key: string]: HighlighterType } = {
   [QUANTITY_TYPE]: quantitySnippetType,
   [INGREDIENT_TYPE]: ingredientSnippetType,
   [INGREDIENT_WITH_QUANTITY_TYPE]: ingredientWithQuantityType,
@@ -112,7 +112,7 @@ export type SnippetProperty = {
   actions?: SnippetPropertyAction[];
 };
 
-export type SnippetType = {
+export type HighlighterType = {
   name: string;
   icon: string;
   color: string;
@@ -168,7 +168,7 @@ export const getGroupWidth = (group: SnippetGroup): number => {
   return (group.extraColumns.length + 1) * GROUP_COLUMN_WIDTH;
 };
 
-export const snippetTypesMobx = observable.map<string, SnippetType>(
+export const snippetTypesMobx = observable.map<string, HighlighterType>(
   DEFAULT_SNIPPET_TYPES
 );
 export const snippetsMobx = observable.map<string, Snippet>({});

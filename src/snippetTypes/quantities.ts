@@ -5,7 +5,7 @@
 
 import { parseIngredient } from "parse-ingredient";
 import { createHighlighter, HighlighterSchemaType } from "../HighlightCreator";
-import { QUANTITY_TYPE, Highlight, SnippetType, Span } from "../primitives";
+import { QUANTITY_TYPE, Highlight, HighlighterType, Span } from "../primitives";
 
 const parse = (text: string) => {
   // This is super weird, but the quantity parsing library expects to parse a whole ingredient,
@@ -55,7 +55,7 @@ const parse = (text: string) => {
   return snippetData;
 };
 
-export const quantitySnippetType: SnippetType = {
+export const quantitySnippetType: HighlighterType = {
   name: "Quantity",
   icon: "⚖️",
   color: "#ffc107",

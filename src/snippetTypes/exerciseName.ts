@@ -1,7 +1,7 @@
 import { createHighlighter, HighlighterSchemaType } from "../HighlightCreator";
-import { SnippetType } from "../primitives";
+import { HighlighterType } from "../primitives";
 
-export const exeriseNameType: SnippetType = {
+export const exeriseNameType: HighlighterType = {
   name: "Exercise name",
   icon: "",
   color: "#ffc107",

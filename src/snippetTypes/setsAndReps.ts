@@ -1,7 +1,7 @@
 import { createHighlighter, HighlighterSchemaType } from "../HighlightCreator";
-import { SnippetType } from "../primitives";
+import { HighlighterType } from "../primitives";
 
-export const setsAndRepsType: SnippetType = {
+export const setsAndRepsType: HighlighterType = {
   name: "Sets x Reps",
   icon: "",
   color: "#ffc107",
