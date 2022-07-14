@@ -425,20 +425,27 @@ export const Editor = observer(({ textId }: { textId: string }) => {
             padding: "0 2px",
             boxSizing: "border-box",
           },
-          ".cm-suggestion-active": {
-            borderBottom: "solid thin #333",
-          },
           [`.cm-suggestion-${INGREDIENT_TYPE}`]: {
             color: "hsla(212, 42%, 40%, 1)",
             backgroundColor: "#52a4ff11",
+          },
+          [`.cm-suggestion-active.cm-suggestion-${INGREDIENT_TYPE}`]: {
+            borderBottom: "2px solid hsla(212, 42%, 40%, 1)",
           },
           [`.cm-suggestion-${INGREDIENT_REFERENCE_TYPE}`]: {
             color: "hsl(109deg 90% 27%)",
             backgroundColor: "#30b41311",
           },
+          [`.cm-suggestion-active.cm-suggestion-${INGREDIENT_REFERENCE_TYPE}`]:
+            {
+              borderBottom: "2px solid hsl(109deg 90% 27%)",
+            },
           [`.cm-suggestion-${QUANTITY_TYPE}`]: {
             color: "hsl(349deg 80% 48%)",
             backgroundColor: "#ff5d7a11",
+          },
+          [`.cm-suggestion-active.cm-suggestion-${QUANTITY_TYPE}`]: {
+            borderBottom: "2px solid hsl(349deg 80% 48%)",
           },
           ".metakey-down & .cm-suggestion:hover, .metakey-down & .cm-snippet:hover":
             {

@@ -182,7 +182,7 @@ export const getLinkedHighlights = (
     case INGREDIENT_TYPE: {
       const link = allHighlights.find((h) => h.refs.ingredient === highlight);
       if (link) {
-        return [link, link?.refs.quantity];
+        return [link.refs.quantity];
       } else {
         return [];
       }
@@ -190,7 +190,7 @@ export const getLinkedHighlights = (
     case QUANTITY_TYPE: {
       const link = allHighlights.find((h) => h.refs.quantity === highlight);
       if (link) {
-        return [link, link?.refs.ingredient];
+        return [link.refs.ingredient];
       } else {
         return [];
       }
