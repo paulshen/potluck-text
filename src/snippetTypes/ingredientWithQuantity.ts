@@ -19,7 +19,7 @@ import {
 // @ts-ignore
 import rawIngredients from "./ingredients.csv";
 import { sortBy } from "lodash";
-import { createHighlighter, HighlighterType } from "../HighlightCreator";
+import { createHighlighter, HighlighterSchemaType } from "../HighlightCreator";
 
 type Ingredient = {
   name: string;
@@ -36,7 +36,7 @@ export const ingredientWithQuantityType: SnippetType = {
   highlight: createHighlighter({
     // TODO: untangle circular dependency so this can use constants
     id: "ingredient_with_quantity",
-    type: HighlighterType.NextToHighlighter,
+    type: HighlighterSchemaType.NextToHighlighter,
     firstHighlightTypeId: "quantity",
     secondHighlightTypeId: "ingredient",
     maxDistanceBetween: 50,

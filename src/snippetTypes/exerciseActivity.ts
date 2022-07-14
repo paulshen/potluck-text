@@ -1,4 +1,4 @@
-import { createHighlighter, HighlighterType } from "../HighlightCreator";
+import { createHighlighter, HighlighterSchemaType } from "../HighlightCreator";
 import { SnippetType } from "../primitives";
 
 export const exerciseActivityType: SnippetType = {
@@ -7,7 +7,7 @@ export const exerciseActivityType: SnippetType = {
   color: "#ffc107",
   highlight: createHighlighter({
     id: "exercise_activity",
-    type: HighlighterType.SameLineHighlighter,
+    type: HighlighterSchemaType.SameLineHighlighter,
     highlightTypeIds: ["exercise_name", "sets_and_reps"],
   }),
 

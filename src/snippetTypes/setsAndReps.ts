@@ -1,4 +1,4 @@
-import { createHighlighter, HighlighterType } from "../HighlightCreator";
+import { createHighlighter, HighlighterSchemaType } from "../HighlightCreator";
 import { SnippetType } from "../primitives";
 
 export const setsAndRepsType: SnippetType = {
@@ -7,7 +7,7 @@ export const setsAndRepsType: SnippetType = {
   color: "#ffc107",
   highlight: createHighlighter({
     id: "sets_and_reps",
-    type: HighlighterType.RegexHighlighter,
+    type: HighlighterSchemaType.RegexHighlighter,
     regex: "\\b(?<sets>\\d+)x(?<reps>\\d+)\\b",
   }),
 

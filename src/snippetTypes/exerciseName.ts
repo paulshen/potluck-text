@@ -1,4 +1,4 @@
-import { createHighlighter, HighlighterType } from "../HighlightCreator";
+import { createHighlighter, HighlighterSchemaType } from "../HighlightCreator";
 import { SnippetType } from "../primitives";
 
 export const exeriseNameType: SnippetType = {
@@ -7,7 +7,7 @@ export const exeriseNameType: SnippetType = {
   color: "#ffc107",
   highlight: createHighlighter({
     id: "exercise_name",
-    type: HighlighterType.RegexHighlighter,
+    type: HighlighterSchemaType.RegexHighlighter,
     regex: "\\b(bench|squat|plank|deadlift)\\b",
   }),
 

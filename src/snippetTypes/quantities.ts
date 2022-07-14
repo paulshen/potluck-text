@@ -4,7 +4,7 @@
 // Climate impact source: https://ourworldindata.org/environmental-impacts-of-food
 
 import { parseIngredient } from "parse-ingredient";
-import { createHighlighter, HighlighterType } from "../HighlightCreator";
+import { createHighlighter, HighlighterSchemaType } from "../HighlightCreator";
 import { QUANTITY_TYPE, Highlight, SnippetType, Span } from "../primitives";
 
 const parse = (text: string) => {
@@ -62,7 +62,7 @@ export const quantitySnippetType: SnippetType = {
   highlight: createHighlighter({
     // TODO: untangle circular dependency so this can be QUANTITY_TYPE
     id: "quantity",
-    type: HighlighterType.RegexHighlighter,
+    type: HighlighterSchemaType.RegexHighlighter,
     regex:
       "(\\d|\\/|¼|½|¾|⅛|\\.)+\\s?(g|gram|oz|tsp|Tbsp|pound|cup|cup|can|teaspoon|tablespoon)s?\\b",
     postProcess: (highlights, text) => {

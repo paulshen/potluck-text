@@ -1,7 +1,7 @@
 import { Text } from "@codemirror/state";
 import { Highlight, Span } from "./primitives";
 
-export enum HighlighterType {
+export enum HighlighterSchemaType {
   RegexHighlighter,
   NextToHighlighter,
   SameLineHighlighter,
@@ -12,17 +12,17 @@ type HighlighterSchema = {
   postProcess?: (highlights: Highlight[], text: string) => Highlight[];
 } & (
   | {
-      type: HighlighterType.RegexHighlighter;
+      type: HighlighterSchemaType.RegexHighlighter;
       regex: string;
     }
   | {
-      type: HighlighterType.NextToHighlighter;
+      type: HighlighterSchemaType.NextToHighlighter;
       firstHighlightTypeId: string;
       secondHighlightTypeId: string;
       maxDistanceBetween: number;
     }
   | {
-      type: HighlighterType.SameLineHighlighter;
+      type: HighlighterSchemaType.SameLineHighlighter;
       highlightTypeIds: string[];
     }
 );
@@ -38,7 +38,7 @@ export function createHighlighter(
   schema: HighlighterSchema
 ): (text: string, existingHighlights: Highlight[]) => Highlight[] {
   switch (schema.type) {
-    case HighlighterType.RegexHighlighter: {
+    case HighlighterSchemaType.RegexHighlighter: {
       return (text: string, existingHighlights: Highlight[]) => {
         const regex = new RegExp(schema.regex, "g");
         const matches: Highlight[] = [];
@@ -55,7 +55,7 @@ export function createHighlighter(
         return schema.postProcess?.(matches, text) ?? matches;
       };
     }
-    case HighlighterType.NextToHighlighter: {
+    case HighlighterSchemaType.NextToHighlighter: {
       const {
         firstHighlightTypeId,
         secondHighlightTypeId,
@@ -97,7 +97,7 @@ export function createHighlighter(
         }));
       };
     }
-    case HighlighterType.SameLineHighlighter: {
+    case HighlighterSchemaType.SameLineHighlighter: {
       const { highlightTypeIds } = schema;
       return (text: string, existingHighlights: Highlight[]) => {
         const cmText = Text.of(text.split("\n"));
