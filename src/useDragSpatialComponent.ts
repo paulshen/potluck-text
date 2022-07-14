@@ -1,13 +1,13 @@
 import { useDrag, Handler } from "@use-gesture/react";
 import { action } from "mobx";
 import {
-  SnippetGroup,
-  dragStateBox,
-  selectedSpatialComponentsMobx,
   SpatialComponent,
-  spatialComponentsMobx,
+  SnippetGroup,
   SpatialComponentType,
-} from "./primitives";
+  spatialComponentsMobx,
+  selectedSpatialComponentsMobx,
+  dragStateBox,
+} from "./primitivesOld";
 import {
   doesRectContainPosition,
   getPositionForSnippetInGroup,

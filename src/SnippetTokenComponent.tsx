@@ -4,23 +4,12 @@ import classNames from "classnames";
 import { observer } from "mobx-react-lite";
 import { executeFormula } from "./formulas";
 import {
-  SnippetGroup,
-  SnippetOnCanvas,
   GROUP_TOKEN_ROW_GAP,
-  selectedSpatialComponentsMobx,
-  spatialComponentsMobx,
   highlighterTypesMobx,
-  SpatialComponentType,
   TOKEN_HEIGHT,
-  GROUP_COLUMN_WIDTH,
   GROUP_TOKEN_COLUMN_GAP,
-  getGroupWidth,
-  dragStateBox,
   textEditorStateMobx,
   HighlighterType,
-  Snippet,
-  SnippetTypeViewConfiguration,
-  snippetTypeViewConfigurationsMobx,
 } from "./primitives";
 import { Token } from "./Token";
 import { useDragSpatialComponent } from "./useDragSpatialComponent";
@@ -30,6 +19,17 @@ import {
 } from "./utils";
 import { useRef, useState } from "react";
 import { SnippetTokenHovercardContent } from "./SnippetTokenHovercardContent";
+import {
+  SnippetOnCanvas,
+  Snippet,
+  spatialComponentsMobx,
+  SpatialComponentType,
+  selectedSpatialComponentsMobx,
+  SnippetTypeViewConfiguration,
+  snippetTypeViewConfigurationsMobx,
+  dragStateBox,
+  GROUP_COLUMN_WIDTH,
+} from "./primitivesOld";
 
 export const SnippetTokenComponent = observer(
   ({ snippetOnCanvas }: { snippetOnCanvas: SnippetOnCanvas }) => {
@@ -156,7 +156,7 @@ export const SnippetTokenComponent = observer(
           </HoverCard.Content>
         </HoverCard.Root>
         {snippetGroup &&
-          snippetGroup.extraColumns.map((column, index) => {
+          snippetGroup.extraColumns.map((column: any, index: any) => {
             const data =
               snippet.data[column.id] ??
               (column.formula &&

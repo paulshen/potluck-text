@@ -1,3 +1,4 @@
+export {};
 // OLD CODE THAT MAY BE USEFUL FOR HIGHLIGHTER
 // const dragSnippetPlugin = ViewPlugin.fromClass(
 //   class {

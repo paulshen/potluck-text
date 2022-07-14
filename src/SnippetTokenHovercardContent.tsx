@@ -1,12 +1,8 @@
 import { sortBy } from "lodash";
 import { computed, runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
-import {
-  Snippet,
-  highlighterTypesMobx,
-  snippetTypeViewConfigurationsMobx,
-  textEditorStateMobx,
-} from "./primitives";
+import { highlighterTypesMobx, textEditorStateMobx } from "./primitives";
+import { Snippet, snippetTypeViewConfigurationsMobx } from "./primitivesOld";
 import { PropertyList } from "./PropertyList";
 
 export const SnippetTokenHovercardContent = observer(

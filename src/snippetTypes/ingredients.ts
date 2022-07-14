@@ -6,8 +6,6 @@
 import {
   INGREDIENT_REFERENCE_TYPE,
   INGREDIENT_TYPE,
-  Snippet,
-  snippetsMobx,
   Highlight,
   HighlighterType,
   Span,
@@ -119,34 +117,32 @@ export const ingredientSnippetType: HighlighterType = {
       actions: [
         {
           label: "replace",
-          available: (snippet: Snippet) => {
+          available: (snippet: any) => {
             const alternative = snippet.data["ingredient--veganAlternative"];
             return alternative !== undefined;
           },
-          handler: (snippet: Snippet) => {
-            const alternative = snippet.data["ingredient--veganAlternative"];
-
-            const view = textEditorViewsMap[snippet.textId];
-            view.dispatch({
-              changes: ChangeSet.of(
-                {
-                  from: snippet.span[0],
-                  to: snippet.span[1],
-                  insert: alternative,
-                },
-                view.state.doc.length
-              ),
-            });
-
-            // reparse snippet
-
-            snippetsMobx.set(snippet.id, {
-              id: snippet.id,
-              snippetTypeId: snippet.snippetTypeId,
-              textId: snippet.textId,
-              span: [snippet.span[0], snippet.span[0] + alternative.length],
-              data: ingredientSnippetType.parse(alternative),
-            });
+          handler: () => {
+            // OLD CODE
+            // const alternative = snippet.data["ingredient--veganAlternative"];
+            // const view = textEditorViewsMap[snippet.textId];
+            // view.dispatch({
+            //   changes: ChangeSet.of(
+            //     {
+            //       from: snippet.span[0],
+            //       to: snippet.span[1],
+            //       insert: alternative,
+            //     },
+            //     view.state.doc.length
+            //   ),
+            // });
+            // // reparse snippet
+            // snippetsMobx.set(snippet.id, {
+            //   id: snippet.id,
+            //   snippetTypeId: snippet.snippetTypeId,
+            //   textId: snippet.textId,
+            //   span: [snippet.span[0], snippet.span[0] + alternative.length],
+            //   data: ingredientSnippetType.parse(alternative),
+            // });
           },
         },
       ],
