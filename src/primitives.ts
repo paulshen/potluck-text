@@ -5,6 +5,9 @@ import { ingredientSnippetType } from "./snippetTypes/ingredients";
 import { quantitySnippetType } from "./snippetTypes/quantities";
 import { ingredientWithQuantityType } from "./snippetTypes/ingredientWithQuantity";
 import { EditorView } from "codemirror";
+import { exeriseNameType } from "./snippetTypes/exerciseName";
+import { exerciseActivityType } from "./snippetTypes/exerciseActivity";
+import { setsAndRepsType } from "./snippetTypes/setsAndReps";
 
 export type Position = [x: number, y: number];
 export type Rect = [x: number, y: number, width: number, height: number];
@@ -49,11 +52,17 @@ export const INGREDIENT_TYPE = "ingredient";
 export const INGREDIENT_REFERENCE_TYPE = "ingredient_reference";
 export const QUANTITY_TYPE = "quantity";
 export const INGREDIENT_WITH_QUANTITY_TYPE = "ingredient_with_quantity";
+export const EXERCISE_NAME_TYPE = "exercise_name";
+export const SETS_AND_REPS_TYPE = "sets_and_reps";
+export const EXERCISE_ACTIVITY_TYPE = "exercise_activity";
 
 const DEFAULT_SNIPPET_TYPES: { [key: string]: SnippetType } = {
   [QUANTITY_TYPE]: quantitySnippetType,
   [INGREDIENT_TYPE]: ingredientSnippetType,
   [INGREDIENT_WITH_QUANTITY_TYPE]: ingredientWithQuantityType,
+  [EXERCISE_NAME_TYPE]: exeriseNameType,
+  [SETS_AND_REPS_TYPE]: setsAndRepsType,
+  [EXERCISE_ACTIVITY_TYPE]: exerciseActivityType,
 };
 const DEFAULT_SNIPPET_TYPE_CONFIGURATION: {
   [key: string]: SnippetTypeViewConfiguration;

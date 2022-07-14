@@ -34,6 +34,9 @@ import {
   INGREDIENT_REFERENCE_TYPE,
   QUANTITY_TYPE,
   INGREDIENT_WITH_QUANTITY_TYPE,
+  EXERCISE_NAME_TYPE,
+  SETS_AND_REPS_TYPE,
+  EXERCISE_ACTIVITY_TYPE,
 } from "./primitives";
 import {
   createSnippetFromSpan,
@@ -525,6 +528,7 @@ export const Editor = observer(({ textId }: { textId: string }) => {
       reaction(
         () => suggestionsComputed.get(),
         (snippetSuggestions) => {
+          console.log(snippetSuggestions);
           view.dispatch({
             effects: [setSnippetSuggestionsEffect.of(snippetSuggestions)],
           });

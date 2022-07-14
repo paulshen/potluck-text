@@ -1,8 +1,10 @@
-import { Highlight } from "./primitives";
+import { Text } from "@codemirror/state";
+import { Highlight, Span } from "./primitives";
 
 export enum HighlighterType {
   RegexHighlighter,
   NextToHighlighter,
+  SameLineHighlighter,
 }
 
 type HighlighterSchema = {
@@ -19,7 +21,18 @@ type HighlighterSchema = {
       secondHighlightTypeId: string;
       maxDistanceBetween: number;
     }
+  | {
+      type: HighlighterType.SameLineHighlighter;
+      highlightTypeIds: string[];
+    }
 );
+
+function getSpanForMultipleSpans(spans: Span[]): Span {
+  return [
+    Math.min(...spans.map((span) => span[0])),
+    Math.max(...spans.map((span) => span[1])),
+  ];
+}
 
 export function createHighlighter(
   schema: HighlighterSchema
@@ -81,6 +94,56 @@ export function createHighlighter(
             [firstHighlightTypeId]: first,
             [secondHighlightTypeId]: second,
           },
+        }));
+      };
+    }
+    case HighlighterType.SameLineHighlighter: {
+      const { highlightTypeIds } = schema;
+      return (text: string, existingHighlights: Highlight[]) => {
+        const cmText = Text.of(text.split("\n"));
+        const highlightsByLine: { [lineNumber: number]: Highlight[] } = {};
+        for (const snippet of existingHighlights) {
+          const line = cmText.lineAt(snippet.span[0]);
+          if (highlightsByLine[line.number] === undefined) {
+            highlightsByLine[line.number] = [];
+          }
+          highlightsByLine[line.number].push(snippet);
+        }
+        const rv: Highlight[][] = [];
+        for (const [lineNumber, lineSnippets] of Object.entries(
+          highlightsByLine
+        )) {
+          const lineHighlightsByType: { [highlightType: string]: Highlight[] } =
+            {};
+          for (const highlight of lineSnippets) {
+            if (lineHighlightsByType[highlight.snippetTypeId] === undefined) {
+              lineHighlightsByType[highlight.snippetTypeId] = [];
+            }
+            lineHighlightsByType[highlight.snippetTypeId].push(highlight);
+          }
+          if (
+            highlightTypeIds.every(
+              (highlightTypeId) =>
+                lineHighlightsByType[highlightTypeId]?.length === 1
+            )
+          ) {
+            rv.push(
+              highlightTypeIds.map(
+                (highlightTypeId) => lineHighlightsByType[highlightTypeId][0]
+              )
+            );
+          }
+        }
+        return rv.map((lineHighlights) => ({
+          snippetTypeId: schema.id,
+          span: getSpanForMultipleSpans(lineHighlights.map((h) => h.span)),
+          data: {},
+          refs: Object.fromEntries(
+            lineHighlights.map((lineHighlight) => [
+              lineHighlight.snippetTypeId,
+              lineHighlight,
+            ])
+          ),
         }));
       };
     }
