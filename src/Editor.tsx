@@ -38,6 +38,7 @@ import {
 import {
   createSnippetFromSpan,
   createSnippetsForSuggestions,
+  getLinkedHighlights,
   getParentByClassName,
   spanEquals,
   spanOverlaps,
@@ -81,31 +82,37 @@ const snippetSuggestionsField = StateField.define<Highlight[]>({
   },
 });
 
-const suggestionMarks: { [key: string]: Decoration } = {
-  [INGREDIENT_TYPE]: Decoration.mark({
-    class: "cm-suggestion cm-suggestion-ingredient",
-  }),
-  [INGREDIENT_REFERENCE_TYPE]: Decoration.mark({
-    class: "cm-suggestion cm-suggestion-ingredient-reference",
-  }),
-  [QUANTITY_TYPE]: Decoration.mark({
-    class: "cm-suggestion cm-suggestion-quantity",
-  }),
-};
-
 const suggestionDecorations = EditorView.decorations.from(
   snippetSuggestionsField,
-  (suggestions) => (view) => {
+  (highlights) => (view) => {
+    const pos = view.state.selection.main.anchor;
+    console.log({ pos });
+
+    // We don't want to show ingredientWithQuantity snippets... todo: figure out how to hide
+    const visibleSnippetTypes = [
+      INGREDIENT_TYPE,
+      INGREDIENT_REFERENCE_TYPE,
+      QUANTITY_TYPE,
+    ];
+
     return Decoration.set(
-      suggestions.flatMap((suggestion) => {
-        if (suggestion.span[1] <= suggestion.span[0]) {
+      highlights.flatMap((highlight) => {
+        const linkedHighlights = getLinkedHighlights(highlight, highlights);
+        const active = [highlight, ...linkedHighlights].some((highlight) =>
+          spanOverlaps(highlight.span, [pos, pos])
+        );
+        if (
+          highlight.span[1] <= highlight.span[0] ||
+          !visibleSnippetTypes.includes(highlight.snippetTypeId)
+        ) {
           return [];
         }
-        const markType = suggestionMarks[suggestion.snippetTypeId];
-        if (markType === undefined) {
-          return [];
-        }
-        return [markType.range(suggestion.span[0], suggestion.span[1])];
+        const decoration = Decoration.mark({
+          class: `cm-suggestion cm-suggestion-${highlight.snippetTypeId} ${
+            active ? "cm-suggestion-active" : ""
+          }`,
+        });
+        return [decoration.range(highlight.span[0], highlight.span[1])];
       }),
       true
     );
@@ -416,24 +423,22 @@ export const Editor = observer(({ textId }: { textId: string }) => {
           },
           ".cm-suggestion": {
             padding: "0 2px",
+            boxSizing: "border-box",
           },
-          ".cm-suggestion-ingredient": {
+          ".cm-suggestion-active": {
+            borderBottom: "solid thin #333",
+          },
+          [`.cm-suggestion-${INGREDIENT_TYPE}`]: {
             color: "hsla(212, 42%, 40%, 1)",
             backgroundColor: "#52a4ff11",
           },
-          ".cm-suggestion-ingredient-reference": {
+          [`.cm-suggestion-${INGREDIENT_REFERENCE_TYPE}`]: {
             color: "hsl(109deg 90% 27%)",
             backgroundColor: "#30b41311",
           },
-          ".cm-suggestion-quantity": {
+          [`.cm-suggestion-${QUANTITY_TYPE}`]: {
             color: "hsl(349deg 80% 48%)",
             backgroundColor: "#ff5d7a11",
-          },
-          ".metakey-down & .cm-suggestion.cm-suggestion-active": {
-            borderBottom: "2px dashed black",
-          },
-          ".metakey-down & .cm-suggestion": {
-            borderBottom: "1px dashed black",
           },
           ".metakey-down & .cm-suggestion:hover, .metakey-down & .cm-snippet:hover":
             {

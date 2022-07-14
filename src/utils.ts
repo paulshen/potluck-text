@@ -16,6 +16,7 @@ import {
   INGREDIENT_TYPE,
   Span,
   snippetTypesMobx,
+  QUANTITY_TYPE,
 } from "./primitives";
 
 // your favorite dumping ground of utility functions
@@ -171,4 +172,32 @@ export const findNextCharacter = (
     i++;
   }
   return text.length;
+};
+
+export const getLinkedHighlights = (
+  highlight: Highlight,
+  allHighlights: Highlight[]
+): Highlight[] => {
+  switch (highlight.snippetTypeId) {
+    case INGREDIENT_TYPE: {
+      const link = allHighlights.find((h) => h.refs.ingredient === highlight);
+      if (link) {
+        return [link, link?.refs.quantity];
+      } else {
+        return [];
+      }
+    }
+    case QUANTITY_TYPE: {
+      const link = allHighlights.find((h) => h.refs.quantity === highlight);
+      if (link) {
+        return [link, link?.refs.ingredient];
+      } else {
+        return [];
+      }
+    }
+    default: {
+      return [];
+    }
+  }
+  return [];
 };

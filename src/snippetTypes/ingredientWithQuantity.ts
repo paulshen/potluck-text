@@ -53,7 +53,10 @@ export const ingredientWithQuantityType: SnippetType = {
       )[0];
       result.push({
         snippetTypeId: INGREDIENT_WITH_QUANTITY_TYPE,
-        span: [0, 1],
+        span: [
+          Math.min(ingredient.span[0], closestQuantity.span[0]),
+          Math.max(ingredient.span[1], closestQuantity.span[1]),
+        ],
         data: {},
         refs: {
           ingredient: ingredient,
