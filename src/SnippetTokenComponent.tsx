@@ -21,7 +21,6 @@ import {
   Snippet,
   SnippetTypeViewConfiguration,
   snippetTypeViewConfigurationsMobx,
-  spatialHoverSnippetIdBox,
 } from "./primitives";
 import { Token } from "./Token";
 import { useDragSpatialComponent } from "./useDragSpatialComponent";
@@ -122,12 +121,6 @@ export const SnippetTokenComponent = observer(
         <HoverCard.Root open={disableHovercard ? false : undefined}>
           <HoverCard.Trigger>
             <Token
-              onMouseEnter={action(() => {
-                spatialHoverSnippetIdBox.set(snippetOnCanvas.snippetId);
-              })}
-              onMouseLeave={action(() => {
-                spatialHoverSnippetIdBox.set(undefined);
-              })}
               isSelected={isSelected}
               className={
                 !isSelected
