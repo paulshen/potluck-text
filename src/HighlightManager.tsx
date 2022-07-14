@@ -1,10 +1,12 @@
-import { observable } from "mobx";
+import { action, observable } from "mobx";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { Highlight } from "./primitives";
 // @ts-ignore
 import rawIngredients from "./snippetTypes/ingredients.csv";
 import { spanOverlaps } from "./utils";
+import * as Dialog from "@radix-ui/react-dialog";
+import { Cross2Icon, TrashIcon } from "@radix-ui/react-icons";
 
 export enum HighlighterType {
   ListMatchHighlighter,
@@ -47,8 +49,8 @@ const BUILT_IN_HIGHLIGHTERS: Highlighter[] = [
   {
     id: "ingredient",
     name: "Ingredient",
-    icon: "ingredient",
-    color: "#ff0000",
+    icon: "🥕",
+    color: "hsla(212, 42%, 40%, 1)",
     parser: {
       type: HighlighterType.ListMatchHighlighter,
       list: rawIngredients.map((line: any) => line.name),
@@ -57,8 +59,8 @@ const BUILT_IN_HIGHLIGHTERS: Highlighter[] = [
   {
     id: "quantity",
     name: "Quantity",
-    icon: "quantity",
-    color: "#00ff00",
+    icon: "⚖️",
+    color: "hsl(349deg 80% 48%)",
     parser: {
       type: HighlighterType.RegexHighlighter,
       regex:
@@ -69,7 +71,6 @@ const BUILT_IN_HIGHLIGHTERS: Highlighter[] = [
 
 export const highlightersMobx = observable.array<Highlighter>([
   BUILT_IN_HIGHLIGHTERS[0],
-  BUILT_IN_HIGHLIGHTERS[1],
 ]);
 
 export function parseWithHighlighter(
@@ -169,12 +170,22 @@ export function parseWithHighlighter(
 const Highlighter = observer(
   ({ highlighter }: { highlighter: Highlighter }) => {
     return (
-      <div>
+      <div className="border border-gray-200 px-2 py-1 rounded flex items-center justify-between">
         <div className="flex gap-2">
-          <div>{highlighter.name}</div>
-          <div>{highlighter.icon}</div>
-          <div>{highlighter.color}</div>
+          <div style={{ color: highlighter.color }}>
+            {highlighter.icon} {highlighter.name}
+          </div>
         </div>
+        <button
+          onClick={action(() => {
+            highlightersMobx.replace(
+              highlightersMobx.filter((h) => h.id !== highlighter.id)
+            );
+          })}
+          className="text-red-500"
+        >
+          <TrashIcon />
+        </button>
       </div>
     );
   }
@@ -195,12 +206,60 @@ function HighlighterForm({
   );
 }
 
+const AddHighlighterDialogContent = observer(() => {
+  const highlighterIds = highlightersMobx.map((h) => h.id);
+  return (
+    <Dialog.Description className="pt-4">
+      {BUILT_IN_HIGHLIGHTERS.map((highlighter) => {
+        return (
+          <div className="mb-2" key={highlighter.id}>
+            <button
+              onClick={action(() => {
+                highlightersMobx.push(highlighter);
+              })}
+              className="button"
+              disabled={highlighterIds.includes(highlighter.id)}
+            >
+              {highlighter.name}
+            </button>
+          </div>
+        );
+      })}
+    </Dialog.Description>
+  );
+});
+
+function AddHighlighterButton() {
+  return (
+    <Dialog.Root>
+      <Dialog.Trigger asChild={true}>
+        <button className="button">Add Highlighter</button>
+      </Dialog.Trigger>
+      <Dialog.Portal>
+        <Dialog.Overlay className="fixed inset-0 bg-gray-500 bg-opacity-80" />
+        <Dialog.Content className="w-[90vw] max-w-lg p-8 bg-white fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-lg">
+          <Dialog.Title>Add Highlighter</Dialog.Title>
+          <AddHighlighterDialogContent />
+          <Dialog.Close asChild={true}>
+            <button className="flex p-1 absolute top-4 right-4">
+              <Cross2Icon />
+            </button>
+          </Dialog.Close>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+}
+
 export const HighlightManager = observer(() => {
   return (
     <div>
-      {highlightersMobx.map((highlighter) => (
-        <Highlighter highlighter={highlighter} key={highlighter.id} />
-      ))}
+      <div className="flex flex-col gap-2 w-64 mb-4">
+        {highlightersMobx.map((highlighter) => (
+          <Highlighter highlighter={highlighter} key={highlighter.id} />
+        ))}
+      </div>
+      <AddHighlighterButton />
     </div>
   );
 });
