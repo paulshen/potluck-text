@@ -19,6 +19,7 @@ import {
 // @ts-ignore
 import rawIngredients from "./ingredients.csv";
 import { sortBy } from "lodash";
+import { createHighlighter, HighlighterType } from "../HighlightCreator";
 
 type Ingredient = {
   name: string;
@@ -32,40 +33,14 @@ export const ingredientWithQuantityType: SnippetType = {
   name: "Ingredient with quantity",
   icon: "",
   color: "#ffc107",
-  highlight: (text, existing): Highlight[] => {
-    const result: Highlight[] = [];
-    const ingredients = existing.filter(
-      (sug) => sug.snippetTypeId === INGREDIENT_TYPE
-    );
-    for (const ingredient of ingredients) {
-      const leftBound = findPreviousCharacter(ingredient.span[0], "\n", text);
-      const rightBound = findNextCharacter(ingredient.span[1], "\n", text);
-      const quantitiesOnSameLine = existing.filter(
-        (sug) =>
-          sug.snippetTypeId === QUANTITY_TYPE &&
-          spanOverlaps([leftBound, rightBound], sug.span)
-      );
-      if (quantitiesOnSameLine.length === 0) {
-        continue;
-      }
-      const closestQuantity = sortBy(quantitiesOnSameLine, (quantity) =>
-        Math.abs(quantity.span[0] - ingredient.span[0])
-      )[0];
-      result.push({
-        snippetTypeId: INGREDIENT_WITH_QUANTITY_TYPE,
-        span: [
-          Math.min(ingredient.span[0], closestQuantity.span[0]),
-          Math.max(ingredient.span[1], closestQuantity.span[1]),
-        ],
-        data: {},
-        refs: {
-          ingredient: ingredient,
-          quantity: closestQuantity,
-        },
-      });
-    }
-    return result;
-  },
+  highlight: createHighlighter({
+    // TODO: untangle circular dependency so this can use constants
+    id: "ingredient_with_quantity",
+    type: HighlighterType.NextToHighlighter,
+    firstHighlightTypeId: "quantity",
+    secondHighlightTypeId: "ingredient",
+    maxDistanceBetween: 50,
+  }),
 
   parse: (text: string) => {},
 
