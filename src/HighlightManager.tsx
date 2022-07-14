@@ -1,5 +1,6 @@
 import { observable } from "mobx";
 import { observer } from "mobx-react-lite";
+import { useState } from "react";
 import { Highlight } from "./primitives";
 // @ts-ignore
 import rawIngredients from "./snippetTypes/ingredients.csv";
@@ -178,6 +179,21 @@ const Highlighter = observer(
     );
   }
 );
+
+function HighlighterForm({
+  highlighter,
+}: {
+  highlighter: Highlighter | undefined;
+}) {
+  const [id, setId] = useState(highlighter?.id ?? "");
+  const [name, setName] = useState(highlighter?.name ?? "");
+  return (
+    <div>
+      <div>{id}</div>
+      <div>{name}</div>
+    </div>
+  );
+}
 
 export const HighlightManager = observer(() => {
   return (
