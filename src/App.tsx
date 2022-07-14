@@ -13,7 +13,7 @@ import {
   textEditorStateMobx,
   INGREDIENT_TYPE,
   snippetsMobx,
-  snippetTypesMobx,
+  highlighterTypesMobx,
 } from "./primitives";
 import { Editor } from "./Editor";
 import { Token } from "./Token";

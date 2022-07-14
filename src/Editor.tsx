@@ -23,7 +23,7 @@ import {
   Snippet,
   Highlight,
   textEditorStateMobx,
-  snippetTypesMobx,
+  highlighterTypesMobx,
   snippetTypeViewConfigurationsMobx,
   spatialHoverSnippetIdBox,
   textEditorViewsMap,
@@ -298,7 +298,7 @@ const snippetAnnotationPlugin = ViewPlugin.define((view) => ({}), {
         const snippetId = parentAnnotationToken.getAttribute("data-snippet-id");
         if (snippetId !== null) {
           const snippet = snippetsMobx.get(snippetId)!;
-          const snippetProperties = snippetTypesMobx.get(
+          const snippetProperties = highlighterTypesMobx.get(
             snippet.snippetTypeId
           )?.properties;
           const snippetPropertyName = parentAnnotationToken.getAttribute(
@@ -381,7 +381,7 @@ export const Editor = observer(({ textId }: { textId: string }) => {
         const text = computed(() =>
           textEditorStateMobx.get(textId)!.sliceDoc(0)
         );
-        const highlights: Highlight[] = [...snippetTypesMobx.values()].reduce<
+        const highlights: Highlight[] = [...highlighterTypesMobx.values()].reduce<
           Highlight[]
         >(
           (highlights, st) =>
@@ -540,7 +540,7 @@ export const Editor = observer(({ textId }: { textId: string }) => {
             (snippet) => snippet.textId === textId
           );
           return snippets.map((snippet) => {
-            const snippetType = snippetTypesMobx.get(snippet.snippetTypeId)!;
+            const snippetType = highlighterTypesMobx.get(snippet.snippetTypeId)!;
             const snippetTypeConfig = snippetTypeViewConfigurationsMobx.get(
               snippet.snippetTypeId
             )!;

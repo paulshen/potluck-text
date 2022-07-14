@@ -168,7 +168,7 @@ export const getGroupWidth = (group: SnippetGroup): number => {
   return (group.extraColumns.length + 1) * GROUP_COLUMN_WIDTH;
 };
 
-export const snippetTypesMobx = observable.map<string, HighlighterType>(
+export const highlighterTypesMobx = observable.map<string, HighlighterType>(
   DEFAULT_SNIPPET_TYPES
 );
 export const snippetsMobx = observable.map<string, Snippet>({});

@@ -15,7 +15,7 @@ import {
   Highlight,
   INGREDIENT_TYPE,
   Span,
-  snippetTypesMobx,
+  highlighterTypesMobx,
   QUANTITY_TYPE,
 } from "./primitives";
 
@@ -88,7 +88,7 @@ export function createSnippetsForSuggestions(
       textId,
       span: suggestion.span,
       type: "suggestion",
-      data: snippetTypesMobx
+      data: highlighterTypesMobx
         .get(suggestion.highlighterTypeId)!
         .parse(textInSnippet),
     };
@@ -136,7 +136,7 @@ export function createSnippetFromSpan(
       snippetTypeId,
       textId,
       span,
-      data: snippetTypesMobx.get(snippetTypeId)!.parse(textInSnippet),
+      data: highlighterTypesMobx.get(snippetTypeId)!.parse(textInSnippet),
     });
   });
   return snippetId;

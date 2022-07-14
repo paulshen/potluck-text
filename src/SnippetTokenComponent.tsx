@@ -9,7 +9,7 @@ import {
   GROUP_TOKEN_ROW_GAP,
   selectedSpatialComponentsMobx,
   spatialComponentsMobx,
-  snippetTypesMobx,
+  highlighterTypesMobx,
   SpatialComponentType,
   TOKEN_HEIGHT,
   GROUP_COLUMN_WIDTH,
@@ -59,7 +59,7 @@ export const SnippetTokenComponent = observer(
     ).get();
 
     const snippetType: HighlighterType = computed(() => {
-      return snippetTypesMobx.get(snippet.snippetTypeId);
+      return highlighterTypesMobx.get(snippet.snippetTypeId);
     }).get()!;
 
     const snippetTypeViewConfiguration: SnippetTypeViewConfiguration = computed(

@@ -3,7 +3,7 @@ import { computed, runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
 import {
   Snippet,
-  snippetTypesMobx,
+  highlighterTypesMobx,
   snippetTypeViewConfigurationsMobx,
   textEditorStateMobx,
 } from "./primitives";
@@ -11,7 +11,7 @@ import { PropertyList } from "./PropertyList";
 
 export const SnippetTokenHovercardContent = observer(
   ({ snippet }: { snippet: Snippet }) => {
-    const snippetType = snippetTypesMobx.get(snippet.snippetTypeId)!;
+    const snippetType = highlighterTypesMobx.get(snippet.snippetTypeId)!;
     const viewConfig = snippetTypeViewConfigurationsMobx.get(
       snippet.snippetTypeId
     )!;
