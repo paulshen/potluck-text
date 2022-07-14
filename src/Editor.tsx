@@ -58,6 +58,7 @@ const highlightsDecoration = EditorView.decorations.from(
     const visibleSnippetTypes = [
       INGREDIENT_TYPE,
       INGREDIENT_REFERENCE_TYPE,
+      INGREDIENT_WITH_QUANTITY_TYPE,
       QUANTITY_TYPE,
     ];
 
@@ -127,12 +128,12 @@ export const Editor = observer(({ textId }: { textId: string }) => {
             lineHeight: "1.75em",
           },
           ".cm-highlight": {
-            padding: "0 2px",
+            // padding: "0 2px",
             boxSizing: "border-box",
           },
           [`.cm-highlight-${INGREDIENT_TYPE}`]: {
             color: "hsla(212, 42%, 40%, 1)",
-            backgroundColor: "#52a4ff11",
+            backgroundColor: "#f3f9ff",
           },
           [`.cm-highlight-active.cm-highlight-${INGREDIENT_TYPE}`]: {
             borderBottom: "2px solid hsla(212, 42%, 40%, 1)",
@@ -145,12 +146,20 @@ export const Editor = observer(({ textId }: { textId: string }) => {
             borderBottom: "2px solid hsl(109deg 90% 27%)",
           },
           [`.cm-highlight-${QUANTITY_TYPE}`]: {
-            color: "hsl(349deg 80% 48%)",
-            backgroundColor: "#ff5d7a11",
+            color: "hsla(212, 42%, 40%, 1)",
+            backgroundColor: "#f3f9ff",
           },
           [`.cm-highlight-active.cm-highlight-${QUANTITY_TYPE}`]: {
-            borderBottom: "2px solid hsl(349deg 80% 48%)",
+            borderBottom: "2px solid hsla(212, 42%, 40%, 1)",
           },
+          [`.cm-highlight-${INGREDIENT_WITH_QUANTITY_TYPE}`]: {
+            color: "hsla(212, 42%, 40%, 1)",
+            backgroundColor: "#f3f9ff",
+          },
+          [`.cm-highlight-active.cm-highlight-${INGREDIENT_WITH_QUANTITY_TYPE}`]:
+            {
+              // borderBottom: "2px solid hsla(212, 42%, 40%, 1)",
+            },
           ".metakey-down & .cm-highlight:hover, .metakey-down & .cm-snippet:hover":
             {
               cursor: "pointer",
