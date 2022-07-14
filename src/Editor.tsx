@@ -231,7 +231,7 @@ export const Editor = observer(({ textId }: { textId: string }) => {
         ref={editorRef}
       ></div>
 
-      {ingredientHighlights.length > 0 && (
+      {/* {ingredientHighlights.length > 0 && (
         <div className="absolute left-[550px] top-0 w-[300px]">
           <span className="font-bold text-sm text-gray-400">
             Ingredients Summary
@@ -250,7 +250,7 @@ export const Editor = observer(({ textId }: { textId: string }) => {
             </div>
           ))}
         </div>
-      )}
+      )} */}
     </div>
   );
 });

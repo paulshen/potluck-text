@@ -51,9 +51,11 @@ const Highlighter = observer(
   ({ highlighter }: { highlighter: Highlighter }) => {
     return (
       <div>
-        <div>{highlighter.name}</div>
-        <div>{highlighter.icon}</div>
-        <div>{highlighter.color}</div>
+        <div className="flex gap-2">
+          <div>{highlighter.name}</div>
+          <div>{highlighter.icon}</div>
+          <div>{highlighter.color}</div>
+        </div>
       </div>
     );
   }
