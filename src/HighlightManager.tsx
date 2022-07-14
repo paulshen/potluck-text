@@ -42,7 +42,7 @@ export type Highlighter = {
   parser: HighlighterParser;
 };
 
-export const highlightersMobx = observable.array<Highlighter>([
+const BUILT_IN_HIGHLIGHTERS: Highlighter[] = [
   {
     id: "ingredient",
     name: "Ingredient",
@@ -53,6 +53,22 @@ export const highlightersMobx = observable.array<Highlighter>([
       list: rawIngredients.map((line: any) => line.name),
     },
   },
+  {
+    id: "quantity",
+    name: "Quantity",
+    icon: "quantity",
+    color: "#00ff00",
+    parser: {
+      type: HighlighterType.RegexHighlighter,
+      regex:
+        "(\\d|\\/|¼|½|¾|⅛|\\.)+\\s?(g|gram|oz|tsp|Tbsp|pound|cup|cup|can|teaspoon|tablespoon)s?\\b",
+    },
+  },
+];
+
+export const highlightersMobx = observable.array<Highlighter>([
+  BUILT_IN_HIGHLIGHTERS[0],
+  BUILT_IN_HIGHLIGHTERS[1],
 ]);
 
 export function parseWithHighlighter(
