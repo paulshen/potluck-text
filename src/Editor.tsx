@@ -18,6 +18,7 @@ import {
   EXERCISE_ACTIVITY_TYPE,
 } from "./primitives";
 import { getLinkedHighlights, spanOverlaps } from "./utils";
+import { highlightersMobx, parseWithHighlighter } from "./HighlightManager";
 
 const textIdFacet = Facet.define<string, string>({
   combine: (values) => values[0],
@@ -92,11 +93,13 @@ export const Editor = observer(({ textId }: { textId: string }) => {
         const text = computed(() =>
           textEditorStateMobx.get(textId)!.sliceDoc(0)
         );
-        const highlights: Highlight[] = [
-          ...highlighterTypesMobx.values(),
-        ].reduce<Highlight[]>(
-          (highlights, st) =>
-            highlights.concat(st.highlight(text.get(), highlights)),
+        const highlights: Highlight[] = [...highlightersMobx.values()].reduce<
+          Highlight[]
+        >(
+          (highlights, highlighter) =>
+            highlights.concat(
+              parseWithHighlighter(highlighter, text.get(), highlights)
+            ),
           []
         );
         return highlights;
