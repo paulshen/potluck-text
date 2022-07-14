@@ -528,7 +528,6 @@ export const Editor = observer(({ textId }: { textId: string }) => {
       reaction(
         () => suggestionsComputed.get(),
         (snippetSuggestions) => {
-          console.log(snippetSuggestions);
           view.dispatch({
             effects: [setSnippetSuggestionsEffect.of(snippetSuggestions)],
           });
