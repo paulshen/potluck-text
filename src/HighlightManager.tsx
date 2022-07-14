@@ -1,4 +1,4 @@
-import { action, observable } from "mobx";
+import { action, observable, runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { Highlight } from "./primitives";
@@ -6,7 +6,13 @@ import { Highlight } from "./primitives";
 import rawIngredients from "./snippetTypes/ingredients.csv";
 import { spanOverlaps } from "./utils";
 import * as Dialog from "@radix-ui/react-dialog";
-import { CheckIcon, Cross2Icon, TrashIcon } from "@radix-ui/react-icons";
+import {
+  CheckIcon,
+  Cross2Icon,
+  Pencil1Icon,
+  TrashIcon,
+} from "@radix-ui/react-icons";
+import { useFormik } from "formik";
 
 export enum HighlighterType {
   ListMatchHighlighter,
@@ -179,25 +185,122 @@ export function parseWithHighlighter(
   throw new Error();
 }
 
+function EditHighlighterDialogContent({
+  highlighter,
+  onClose,
+}: {
+  highlighter: Highlighter;
+  onClose: () => void;
+}) {
+  const formik = useFormik({
+    initialValues: {
+      name: highlighter.name,
+      icon: highlighter.icon,
+    },
+    onSubmit: (values) => {
+      runInAction(() => {
+        highlighter.name = values.name;
+        highlighter.icon = values.icon;
+      });
+      onClose();
+    },
+  });
+  return (
+    <div className="pt-4">
+      <form onSubmit={formik.handleSubmit} className="flex flex-col gap-2">
+        <div className="flex items-center">
+          <label className="w-32">id</label>
+          <div className="grow">{highlighter.id}</div>
+        </div>
+        <div className="flex items-center">
+          <label htmlFor="name" className="w-32">
+            name
+          </label>
+          <input
+            id="name"
+            name="name"
+            type="text"
+            onChange={formik.handleChange}
+            value={formik.values.name}
+            className="border border-gray-200 p-1 rounded-sm grow"
+          />
+        </div>
+        <div className="flex items-center">
+          <label htmlFor="name" className="w-32">
+            icon
+          </label>
+          <input
+            id="icon"
+            name="icon"
+            type="text"
+            onChange={formik.handleChange}
+            value={formik.values.icon}
+            className="border border-gray-200 p-1 rounded-sm grow"
+          />
+        </div>
+        <div className="mt-4">
+          <button type="submit" className="button">
+            Submit
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+function HighlighterEditButton({ highlighter }: { highlighter: Highlighter }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <Dialog.Root open={open} onOpenChange={(open) => setOpen(open)}>
+      <Dialog.Trigger asChild={true}>
+        <button className="text-gray-500">
+          <Pencil1Icon />
+        </button>
+      </Dialog.Trigger>
+      <Dialog.Portal>
+        <Dialog.Overlay className="fixed inset-0 bg-gray-500 bg-opacity-80" />
+        <Dialog.Content className="w-[90vw] max-w-lg p-8 bg-white fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-lg">
+          <Dialog.Title>Edit Highlighter</Dialog.Title>
+          <EditHighlighterDialogContent
+            highlighter={highlighter}
+            onClose={() => {
+              setOpen(false);
+            }}
+          />
+          <Dialog.Close asChild={true}>
+            <button className="flex p-1 absolute top-4 right-4">
+              <Cross2Icon />
+            </button>
+          </Dialog.Close>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+}
+
 const Highlighter = observer(
   ({ highlighter }: { highlighter: Highlighter }) => {
     return (
-      <div className="border border-gray-200 px-2 py-1 rounded flex items-center justify-between">
+      <div className="border border-gray-200 px-2 py-1 rounded flex items-center">
         <div className="flex gap-2">
           <div style={{ color: highlighter.color }}>
             {highlighter.icon} {highlighter.name}
           </div>
         </div>
-        <button
-          onClick={action(() => {
-            highlightersMobx.replace(
-              highlightersMobx.filter((h) => h.id !== highlighter.id)
-            );
-          })}
-          className="text-red-500"
-        >
-          <TrashIcon />
-        </button>
+        <div className="grow" />
+        <div className="flex gap-2">
+          <HighlighterEditButton highlighter={highlighter} />
+          <button
+            onClick={action(() => {
+              highlightersMobx.replace(
+                highlightersMobx.filter((h) => h.id !== highlighter.id)
+              );
+            })}
+            className="text-red-500"
+          >
+            <TrashIcon />
+          </button>
+        </div>
       </div>
     );
   }
