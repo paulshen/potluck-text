@@ -13,6 +13,7 @@ import {
   spatialComponentsMobx,
   SpatialComponentType,
 } from "./primitivesOld";
+import { HighlightManager } from "./HighlightManager";
 
 export const App = observer(() => {
   useEffect(() => {
@@ -105,6 +106,9 @@ export const App = observer(() => {
             </Pane>
           );
         })}
+      </div>
+      <div className="fixed right-4 top-12">
+        <HighlightManager />
       </div>
     </div>
   );
