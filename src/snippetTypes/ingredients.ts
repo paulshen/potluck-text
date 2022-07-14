@@ -87,7 +87,7 @@ export const ingredientSnippetType: HighlighterType = {
         ) {
           matches.push({
             span: [from, to],
-            snippetTypeId: INGREDIENT_REFERENCE_TYPE,
+            highlighterTypeId: INGREDIENT_REFERENCE_TYPE,
             data: parse(text.slice(from, to)),
             refs: {},
           });
@@ -96,7 +96,7 @@ export const ingredientSnippetType: HighlighterType = {
 
         matches.push({
           span: [from, to],
-          snippetTypeId: INGREDIENT_TYPE,
+          highlighterTypeId: INGREDIENT_TYPE,
           data: parse(text.slice(from, to)),
           refs: {},
         });

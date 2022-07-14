@@ -46,7 +46,7 @@ export function createHighlighter(
         while ((match = regex.exec(text)) !== null) {
           const length = match[0].length;
           matches.push({
-            snippetTypeId: schema.id,
+            highlighterTypeId: schema.id,
             span: [regex.lastIndex - length, regex.lastIndex],
             data: {},
             refs: {},
@@ -66,17 +66,17 @@ export function createHighlighter(
         const sortedHighlights = existingHighlights
           .filter(
             (h) =>
-              h.snippetTypeId === firstHighlightTypeId ||
-              h.snippetTypeId === secondHighlightTypeId
+              h.highlighterTypeId === firstHighlightTypeId ||
+              h.highlighterTypeId === secondHighlightTypeId
           )
           .sort((a, b) => a.span[0] - b.span[0]);
         for (let i = 0; i < sortedHighlights.length - 1; i++) {
           const highlight = sortedHighlights[i];
-          if (highlight.snippetTypeId !== firstHighlightTypeId) {
+          if (highlight.highlighterTypeId !== firstHighlightTypeId) {
             continue;
           }
           const nextHighlight = sortedHighlights[i + 1];
-          if (nextHighlight.snippetTypeId !== secondHighlightTypeId) {
+          if (nextHighlight.highlighterTypeId !== secondHighlightTypeId) {
             continue;
           }
           if (
@@ -87,7 +87,7 @@ export function createHighlighter(
           }
         }
         return rv.map(([first, second]) => ({
-          snippetTypeId: schema.id,
+          highlighterTypeId: schema.id,
           span: [first.span[0], second.span[1]],
           data: {},
           refs: {
@@ -116,10 +116,12 @@ export function createHighlighter(
           const lineHighlightsByType: { [highlightType: string]: Highlight[] } =
             {};
           for (const highlight of lineSnippets) {
-            if (lineHighlightsByType[highlight.snippetTypeId] === undefined) {
-              lineHighlightsByType[highlight.snippetTypeId] = [];
+            if (
+              lineHighlightsByType[highlight.highlighterTypeId] === undefined
+            ) {
+              lineHighlightsByType[highlight.highlighterTypeId] = [];
             }
-            lineHighlightsByType[highlight.snippetTypeId].push(highlight);
+            lineHighlightsByType[highlight.highlighterTypeId].push(highlight);
           }
           if (
             highlightTypeIds.every(
@@ -135,12 +137,12 @@ export function createHighlighter(
           }
         }
         return rv.map((lineHighlights) => ({
-          snippetTypeId: schema.id,
+          highlighterTypeId: schema.id,
           span: getSpanForMultipleSpans(lineHighlights.map((h) => h.span)),
           data: {},
           refs: Object.fromEntries(
             lineHighlights.map((lineHighlight) => [
-              lineHighlight.snippetTypeId,
+              lineHighlight.highlighterTypeId,
               lineHighlight,
             ])
           ),

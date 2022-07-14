@@ -158,7 +158,7 @@ export type SnippetGroup = {
 
 export type Highlight = {
   span: Span;
-  snippetTypeId: string;
+  highlighterTypeId: string;
   data: any;
   refs: { [key: string]: Highlight };
 };

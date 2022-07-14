@@ -84,12 +84,12 @@ export function createSnippetsForSuggestions(
       .sliceDoc(suggestion.span[0], suggestion.span[1])!;
     return {
       id: nanoid(),
-      snippetTypeId: suggestion.snippetTypeId,
+      snippetTypeId: suggestion.highlighterTypeId,
       textId,
       span: suggestion.span,
       type: "suggestion",
       data: snippetTypesMobx
-        .get(suggestion.snippetTypeId)!
+        .get(suggestion.highlighterTypeId)!
         .parse(textInSnippet),
     };
   });
@@ -178,7 +178,7 @@ export const getLinkedHighlights = (
   highlight: Highlight,
   allHighlights: Highlight[]
 ): Highlight[] => {
-  switch (highlight.snippetTypeId) {
+  switch (highlight.highlighterTypeId) {
     case INGREDIENT_TYPE: {
       const link = allHighlights.find((h) => h.refs.ingredient === highlight);
       if (link) {

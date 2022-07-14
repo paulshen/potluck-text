@@ -106,12 +106,12 @@ const suggestionDecorations = EditorView.decorations.from(
         );
         if (
           highlight.span[1] <= highlight.span[0] ||
-          !visibleSnippetTypes.includes(highlight.snippetTypeId)
+          !visibleSnippetTypes.includes(highlight.highlighterTypeId)
         ) {
           return [];
         }
         const decoration = Decoration.mark({
-          class: `cm-suggestion cm-suggestion-${highlight.snippetTypeId} ${
+          class: `cm-suggestion cm-suggestion-${highlight.highlighterTypeId} ${
             active ? "cm-suggestion-active" : ""
           }`,
         });
@@ -222,7 +222,7 @@ const dragSnippetPlugin = ViewPlugin.fromClass(
                 createSnippetFromSpan(
                   textId,
                   suggestionAtPos.span,
-                  suggestionAtPos.snippetTypeId
+                  suggestionAtPos.highlighterTypeId
                 );
               });
               return true;
@@ -587,11 +587,11 @@ export const Editor = observer(({ textId }: { textId: string }) => {
 
   const ingredientHighlights = allSuggestions
     .sort((a, b) => a.span[0] - b.span[0])
-    .filter((s) => s.snippetTypeId === INGREDIENT_TYPE)
+    .filter((s) => s.highlighterTypeId === INGREDIENT_TYPE)
     .map((ingredientHighlight) => {
       const ingredientWithQuantity = allSuggestions.find(
         (otherSuggestion) =>
-          otherSuggestion.snippetTypeId === INGREDIENT_WITH_QUANTITY_TYPE &&
+          otherSuggestion.highlighterTypeId === INGREDIENT_WITH_QUANTITY_TYPE &&
           otherSuggestion.refs.ingredient === ingredientHighlight
       );
 
