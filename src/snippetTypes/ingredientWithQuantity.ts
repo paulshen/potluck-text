@@ -8,7 +8,7 @@ import {
   INGREDIENT_WITH_QUANTITY_TYPE,
   QUANTITY_TYPE,
   Highlight,
-  SnippetType,
+  HighlighterType,
 } from "../primitives";
 import {
   findNextCharacter,
@@ -19,7 +19,7 @@ import {
 // @ts-ignore
 import rawIngredients from "./ingredients.csv";
 import { sortBy } from "lodash";
-import { createHighlighter, HighlighterType } from "../HighlightCreator";
+import { createHighlighter, HighlighterSchemaType } from "../HighlightCreator";
 
 type Ingredient = {
   name: string;
@@ -29,14 +29,14 @@ type Ingredient = {
   description: string;
 };
 
-export const ingredientWithQuantityType: SnippetType = {
+export const ingredientWithQuantityType: HighlighterType = {
   name: "Ingredient with quantity",
   icon: "",
   color: "#ffc107",
   highlight: createHighlighter({
     // TODO: untangle circular dependency so this can use constants
     id: "ingredient_with_quantity",
-    type: HighlighterType.NextToHighlighter,
+    type: HighlighterSchemaType.NextToHighlighter,
     firstHighlightTypeId: "quantity",
     secondHighlightTypeId: "ingredient",
     maxDistanceBetween: 50,

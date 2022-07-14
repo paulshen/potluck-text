@@ -1,6 +1,6 @@
 import { EditorState } from "@codemirror/state";
 import { EventEmitter } from "eventemitter3";
-import { observable, reaction } from "mobx";
+import { observable } from "mobx";
 import { ingredientSnippetType } from "./snippetTypes/ingredients";
 import { quantitySnippetType } from "./snippetTypes/quantities";
 import { ingredientWithQuantityType } from "./snippetTypes/ingredientWithQuantity";
@@ -56,7 +56,7 @@ export const EXERCISE_NAME_TYPE = "exercise_name";
 export const SETS_AND_REPS_TYPE = "sets_and_reps";
 export const EXERCISE_ACTIVITY_TYPE = "exercise_activity";
 
-const DEFAULT_SNIPPET_TYPES: { [key: string]: SnippetType } = {
+const DEFAULT_HIGHLIGHTER_TYPES: { [key: string]: HighlighterType } = {
   [QUANTITY_TYPE]: quantitySnippetType,
   [INGREDIENT_TYPE]: ingredientSnippetType,
   [INGREDIENT_WITH_QUANTITY_TYPE]: ingredientWithQuantityType,
@@ -64,20 +64,6 @@ const DEFAULT_SNIPPET_TYPES: { [key: string]: SnippetType } = {
   [SETS_AND_REPS_TYPE]: setsAndRepsType,
   [EXERCISE_ACTIVITY_TYPE]: exerciseActivityType,
 };
-const DEFAULT_SNIPPET_TYPE_CONFIGURATION: {
-  [key: string]: SnippetTypeViewConfiguration;
-} = {
-  [INGREDIENT_TYPE]: {
-    inlineVisiblePropertyIds: [],
-  },
-  [QUANTITY_TYPE]: {
-    inlineVisiblePropertyIds: [],
-  },
-  [INGREDIENT_WITH_QUANTITY_TYPE]: {
-    inlineVisiblePropertyIds: [],
-  },
-};
-
 export const FIRST_TEXT_ID = "text-id-1";
 export const textEditorStateMobx = observable.map<string, EditorState>(
   {
@@ -88,31 +74,7 @@ export const textEditorStateMobx = observable.map<string, EditorState>(
 export const textEditorViewsMap: { [textId: string]: EditorView } = {};
 export const dragNewSnippetEmitter = new EventEmitter();
 
-export type ColumnDefinition = {
-  id: string;
-  name: string;
-  formula?: string;
-};
-
-export enum SpatialComponentType {
-  Snippet,
-  SnippetGroup,
-}
-
-export type SnippetPropertyAction = {
-  label: string;
-  available: (snippet: Snippet) => boolean;
-  handler: (snippet: Snippet) => void;
-};
-
-export type SnippetProperty = {
-  id: string;
-  name: string;
-  type: "number" | "string" | "boolean";
-  actions?: SnippetPropertyAction[];
-};
-
-export type SnippetType = {
+export type HighlighterType = {
   name: string;
   icon: string;
   color: string;
@@ -123,73 +85,21 @@ export type SnippetType = {
   /** Given text for a single snippet, return structured data for the snippet */
   parse: (text: string) => any;
 
-  properties: SnippetProperty[];
-};
-
-export type SnippetTypeViewConfiguration = {
-  /** IDs of properties that should be visible inline */
-  inlineVisiblePropertyIds: string[];
-};
-
-export type Snippet = {
-  id: string;
-  snippetTypeId: string;
-  textId: string;
-  span: Span;
-  /** { [columnId]: data } */
-  data: { [key: string]: any };
-};
-
-export type SnippetOnCanvas = {
-  spatialComponentType: SpatialComponentType.Snippet;
-  id: string;
-  snippetId: string;
-  position: Position;
-};
-
-export type SnippetGroup = {
-  spatialComponentType: SpatialComponentType.SnippetGroup;
-  id: string;
-  position: Position;
-  snippetIds: string[];
-  /** Definitions for additional data to record for each annotation */
-  extraColumns: ColumnDefinition[];
+  properties: any[];
 };
 
 export type Highlight = {
   span: Span;
-  snippetTypeId: string;
+  highlighterTypeId: string;
   data: any;
   refs: { [key: string]: Highlight };
 };
 
-export type SpatialComponent = SnippetOnCanvas | SnippetGroup;
-export const getGroupWidth = (group: SnippetGroup): number => {
-  return (group.extraColumns.length + 1) * GROUP_COLUMN_WIDTH;
-};
-
-export const snippetTypesMobx = observable.map<string, SnippetType>(
-  DEFAULT_SNIPPET_TYPES
+export const highlighterTypesMobx = observable.map<string, HighlighterType>(
+  DEFAULT_HIGHLIGHTER_TYPES
 );
-export const snippetsMobx = observable.map<string, Snippet>({});
-export const snippetTypeViewConfigurationsMobx = observable.map<
-  string,
-  SnippetTypeViewConfiguration
->(DEFAULT_SNIPPET_TYPE_CONFIGURATION);
-
-export const spatialComponentsMobx = observable.array<SpatialComponent>([]);
-export const selectedSpatialComponentsMobx = observable.array<string>([]);
-export const spatialHoverSnippetIdBox =
-  observable.box<string | undefined>(undefined);
-
-export type DragState = {
-  spatialComponentIds: string[];
-  snippetsOverGroupId: string | undefined;
-};
-export const dragStateBox = observable.box<DragState | undefined>(undefined);
 
 export const CHAR_WIDTH = 8.5;
-export const GROUP_COLUMN_WIDTH = 192;
 export const TOKEN_HEIGHT = 28;
 export const GROUP_TOKEN_ROW_GAP = 8;
 export const GROUP_TOKEN_COLUMN_GAP = 4;

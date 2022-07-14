@@ -4,24 +4,12 @@ import classNames from "classnames";
 import { observer } from "mobx-react-lite";
 import { executeFormula } from "./formulas";
 import {
-  SnippetGroup,
-  SnippetOnCanvas,
   GROUP_TOKEN_ROW_GAP,
-  selectedSpatialComponentsMobx,
-  spatialComponentsMobx,
-  snippetTypesMobx,
-  SpatialComponentType,
+  highlighterTypesMobx,
   TOKEN_HEIGHT,
-  GROUP_COLUMN_WIDTH,
   GROUP_TOKEN_COLUMN_GAP,
-  getGroupWidth,
-  dragStateBox,
   textEditorStateMobx,
-  SnippetType,
-  Snippet,
-  SnippetTypeViewConfiguration,
-  snippetTypeViewConfigurationsMobx,
-  spatialHoverSnippetIdBox,
+  HighlighterType,
 } from "./primitives";
 import { Token } from "./Token";
 import { useDragSpatialComponent } from "./useDragSpatialComponent";
@@ -31,6 +19,17 @@ import {
 } from "./utils";
 import { useRef, useState } from "react";
 import { SnippetTokenHovercardContent } from "./SnippetTokenHovercardContent";
+import {
+  SnippetOnCanvas,
+  Snippet,
+  spatialComponentsMobx,
+  SpatialComponentType,
+  selectedSpatialComponentsMobx,
+  SnippetTypeViewConfiguration,
+  snippetTypeViewConfigurationsMobx,
+  dragStateBox,
+  GROUP_COLUMN_WIDTH,
+} from "./primitivesOld";
 
 export const SnippetTokenComponent = observer(
   ({ snippetOnCanvas }: { snippetOnCanvas: SnippetOnCanvas }) => {
@@ -58,8 +57,8 @@ export const SnippetTokenComponent = observer(
         selectedSpatialComponentsMobx.includes(snippetOnCanvas.id)
     ).get();
 
-    const snippetType: SnippetType = computed(() => {
-      return snippetTypesMobx.get(snippet.snippetTypeId);
+    const snippetType: HighlighterType = computed(() => {
+      return highlighterTypesMobx.get(snippet.snippetTypeId);
     }).get()!;
 
     const snippetTypeViewConfiguration: SnippetTypeViewConfiguration = computed(
@@ -122,12 +121,6 @@ export const SnippetTokenComponent = observer(
         <HoverCard.Root open={disableHovercard ? false : undefined}>
           <HoverCard.Trigger>
             <Token
-              onMouseEnter={action(() => {
-                spatialHoverSnippetIdBox.set(snippetOnCanvas.snippetId);
-              })}
-              onMouseLeave={action(() => {
-                spatialHoverSnippetIdBox.set(undefined);
-              })}
               isSelected={isSelected}
               className={
                 !isSelected
@@ -163,7 +156,7 @@ export const SnippetTokenComponent = observer(
           </HoverCard.Content>
         </HoverCard.Root>
         {snippetGroup &&
-          snippetGroup.extraColumns.map((column, index) => {
+          snippetGroup.extraColumns.map((column: any, index: any) => {
             const data =
               snippet.data[column.id] ??
               (column.formula &&

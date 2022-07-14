@@ -1,23 +1,25 @@
 import { runInAction } from "mobx";
 import { nanoid } from "nanoid";
 import {
-  SnippetGroup,
   GROUP_TOKEN_ROW_GAP,
-  GROUP_COLUMN_WIDTH,
   Rect,
   TOKEN_HEIGHT,
   Position,
   CHAR_WIDTH,
-  SnippetOnCanvas,
   textEditorStateMobx,
-  snippetsMobx,
-  Snippet,
   Highlight,
   INGREDIENT_TYPE,
   Span,
-  snippetTypesMobx,
+  highlighterTypesMobx,
   QUANTITY_TYPE,
 } from "./primitives";
+import {
+  SnippetGroup,
+  GROUP_COLUMN_WIDTH,
+  SnippetOnCanvas,
+  Snippet,
+  snippetsMobx,
+} from "./primitivesOld";
 
 // your favorite dumping ground of utility functions
 // ideally this file doesn't have dependencies outside primitives.ts and npm packages
@@ -71,35 +73,6 @@ export function getSnippetForSnippetOnCanvas(
   return snippetsMobx.get(snippetOnCanvas.snippetId)!;
 }
 
-/** Given some snippet suggestions for a given text box,
- *  create snippets for those suggestions.
- */
-export function createSnippetsForSuggestions(
-  textId: string,
-  suggestions: Highlight[]
-) {
-  const snippets: Snippet[] = suggestions.map((suggestion) => {
-    const textInSnippet = textEditorStateMobx
-      .get(textId)!
-      .sliceDoc(suggestion.span[0], suggestion.span[1])!;
-    return {
-      id: nanoid(),
-      snippetTypeId: suggestion.snippetTypeId,
-      textId,
-      span: suggestion.span,
-      type: "suggestion",
-      data: snippetTypesMobx
-        .get(suggestion.snippetTypeId)!
-        .parse(textInSnippet),
-    };
-  });
-  runInAction(() => {
-    for (const snippet of snippets) {
-      snippetsMobx.set(snippet.id, snippet);
-    }
-  });
-}
-
 export function getParentByClassName(
   element: HTMLElement | { parentElement: HTMLElement | null },
   className: string
@@ -136,7 +109,7 @@ export function createSnippetFromSpan(
       snippetTypeId,
       textId,
       span,
-      data: snippetTypesMobx.get(snippetTypeId)!.parse(textInSnippet),
+      data: highlighterTypesMobx.get(snippetTypeId)!.parse(textInSnippet),
     });
   });
   return snippetId;
@@ -178,7 +151,7 @@ export const getLinkedHighlights = (
   highlight: Highlight,
   allHighlights: Highlight[]
 ): Highlight[] => {
-  switch (highlight.snippetTypeId) {
+  switch (highlight.highlighterTypeId) {
     case INGREDIENT_TYPE: {
       const link = allHighlights.find((h) => h.refs.ingredient === highlight);
       if (link) {

@@ -1,12 +1,12 @@
 import { Handler, useDrag } from "@use-gesture/react";
 import { action } from "mobx";
 import { useState } from "react";
+import { Rect } from "./primitives";
 import {
-  Rect,
   selectedSpatialComponentsMobx,
   spatialComponentsMobx,
   SpatialComponentType,
-} from "./primitives";
+} from "./primitivesOld";
 import { getRectForSnippetGroup, getRectForSnippetToken } from "./utils";
 
 function doesRectContain(rect: Rect, [x, y]: [x: number, y: number]) {
@@ -29,9 +29,8 @@ function doRectsOverlap(r1: Rect, r2: Rect): boolean {
 }
 
 export function CanvasBackground() {
-  const [selectionRect, setSelectionRect] = useState<Rect | undefined>(
-    undefined
-  );
+  const [selectionRect, setSelectionRect] =
+    useState<Rect | undefined>(undefined);
   const bindDrag = useDrag(
     action<Handler<"drag">>(({ initial, first, last, movement }) => {
       if (first) {

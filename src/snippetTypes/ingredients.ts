@@ -6,10 +6,8 @@
 import {
   INGREDIENT_REFERENCE_TYPE,
   INGREDIENT_TYPE,
-  Snippet,
-  snippetsMobx,
   Highlight,
-  SnippetType,
+  HighlighterType,
   Span,
   textEditorViewsMap,
 } from "../primitives";
@@ -55,7 +53,7 @@ const parse = (text: string) => {
   }
 };
 
-export const ingredientSnippetType: SnippetType = {
+export const ingredientSnippetType: HighlighterType = {
   name: "Ingredient",
   icon: "🥕",
   color: "#ffc107",
@@ -87,7 +85,7 @@ export const ingredientSnippetType: SnippetType = {
         ) {
           matches.push({
             span: [from, to],
-            snippetTypeId: INGREDIENT_REFERENCE_TYPE,
+            highlighterTypeId: INGREDIENT_REFERENCE_TYPE,
             data: parse(text.slice(from, to)),
             refs: {},
           });
@@ -96,7 +94,7 @@ export const ingredientSnippetType: SnippetType = {
 
         matches.push({
           span: [from, to],
-          snippetTypeId: INGREDIENT_TYPE,
+          highlighterTypeId: INGREDIENT_TYPE,
           data: parse(text.slice(from, to)),
           refs: {},
         });
@@ -119,34 +117,32 @@ export const ingredientSnippetType: SnippetType = {
       actions: [
         {
           label: "replace",
-          available: (snippet: Snippet) => {
+          available: (snippet: any) => {
             const alternative = snippet.data["ingredient--veganAlternative"];
             return alternative !== undefined;
           },
-          handler: (snippet: Snippet) => {
-            const alternative = snippet.data["ingredient--veganAlternative"];
-
-            const view = textEditorViewsMap[snippet.textId];
-            view.dispatch({
-              changes: ChangeSet.of(
-                {
-                  from: snippet.span[0],
-                  to: snippet.span[1],
-                  insert: alternative,
-                },
-                view.state.doc.length
-              ),
-            });
-
-            // reparse snippet
-
-            snippetsMobx.set(snippet.id, {
-              id: snippet.id,
-              snippetTypeId: snippet.snippetTypeId,
-              textId: snippet.textId,
-              span: [snippet.span[0], snippet.span[0] + alternative.length],
-              data: ingredientSnippetType.parse(alternative),
-            });
+          handler: () => {
+            // OLD CODE
+            // const alternative = snippet.data["ingredient--veganAlternative"];
+            // const view = textEditorViewsMap[snippet.textId];
+            // view.dispatch({
+            //   changes: ChangeSet.of(
+            //     {
+            //       from: snippet.span[0],
+            //       to: snippet.span[1],
+            //       insert: alternative,
+            //     },
+            //     view.state.doc.length
+            //   ),
+            // });
+            // // reparse snippet
+            // snippetsMobx.set(snippet.id, {
+            //   id: snippet.id,
+            //   snippetTypeId: snippet.snippetTypeId,
+            //   textId: snippet.textId,
+            //   span: [snippet.span[0], snippet.span[0] + alternative.length],
+            //   data: ingredientSnippetType.parse(alternative),
+            // });
           },
         },
       ],

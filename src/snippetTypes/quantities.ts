@@ -4,8 +4,8 @@
 // Climate impact source: https://ourworldindata.org/environmental-impacts-of-food
 
 import { parseIngredient } from "parse-ingredient";
-import { createHighlighter, HighlighterType } from "../HighlightCreator";
-import { QUANTITY_TYPE, Highlight, SnippetType, Span } from "../primitives";
+import { createHighlighter, HighlighterSchemaType } from "../HighlightCreator";
+import { QUANTITY_TYPE, Highlight, HighlighterType, Span } from "../primitives";
 
 const parse = (text: string) => {
   // This is super weird, but the quantity parsing library expects to parse a whole ingredient,
@@ -55,14 +55,14 @@ const parse = (text: string) => {
   return snippetData;
 };
 
-export const quantitySnippetType: SnippetType = {
+export const quantitySnippetType: HighlighterType = {
   name: "Quantity",
   icon: "⚖️",
   color: "#ffc107",
   highlight: createHighlighter({
     // TODO: untangle circular dependency so this can be QUANTITY_TYPE
     id: "quantity",
-    type: HighlighterType.RegexHighlighter,
+    type: HighlighterSchemaType.RegexHighlighter,
     regex:
       "(\\d|\\/|¼|½|¾|⅛|\\.)+\\s?(g|gram|oz|tsp|Tbsp|pound|cup|cup|can|teaspoon|tablespoon)s?\\b",
     postProcess: (highlights, text) => {

@@ -4,16 +4,15 @@ import { observer } from "mobx-react-lite";
 import { nanoid } from "nanoid";
 import { useRef, useState } from "react";
 import { formulaIsValid } from "./formulas";
+import { getRectForSnippetGroup } from "./utils";
+import { useDragSpatialComponent } from "./useDragSpatialComponent";
 import {
   SnippetGroup,
   selectedSpatialComponentsMobx,
   dragStateBox,
-  spatialComponentsMobx,
-  GROUP_COLUMN_WIDTH,
   getGroupWidth,
-} from "./primitives";
-import { getRectForSnippetGroup } from "./utils";
-import { useDragSpatialComponent } from "./useDragSpatialComponent";
+  GROUP_COLUMN_WIDTH,
+} from "./primitivesOld";
 
 export const SnippetGroupComponent = observer(
   ({ group }: { group: SnippetGroup }) => {
