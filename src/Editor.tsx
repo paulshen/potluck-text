@@ -15,9 +15,10 @@ import {
   EXERCISE_NAME_TYPE,
   SETS_AND_REPS_TYPE,
   EXERCISE_ACTIVITY_TYPE,
+  highlightersMobx,
 } from "./primitives";
 import { getLinkedHighlights, spanOverlaps } from "./utils";
-import { highlightersMobx, parseWithHighlighter } from "./HighlightManager";
+import { parseWithHighlighter } from "./HighlightManager";
 
 const textIdFacet = Facet.define<string, string>({
   combine: (values) => values[0],
