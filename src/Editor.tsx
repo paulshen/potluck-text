@@ -1,5 +1,5 @@
-import { Facet, StateEffect, StateField } from "@codemirror/state";
-import { Decoration } from "@codemirror/view";
+import { Facet, Prec, StateEffect, StateField } from "@codemirror/state";
+import { Decoration, ViewPlugin, ViewUpdate } from "@codemirror/view";
 import { EditorView, minimalSetup } from "codemirror";
 import {
   autorun,
@@ -25,6 +25,8 @@ import {
   EXERCISE_ACTIVITY_TYPE,
   highlightersMobx,
   hiddenHighlighterIdsMobx,
+  antiHighlightsMobx,
+  AntiHighlight,
 } from "./primitives";
 import { getLinkedHighlights, spanOverlaps } from "./utils";
 import { parseWithHighlighter } from "./HighlightManager";
@@ -103,6 +105,35 @@ const highlightsDecoration = EditorView.decorations.compute(
   }
 );
 
+// Accept suggestions (just the one near the cursor, or all) with keyboard shortcuts
+const eraseHighlightsPlugin = ViewPlugin.fromClass(
+  class {
+    constructor(view: EditorView) {}
+    update(update: ViewUpdate) {}
+    destroy() {}
+  },
+  {
+    eventHandlers: {
+      keydown(event, view) {
+        // cmd-backspace to remove highlights in a range
+        if (event.key === "0" && event.metaKey) {
+          event.preventDefault();
+          runInAction(() => {
+            const antiHighlight: AntiHighlight = {
+              span: [
+                view.state.selection.main.from,
+                view.state.selection.main.to,
+              ],
+              textId: view.state.facet(textIdFacet),
+            };
+            antiHighlightsMobx.push(antiHighlight);
+          });
+        }
+      },
+    },
+  }
+);
+
 export const Editor = observer(({ textId }: { textId: string }) => {
   const editorRef = useRef(null);
   const highlightsComputed = useMemo(
@@ -110,6 +141,9 @@ export const Editor = observer(({ textId }: { textId: string }) => {
       computed(() => {
         const textComputed = computed(() =>
           textEditorStateMobx.get(textId)!.sliceDoc(0)
+        );
+        const antiHighlights = antiHighlightsMobx.filter(
+          (ah) => ah.textId === textId
         );
         const highlights: Highlight[] = [...highlightersMobx.values()].reduce<
           Highlight[]
@@ -119,6 +153,11 @@ export const Editor = observer(({ textId }: { textId: string }) => {
             highlighter,
             text,
             highlights
+          ).filter(
+            (highlight) =>
+              !antiHighlights.some((ah) =>
+                spanOverlaps(ah.span, highlight.span)
+              )
           );
           if (highlighter.postProcess !== undefined) {
             addHighlights = addHighlights.map((h) =>
@@ -195,6 +234,7 @@ export const Editor = observer(({ textId }: { textId: string }) => {
         highlightsField,
         highlightsDecoration,
         hiddenHighlightIdsField,
+        Prec.high(eraseHighlightsPlugin),
       ],
       parent: editorRef.current!,
       dispatch(transaction) {

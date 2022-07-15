@@ -173,6 +173,12 @@ export const BUILT_IN_HIGHLIGHTERS: Highlighter[] = [
   },
 ];
 
+/** An AntiHighlight is a region where highlights have been removed and they should not return */
+export type AntiHighlight = {
+  textId: string;
+  span: Span;
+};
+
 export const highlightersMobx = observable.array<Highlighter>(
   BUILT_IN_HIGHLIGHTERS
 );
@@ -194,6 +200,8 @@ reaction(
 export const highlighterTypesMobx = observable.map<string, HighlighterType>(
   DEFAULT_HIGHLIGHTER_TYPES
 );
+
+export const antiHighlightsMobx = observable.array<AntiHighlight>([]);
 
 export const CHAR_WIDTH = 8.5;
 export const TOKEN_HEIGHT = 28;
