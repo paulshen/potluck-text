@@ -236,7 +236,7 @@ const HighlighterComponent = observer(
 const AddHighlighterDialogContent = observer(() => {
   const highlighterIds = highlightersMobx.map((h) => h.id);
   return (
-    <Dialog.Description className="pt-4">
+    <div className="pt-4">
       {BUILT_IN_HIGHLIGHTERS.map((highlighter) => {
         const isAlreadyEnabled = highlighterIds.includes(highlighter.id);
         return (
@@ -254,7 +254,7 @@ const AddHighlighterDialogContent = observer(() => {
           </div>
         );
       })}
-    </Dialog.Description>
+    </div>
   );
 });
 
@@ -282,7 +282,7 @@ function AddHighlighterButton() {
 
 export const HighlightManager = observer(() => {
   return (
-    <div>
+    <div className="bg-white">
       <div className="flex flex-col gap-2 w-64 mb-4">
         {highlightersMobx.map((highlighter) => (
           <HighlighterComponent
