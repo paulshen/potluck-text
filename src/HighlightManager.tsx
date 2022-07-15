@@ -1,8 +1,9 @@
-import { action, observable, runInAction } from "mobx";
+import { action, computed, observable, runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import {
   BUILT_IN_HIGHLIGHTERS,
+  hiddenHighlighterIdsMobx,
   Highlight,
   Highlighter,
   HighlighterParserType,
@@ -13,6 +14,8 @@ import * as Dialog from "@radix-ui/react-dialog";
 import {
   CheckIcon,
   Cross2Icon,
+  EyeNoneIcon,
+  EyeOpenIcon,
   Pencil1Icon,
   TrashIcon,
 } from "@radix-ui/react-icons";
@@ -207,15 +210,30 @@ function HighlighterEditButton({ highlighter }: { highlighter: Highlighter }) {
 
 const HighlighterComponent = observer(
   ({ highlighter }: { highlighter: Highlighter }) => {
+    const isHidden = computed(() =>
+      hiddenHighlighterIdsMobx.has(highlighter.id)
+    ).get();
     return (
       <div className="border border-gray-200 px-2 py-1 rounded flex items-center">
         <div className="flex gap-2">
-          <div style={{ color: highlighter.color }}>
+          <div className="text-yellow-600">
             {highlighter.icon} {highlighter.name}
           </div>
         </div>
         <div className="grow" />
         <div className="flex gap-2">
+          <button
+            onClick={action(() => {
+              if (isHidden) {
+                hiddenHighlighterIdsMobx.delete(highlighter.id);
+              } else {
+                hiddenHighlighterIdsMobx.add(highlighter.id);
+              }
+            })}
+            className="text-gray-500"
+          >
+            {isHidden ? <EyeNoneIcon /> : <EyeOpenIcon />}
+          </button>
           <HighlighterEditButton highlighter={highlighter} />
           <button
             onClick={action(() => {

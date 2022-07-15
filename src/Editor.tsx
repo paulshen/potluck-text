@@ -1,7 +1,15 @@
 import { Facet, StateEffect, StateField } from "@codemirror/state";
 import { Decoration } from "@codemirror/view";
 import { EditorView, minimalSetup } from "codemirror";
-import { autorun, comparer, computed, reaction, runInAction } from "mobx";
+import {
+  autorun,
+  comparer,
+  computed,
+  reaction,
+  runInAction,
+  set,
+  toJS,
+} from "mobx";
 import { observer } from "mobx-react-lite";
 import { useRef, useEffect, useMemo } from "react";
 import {
@@ -16,6 +24,7 @@ import {
   SETS_AND_REPS_TYPE,
   EXERCISE_ACTIVITY_TYPE,
   highlightersMobx,
+  hiddenHighlighterIdsMobx,
 } from "./primitives";
 import { getLinkedHighlights, spanOverlaps } from "./utils";
 import { parseWithHighlighter } from "./HighlightManager";
@@ -50,18 +59,27 @@ const highlightsField = StateField.define<Highlight[]>({
   },
 });
 
-const highlightsDecoration = EditorView.decorations.from(
-  highlightsField,
-  (highlights) => (view) => {
-    const pos = view.state.selection.main.anchor;
+const setHiddenHighlightIds = StateEffect.define<Set<string>>();
+const hiddenHighlightIdsField = StateField.define<Set<string>>({
+  create() {
+    return new Set();
+  },
+  update(hiddenHighlightIds, tr) {
+    for (let e of tr.effects) {
+      if (e.is(setHiddenHighlightIds)) {
+        return e.value;
+      }
+    }
+    return hiddenHighlightIds;
+  },
+});
 
-    // We don't want to show ingredientWithQuantity snippets... todo: figure out how to hide
-    const visibleSnippetTypes = [
-      INGREDIENT_TYPE,
-      INGREDIENT_REFERENCE_TYPE,
-      INGREDIENT_WITH_QUANTITY_TYPE,
-      QUANTITY_TYPE,
-    ];
+const highlightsDecoration = EditorView.decorations.compute(
+  [highlightsField, hiddenHighlightIdsField],
+  (state) => {
+    const pos = state.selection.main.anchor;
+    const highlights = state.field(highlightsField);
+    const hiddenHighlightIds = state.field(hiddenHighlightIdsField);
 
     return Decoration.set(
       highlights.flatMap((highlight) => {
@@ -71,7 +89,7 @@ const highlightsDecoration = EditorView.decorations.from(
         );
         if (
           highlight.span[1] <= highlight.span[0] ||
-          !visibleSnippetTypes.includes(highlight.highlighterTypeId)
+          hiddenHighlightIds.has(highlight.highlighterTypeId)
         ) {
           return [];
         }
@@ -176,6 +194,7 @@ export const Editor = observer(({ textId }: { textId: string }) => {
         textIdFacet.of(textId),
         highlightsField,
         highlightsDecoration,
+        hiddenHighlightIdsField,
       ],
       parent: editorRef.current!,
       dispatch(transaction) {
@@ -200,6 +219,11 @@ export const Editor = observer(({ textId }: { textId: string }) => {
         },
         { equals: comparer.structural, fireImmediately: true }
       ),
+      autorun(() => {
+        view.dispatch({
+          effects: [setHiddenHighlightIds.of(toJS(hiddenHighlighterIdsMobx))],
+        });
+      }),
     ];
     return () => {
       view.destroy();

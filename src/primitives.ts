@@ -1,6 +1,6 @@
 import { EditorState } from "@codemirror/state";
 import { EventEmitter } from "eventemitter3";
-import { observable } from "mobx";
+import { action, comparer, observable, reaction } from "mobx";
 import { ingredientSnippetType } from "./snippetTypes/ingredients";
 import { parseQuantity, quantitySnippetType } from "./snippetTypes/quantities";
 import { ingredientWithQuantityType } from "./snippetTypes/ingredientWithQuantity";
@@ -175,6 +175,19 @@ export const BUILT_IN_HIGHLIGHTERS: Highlighter[] = [
 
 export const highlightersMobx = observable.array<Highlighter>(
   BUILT_IN_HIGHLIGHTERS
+);
+
+export const hiddenHighlighterIdsMobx = observable.set<string>([]);
+reaction(
+  () => highlightersMobx.map((h) => h.id),
+  action((highlighterIds) => {
+    for (const hiddenHighlighterId of hiddenHighlighterIdsMobx) {
+      if (!highlighterIds.includes(hiddenHighlighterId)) {
+        hiddenHighlighterIdsMobx.delete(hiddenHighlighterId);
+      }
+    }
+  }),
+  { equals: comparer.structural }
 );
 
 // TODO: remove this
