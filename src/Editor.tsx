@@ -134,7 +134,7 @@ export const Editor = observer(({ textId }: { textId: string }) => {
           ".cm-highlight": {
             // padding: "0 2px",
             background:
-              "linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(255,247,180, 1) 50%, rgba(255,255, 255,1) 100%)",
+              "linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255,247,200, 1) 50%, rgba(255,255, 255,0) 100%)",
             boxSizing: "border-box",
           },
           ".cm-highlight-active": {
