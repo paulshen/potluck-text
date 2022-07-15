@@ -7,7 +7,7 @@ import { parseIngredient } from "parse-ingredient";
 import { createHighlighter, HighlighterSchemaType } from "../HighlightCreator";
 import { QUANTITY_TYPE, Highlight, HighlighterType, Span } from "../primitives";
 
-const parse = (text: string) => {
+export const parseQuantity = (text: string) => {
   // This is super weird, but the quantity parsing library expects to parse a whole ingredient,
   // so we have to add a fake food at the end of the quantity to get it to work right
   const data = parseIngredient(`${text} milk`)[0];
@@ -68,12 +68,12 @@ export const quantitySnippetType: HighlighterType = {
     postProcess: (highlights, text) => {
       return highlights.map((highlight) => ({
         ...highlight,
-        data: parse(text.slice(highlight.span[0], highlight.span[1])),
+        data: parseQuantity(text.slice(highlight.span[0], highlight.span[1])),
       }));
     },
   }),
 
-  parse,
+  parse: parseQuantity,
 
   properties: [
     { id: "quantity--quantity", name: "Quantity", type: "number" },

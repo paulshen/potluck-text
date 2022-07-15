@@ -7,7 +7,6 @@ import { useRef, useEffect, useMemo } from "react";
 import {
   Highlight,
   textEditorStateMobx,
-  highlighterTypesMobx,
   textEditorViewsMap,
   INGREDIENT_TYPE,
   INGREDIENT_REFERENCE_TYPE,
@@ -16,8 +15,10 @@ import {
   EXERCISE_NAME_TYPE,
   SETS_AND_REPS_TYPE,
   EXERCISE_ACTIVITY_TYPE,
+  highlightersMobx,
 } from "./primitives";
 import { getLinkedHighlights, spanOverlaps } from "./utils";
+import { parseWithHighlighter } from "./HighlightManager";
 
 const textIdFacet = Facet.define<string, string>({
   combine: (values) => values[0],
@@ -89,16 +90,25 @@ export const Editor = observer(({ textId }: { textId: string }) => {
   const highlightsComputed = useMemo(
     () =>
       computed(() => {
-        const text = computed(() =>
+        const textComputed = computed(() =>
           textEditorStateMobx.get(textId)!.sliceDoc(0)
         );
-        const highlights: Highlight[] = [
-          ...highlighterTypesMobx.values(),
-        ].reduce<Highlight[]>(
-          (highlights, st) =>
-            highlights.concat(st.highlight(text.get(), highlights)),
-          []
-        );
+        const highlights: Highlight[] = [...highlightersMobx.values()].reduce<
+          Highlight[]
+        >((highlights, highlighter) => {
+          const text = textComputed.get();
+          let addHighlights = parseWithHighlighter(
+            highlighter,
+            text,
+            highlights
+          );
+          if (highlighter.postProcess !== undefined) {
+            addHighlights = addHighlights.map((h) =>
+              highlighter.postProcess!(h, text)
+            );
+          }
+          return highlights.concat(addHighlights);
+        }, []);
         return highlights;
       }),
     [textId]
