@@ -75,9 +75,7 @@ const highlightsDecoration = EditorView.decorations.from(
           return [];
         }
         const decoration = Decoration.mark({
-          class: `cm-highlight cm-highlight-${highlight.highlighterTypeId} ${
-            active ? "cm-highlight-active" : ""
-          }`,
+          class: `cm-highlight  ${active ? "cm-highlight-active" : ""}`,
         });
         return [decoration.range(highlight.span[0], highlight.span[1])];
       }),
@@ -122,6 +120,12 @@ export const Editor = observer(({ textId }: { textId: string }) => {
           "&.cm-editor.cm-focused": {
             outline: "none",
           },
+          ".cm-line": {
+            "border-bottom": "solid thin hsl(188deg 92% 90%)",
+          },
+          ".cm-line:first-of-type": {
+            "border-bottom": "solid thin #ffc9c9",
+          },
           ".cm-scroller": {
             fontFamily: `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"`,
             fontSize: "1rem",
@@ -129,37 +133,13 @@ export const Editor = observer(({ textId }: { textId: string }) => {
           },
           ".cm-highlight": {
             // padding: "0 2px",
+            background:
+              "linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(255,247,180, 1) 50%, rgba(255,255, 255,1) 100%)",
             boxSizing: "border-box",
           },
-          [`.cm-highlight-${INGREDIENT_TYPE}`]: {
-            color: "hsla(212, 42%, 40%, 1)",
-            backgroundColor: "#f3f9ff",
+          ".cm-highlight-active": {
+            borderBottom: "2px solid hsl(55deg 80% 55%)",
           },
-          [`.cm-highlight-active.cm-highlight-${INGREDIENT_TYPE}`]: {
-            borderBottom: "2px solid hsla(212, 42%, 40%, 1)",
-          },
-          [`.cm-highlight-${INGREDIENT_REFERENCE_TYPE}`]: {
-            color: "hsl(109deg 90% 27%)",
-            backgroundColor: "#30b41311",
-          },
-          [`.cm-highlight-active.cm-highlight-${INGREDIENT_REFERENCE_TYPE}`]: {
-            borderBottom: "2px solid hsl(109deg 90% 27%)",
-          },
-          [`.cm-highlight-${QUANTITY_TYPE}`]: {
-            color: "hsla(212, 42%, 40%, 1)",
-            backgroundColor: "#f3f9ff",
-          },
-          [`.cm-highlight-active.cm-highlight-${QUANTITY_TYPE}`]: {
-            borderBottom: "2px solid hsla(212, 42%, 40%, 1)",
-          },
-          [`.cm-highlight-${INGREDIENT_WITH_QUANTITY_TYPE}`]: {
-            color: "hsla(212, 42%, 40%, 1)",
-            backgroundColor: "#f3f9ff",
-          },
-          [`.cm-highlight-active.cm-highlight-${INGREDIENT_WITH_QUANTITY_TYPE}`]:
-            {
-              // borderBottom: "2px solid hsla(212, 42%, 40%, 1)",
-            },
           ".metakey-down & .cm-highlight:hover, .metakey-down & .cm-snippet:hover":
             {
               cursor: "pointer",
