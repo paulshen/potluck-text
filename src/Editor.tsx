@@ -7,7 +7,6 @@ import { useRef, useEffect, useMemo } from "react";
 import {
   Highlight,
   textEditorStateMobx,
-  highlighterTypesMobx,
   textEditorViewsMap,
   INGREDIENT_TYPE,
   INGREDIENT_REFERENCE_TYPE,

@@ -1,9 +1,13 @@
 import { action, observable, runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
-import { Highlight } from "./primitives";
-// @ts-ignore
-import rawIngredients from "./snippetTypes/ingredients.csv";
+import {
+  BUILT_IN_HIGHLIGHTERS,
+  Highlight,
+  Highlighter,
+  HighlighterParserType,
+  highlightersMobx,
+} from "./primitives";
 import { spanOverlaps } from "./utils";
 import * as Dialog from "@radix-ui/react-dialog";
 import {
@@ -14,83 +18,6 @@ import {
 } from "@radix-ui/react-icons";
 import { useFormik } from "formik";
 
-export enum HighlighterType {
-  ListMatchHighlighter,
-  RegexHighlighter,
-  NextToHighlighter,
-  CustomHighlighter,
-}
-
-export type HighlighterParser =
-  | {
-      type: HighlighterType.ListMatchHighlighter;
-      list: string[];
-    }
-  | {
-      type: HighlighterType.RegexHighlighter;
-      regex: string;
-    }
-  | {
-      type: HighlighterType.NextToHighlighter;
-      firstHighlightTypeId: string;
-      secondHighlightTypeId: string;
-      maxDistanceBetween: number;
-    }
-  | {
-      type: HighlighterType.CustomHighlighter;
-      parser: (text: string, existingHighlights: Highlight[]) => Highlight[];
-    };
-
-export type HighlighterConfig = {};
-
-export type Highlighter = {
-  id: string;
-  name: string;
-  icon: string;
-  color: string;
-  parser: HighlighterParser;
-};
-
-const BUILT_IN_HIGHLIGHTERS: Highlighter[] = [
-  {
-    id: "ingredient",
-    name: "Ingredient",
-    icon: "🥕",
-    color: "hsla(212, 42%, 40%, 1)",
-    parser: {
-      type: HighlighterType.ListMatchHighlighter,
-      list: rawIngredients.map((line: any) => line.name),
-    },
-  },
-  {
-    id: "quantity",
-    name: "Quantity",
-    icon: "⚖️",
-    color: "hsl(349deg 80% 48%)",
-    parser: {
-      type: HighlighterType.RegexHighlighter,
-      regex:
-        "(\\d|\\/|¼|½|¾|⅛|\\.)+\\s?(g|gram|oz|tsp|Tbsp|pound|cup|cup|can|teaspoon|tablespoon)s?\\b",
-    },
-  },
-  {
-    id: "ingredient_with_quantity",
-    name: "Ingredient with quantity",
-    icon: "",
-    color: "#059669",
-    parser: {
-      type: HighlighterType.NextToHighlighter,
-      firstHighlightTypeId: "quantity",
-      secondHighlightTypeId: "ingredient",
-      maxDistanceBetween: 50,
-    },
-  },
-];
-
-export const highlightersMobx = observable.array<Highlighter>([
-  BUILT_IN_HIGHLIGHTERS[0],
-]);
-
 export function parseWithHighlighter(
   highlighter: Highlighter,
   text: string,
@@ -98,7 +25,7 @@ export function parseWithHighlighter(
 ): Highlight[] {
   const { parser } = highlighter;
   switch (parser.type) {
-    case HighlighterType.ListMatchHighlighter: {
+    case HighlighterParserType.ListMatchHighlighter: {
       const matches: Highlight[] = [];
       // We could probably do this faster if we combined all the known strings into one regex,
       // but this is simpler to reason about and seems fast enough for now.
@@ -126,7 +53,7 @@ export function parseWithHighlighter(
       }
       return matches;
     }
-    case HighlighterType.RegexHighlighter: {
+    case HighlighterParserType.RegexHighlighter: {
       const regex = new RegExp(parser.regex, "g");
       const matches: Highlight[] = [];
       let match;
@@ -141,7 +68,7 @@ export function parseWithHighlighter(
       }
       return matches;
     }
-    case HighlighterType.NextToHighlighter: {
+    case HighlighterParserType.NextToHighlighter: {
       const {
         firstHighlightTypeId,
         secondHighlightTypeId,
@@ -278,7 +205,7 @@ function HighlighterEditButton({ highlighter }: { highlighter: Highlighter }) {
   );
 }
 
-const Highlighter = observer(
+const HighlighterComponent = observer(
   ({ highlighter }: { highlighter: Highlighter }) => {
     return (
       <div className="border border-gray-200 px-2 py-1 rounded flex items-center">
@@ -305,21 +232,6 @@ const Highlighter = observer(
     );
   }
 );
-
-function HighlighterForm({
-  highlighter,
-}: {
-  highlighter: Highlighter | undefined;
-}) {
-  const [id, setId] = useState(highlighter?.id ?? "");
-  const [name, setName] = useState(highlighter?.name ?? "");
-  return (
-    <div>
-      <div>{id}</div>
-      <div>{name}</div>
-    </div>
-  );
-}
 
 const AddHighlighterDialogContent = observer(() => {
   const highlighterIds = highlightersMobx.map((h) => h.id);
@@ -373,7 +285,10 @@ export const HighlightManager = observer(() => {
     <div>
       <div className="flex flex-col gap-2 w-64 mb-4">
         {highlightersMobx.map((highlighter) => (
-          <Highlighter highlighter={highlighter} key={highlighter.id} />
+          <HighlighterComponent
+            highlighter={highlighter}
+            key={highlighter.id}
+          />
         ))}
       </div>
       <AddHighlighterButton />

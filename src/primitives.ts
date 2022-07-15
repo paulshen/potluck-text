@@ -8,6 +8,8 @@ import { EditorView } from "codemirror";
 import { exeriseNameType } from "./snippetTypes/exerciseName";
 import { exerciseActivityType } from "./snippetTypes/exerciseActivity";
 import { setsAndRepsType } from "./snippetTypes/setsAndReps";
+// @ts-ignore
+import rawIngredients from "./snippetTypes/ingredients.csv";
 
 export type Position = [x: number, y: number];
 export type Rect = [x: number, y: number, width: number, height: number];
@@ -95,6 +97,82 @@ export type Highlight = {
   refs: { [key: string]: Highlight };
 };
 
+export enum HighlighterParserType {
+  ListMatchHighlighter,
+  RegexHighlighter,
+  NextToHighlighter,
+  CustomHighlighter,
+}
+
+export type HighlighterParser =
+  | {
+      type: HighlighterParserType.ListMatchHighlighter;
+      list: string[];
+    }
+  | {
+      type: HighlighterParserType.RegexHighlighter;
+      regex: string;
+    }
+  | {
+      type: HighlighterParserType.NextToHighlighter;
+      firstHighlightTypeId: string;
+      secondHighlightTypeId: string;
+      maxDistanceBetween: number;
+    }
+  | {
+      type: HighlighterParserType.CustomHighlighter;
+      parser: (text: string, existingHighlights: Highlight[]) => Highlight[];
+    };
+
+export type Highlighter = {
+  id: string;
+  name: string;
+  icon: string;
+  color: string;
+  parser: HighlighterParser;
+};
+
+export const BUILT_IN_HIGHLIGHTERS: Highlighter[] = [
+  {
+    id: "ingredient",
+    name: "Ingredient",
+    icon: "🥕",
+    color: "hsla(212, 42%, 40%, 1)",
+    parser: {
+      type: HighlighterParserType.ListMatchHighlighter,
+      list: rawIngredients.map((line: any) => line.name),
+    },
+  },
+  {
+    id: "quantity",
+    name: "Quantity",
+    icon: "⚖️",
+    color: "hsl(349deg 80% 48%)",
+    parser: {
+      type: HighlighterParserType.RegexHighlighter,
+      regex:
+        "(\\d|\\/|¼|½|¾|⅛|\\.)+\\s?(g|gram|oz|tsp|Tbsp|pound|cup|cup|can|teaspoon|tablespoon)s?\\b",
+    },
+  },
+  {
+    id: "ingredient_with_quantity",
+    name: "Ingredient with quantity",
+    icon: "",
+    color: "#059669",
+    parser: {
+      type: HighlighterParserType.NextToHighlighter,
+      firstHighlightTypeId: "quantity",
+      secondHighlightTypeId: "ingredient",
+      maxDistanceBetween: 50,
+    },
+  },
+];
+
+export const highlightersMobx = observable.array<Highlighter>(
+  BUILT_IN_HIGHLIGHTERS
+);
+
+// TODO: remove this
 export const highlighterTypesMobx = observable.map<string, HighlighterType>(
   DEFAULT_HIGHLIGHTER_TYPES
 );
