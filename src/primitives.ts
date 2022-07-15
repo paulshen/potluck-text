@@ -2,7 +2,7 @@ import { EditorState } from "@codemirror/state";
 import { EventEmitter } from "eventemitter3";
 import { observable } from "mobx";
 import { ingredientSnippetType } from "./snippetTypes/ingredients";
-import { quantitySnippetType } from "./snippetTypes/quantities";
+import { parseQuantity, quantitySnippetType } from "./snippetTypes/quantities";
 import { ingredientWithQuantityType } from "./snippetTypes/ingredientWithQuantity";
 import { EditorView } from "codemirror";
 import { exeriseNameType } from "./snippetTypes/exerciseName";
@@ -130,6 +130,7 @@ export type Highlighter = {
   icon: string;
   color: string;
   parser: HighlighterParser;
+  postProcess?: (highlight: Highlight, text: string) => Highlight;
 };
 
 export const BUILT_IN_HIGHLIGHTERS: Highlighter[] = [
@@ -153,6 +154,10 @@ export const BUILT_IN_HIGHLIGHTERS: Highlighter[] = [
       regex:
         "(\\d|\\/|¼|½|¾|⅛|\\.)+\\s?(g|gram|oz|tsp|Tbsp|pound|cup|cup|can|teaspoon|tablespoon)s?\\b",
     },
+    postProcess: (highlight: Highlight, text: string) => ({
+      ...highlight,
+      data: parseQuantity(text.slice(highlight.span[0], highlight.span[1])),
+    }),
   },
   {
     id: "ingredient_with_quantity",

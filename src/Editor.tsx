@@ -90,18 +90,25 @@ export const Editor = observer(({ textId }: { textId: string }) => {
   const highlightsComputed = useMemo(
     () =>
       computed(() => {
-        const text = computed(() =>
+        const textComputed = computed(() =>
           textEditorStateMobx.get(textId)!.sliceDoc(0)
         );
         const highlights: Highlight[] = [...highlightersMobx.values()].reduce<
           Highlight[]
-        >(
-          (highlights, highlighter) =>
-            highlights.concat(
-              parseWithHighlighter(highlighter, text.get(), highlights)
-            ),
-          []
-        );
+        >((highlights, highlighter) => {
+          const text = textComputed.get();
+          let addHighlights = parseWithHighlighter(
+            highlighter,
+            text,
+            highlights
+          );
+          if (highlighter.postProcess !== undefined) {
+            addHighlights = addHighlights.map((h) =>
+              highlighter.postProcess!(h, text)
+            );
+          }
+          return highlights.concat(addHighlights);
+        }, []);
         return highlights;
       }),
     [textId]

@@ -9,6 +9,7 @@ export enum HighlighterSchemaType {
 
 type HighlighterSchema = {
   id: string;
+  // optional handler that you can used to populate a highlight's data
   postProcess?: (highlights: Highlight[], text: string) => Highlight[];
 } & (
   | {
